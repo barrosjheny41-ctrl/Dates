@@ -5,52 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Date Quest SP - Aventura a Dois</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,700&family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Playfair+Display:ital,wght@0,600;1,700&family=Poppins:wght@400;600;800&display=swap');
 
         :root {
-            --bg-dark: #0f0c20;
-            --primary-blue: #1a237e;
-            --primary-purple: #4a148c;
-            --accent-gold: #ffd700;
-            --bg-cream: #fbf8f3;
-            --text-dark: #1f1f1f;
+            --bg-ocean: #091322;
+            --primary-blue: #0b1a48;
+            --accent-gold: #f3c649;
+            --gold-light: #fff3c4;
+            --paper-cream: #f4eee1;
+            --paper-dark: #e8ded0;
+            --leather-p1: #1e295d;
+            --leather-p2: #4a154b;
             
-            /* Cores dos Polos/Regiões da Ilha */
-            --polo-1: #4caf50; /* Baixada Gastronômica - Verde */
-            --polo-2: #ff9800; /* Vale dos Sabores - Laranja */
-            --polo-3: #e91e63; /* Ilha Temática - Rosa Magia */
-            --polo-4: #9c27b0; /* Reino dos Fondues - Roxo */
-            --polo-5: #00bcd4; /* Cume Alta Gastronomia - Azul Céu */
+            /* Biomas da Ilha Gastronômica */
+            --polo-1: #2ec4b6; /* Baixada Tropical */
+            --polo-2: #ff9f1c; /* Vale dos Sabores */
+            --polo-3: #ff006e; /* Terras Mágicas */
+            --polo-4: #8338ec; /* Reino dos Fondues */
+            --polo-5: #3a86ff; /* Cume das Estrelas */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-dark); overflow-x: hidden; }
+        body { background-color: var(--bg-ocean); color: #fff; overflow-x: hidden; }
 
-        /* LOBBY & SELEÇÃO DE PERSONAGEM */
+        /* LOBBY & SELEÇÃO DE PERFIL */
         #lobby {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
-            color: white; text-align: center; padding: 20px; z-index: 1000; position: fixed; width: 100%; top: 0; left: 0;
+            min-height: 100vh; background: radial-gradient(circle at center, #1a2a4a 0%, #080d1a 100%);
+            color: white; text-align: center; padding: 20px; z-index: 2000; position: fixed; width: 100%; top: 0; left: 0;
             overflow-y: auto;
         }
-        .lobby-box { background: rgba(255,255,255,0.08); padding: 30px; border-radius: 24px; backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.18); max-width: 450px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        .lobby-box h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--accent-gold); margin-bottom: 8px; }
-        .lobby-box p { font-size: 0.9rem; opacity: 0.85; margin-bottom: 20px; }
+        .lobby-box { background: rgba(255,255,255,0.06); padding: 30px; border-radius: 24px; backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.15); max-width: 440px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .lobby-box h1 { font-family: 'Cinzel', serif; font-size: 2.2rem; color: var(--accent-gold); margin-bottom: 6px; letter-spacing: 2px; }
+        .lobby-box p { font-size: 0.85rem; opacity: 0.8; margin-bottom: 20px; }
         
         .lobby-box input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 16px; text-align: center; text-transform: uppercase; font-weight: bold; background: rgba(255,255,255,0.9); }
         .lobby-box button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.3s transform, 0.3s background; }
-        .btn-gerar { background: linear-gradient(90deg, #ffd700, #ffa000); color: #000; }
-        .btn-conectar { background: #3f51b5; color: white; }
-        .btn-gerar:hover, .btn-conectar:hover { transform: translateY(-2px); }
-        .btn-gerar:disabled, .btn-conectar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        #display-codigo { font-size: 28px; font-weight: 800; letter-spacing: 6px; margin: 15px 0; color: var(--accent-gold); background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; border: 1px dashed var(--accent-gold); }
+        .btn-gold { background: linear-gradient(90deg, #f3c649, #e0a926); color: #000; }
+        .btn-blue { background: #3a86ff; color: white; }
+        .btn-gold:disabled, .btn-blue:disabled { opacity: 0.5; cursor: not-allowed; }
+        #display-codigo { font-size: 28px; font-weight: 800; letter-spacing: 6px; margin: 15px 0; color: var(--accent-gold); background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px dashed var(--accent-gold); }
 
-        /* SELEÇÃO DE PERFIL */
         .step-perfil { display: none; text-align: center; }
-        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 15px 0; }
-        .avatar-card { background: rgba(255,255,255,0.1); border-radius: 16px; padding: 10px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-        .avatar-card.selected { border-color: var(--accent-gold); background: rgba(255, 215, 0, 0.2); transform: scale(1.05); }
-        .avatar-card span { font-size: 38px; display: block; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+        .avatar-card { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 10px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .avatar-card.selected { border-color: var(--accent-gold); background: rgba(243, 198, 73, 0.25); transform: scale(1.05); }
+        .avatar-card span { font-size: 34px; display: block; }
         .avatar-card p { font-size: 11px; margin-top: 4px; color: white; }
 
         /* APP PRINCIPAL */
@@ -58,165 +58,186 @@
         .screen { display: none; padding: 15px; max-width: 900px; margin: 0 auto; }
         .screen.active { display: block; }
 
-        /* PASSAPORTES (PAINEL DUPLO) */
-        #passaporte { background-color: var(--bg-dark); min-height: 100vh; padding-top: 20px; }
-        .pass-title { text-align: center; color: white; margin-bottom: 20px; font-family: 'Playfair Display', serif; }
-        .pass-title h2 { color: var(--accent-gold); font-size: 2rem; }
+        /* PASSAPORTES 3D LIVRO */
+        #passaporte { background-color: var(--bg-ocean); min-height: 100vh; padding-top: 20px; }
+        .pass-title { text-align: center; color: white; margin-bottom: 25px; }
+        .pass-title h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 2rem; letter-spacing: 2px; }
 
-        .passaportes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .passaportes-wrapper { display: flex; flex-direction: column; gap: 30px; align-items: center; perspective: 1200px; }
+
+        /* Estrutura do Passaporte 3D */
+        .passport-book {
+            width: 320px; height: 460px; position: relative; transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1); cursor: pointer;
+        }
+        .passport-book.open { transform: rotateY(-170deg) translateX(50px); }
+
+        /* Capa */
+        .passport-cover {
+            position: absolute; width: 100%; height: 100%; border-radius: 16px 6px 6px 16px;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+            align-items: center; justify-content: space-between; padding: 35px 20px;
+            backface-visibility: hidden; z-index: 5; transform-origin: left; transition: transform 0.8s;
+            border-left: 8px solid rgba(0,0,0,0.3);
+        }
+        .passport-cover.p1-skin { background: linear-gradient(135deg, #1e295d, #0b1233); border-right: 2px solid var(--accent-gold); }
+        .passport-cover.p2-skin { background: linear-gradient(135deg, #4a154b, #220823); border-right: 2px solid var(--accent-gold); }
+
+        .cover-emblem { font-size: 55px; color: var(--accent-gold); text-shadow: 0 0 10px rgba(243, 198, 73, 0.4); }
+        .cover-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--accent-gold); letter-spacing: 4px; font-weight: 800; text-align: center; }
+        .cover-name { font-family: 'Playfair Display', serif; font-size: 20px; color: #fff; font-style: italic; border-bottom: 1px solid var(--accent-gold); padding-bottom: 5px; width: 80%; text-align: center; }
+        .cover-hint { font-size: 10px; color: var(--accent-gold); letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; }
+
+        /* Páginas Internas */
+        .passport-page {
+            position: absolute; width: 100%; height: 100%; background: var(--paper-cream);
+            border-radius: 12px; padding: 20px; color: #222; box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #d4c5b0;
+        }
+
+        .page-header { text-align: center; border-bottom: 2px dashed #b5a48b; padding-bottom: 10px; }
+        .page-avatar { font-size: 40px; background: #fff; width: 65px; height: 65px; line-height: 65px; border-radius: 50%; margin: 0 auto 5px; border: 2px solid var(--accent-gold); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .page-owner { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: bold; color: var(--primary-blue); }
         
-        .passaporte-card {
-            background: var(--bg-cream); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            border: 3px solid var(--accent-gold); position: relative; overflow: hidden;
+        .page-stats { background: #e8ded0; padding: 10px; border-radius: 10px; font-size: 11px; margin: 10px 0; }
+        .stats-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; color: var(--primary-blue); }
+        .bar-bg { height: 8px; background: #ccc; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--primary-blue); width: 0%; transition: width 0.4s; }
+
+        .stamps-page { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex-grow: 1; align-content: start; margin-top: 5px; }
+        .stamp-mark {
+            aspect-ratio: 1; border-radius: 50%; border: 2px dashed #a0907a; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; padding: 3px; opacity: 0.3; background: rgba(255,255,255,0.4);
         }
-        .passaporte-card::before {
-            content: 'PASSAPORTE OFICIAL'; position: absolute; top: 12px; right: -30px; transform: rotate(45deg);
-            background: var(--accent-gold); color: #000; font-size: 8px; font-weight: bold; padding: 4px 30px;
+        .stamp-mark.stamped {
+            opacity: 1; border: 3px double #0b1a48; color: #0b1a48; transform: rotate(-10deg); background: #f0f3ff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
+        .stamp-mark h6 { font-size: 7px; font-weight: 800; text-transform: uppercase; }
 
-        .pass-header { text-align: center; border-bottom: 2px dashed rgba(26, 35, 126, 0.2); padding-bottom: 15px; margin-bottom: 15px; }
-        .pass-avatar { font-size: 50px; background: white; width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid var(--primary-blue); }
-        .pass-nome { font-family: 'Playfair Display', serif; color: var(--primary-blue); font-size: 1.4rem; font-weight: 700; }
-        .pass-cargo { font-size: 11px; color: #666; letter-spacing: 1px; text-transform: uppercase; }
+        .page-footer { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #777; border-top: 1px solid #d4c5b0; padding-top: 8px; }
+        .btn-page { background: #0b1a48; color: #fff; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 10px; }
 
-        .xp-box { background: white; padding: 12px; border-radius: 12px; margin-bottom: 15px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
-        .xp-text { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: var(--primary-blue); margin-bottom: 6px; }
-        .xp-bar { height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; }
-        .xp-fill { height: 100%; background: linear-gradient(90deg, #1a237e, #7b1fa2); width: 0%; transition: width 0.5s ease; }
+        /* MAPA DA ILHA ORGANICO E VIBRANTE */
+        #mapa { background: radial-gradient(circle, #102142 0%, #070e1c 100%); min-height: 100vh; position: relative; padding: 20px 10px 120px; }
+        .mapa-title { text-align: center; color: white; margin-bottom: 20px; }
+        .mapa-title h2 { font-family: 'Cinzel', serif; color: var(--accent-gold); font-size: 1.8rem; letter-spacing: 2px; }
 
-        .carimbos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .carimbo {
-            aspect-ratio: 1; border-radius: 50%; border: 2px dashed #bbb; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center; padding: 5px; opacity: 0.35; transition: 0.3s; background: white;
-        }
-        .carimbo.concluido {
-            opacity: 1; border: 3px double var(--primary-blue); color: var(--primary-blue); transform: rotate(-8deg);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #f0f3ff;
-        }
-        .carimbo-icon { font-size: 18px; }
-        .carimbo-nome { font-size: 8px; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
-
-        /* MAPA DA ILHA REFORMULADO */
-        #mapa { background: #111936; min-height: 100vh; position: relative; padding: 20px 10px 120px; }
-        .mapa-header { text-align: center; color: white; margin-bottom: 25px; }
-        .mapa-header h2 { font-family: 'Playfair Display', serif; color: var(--accent-gold); font-size: 1.8rem; }
-
-        .ilha-wrapper {
-            position: relative; max-width: 600px; margin: 0 auto; padding: 40px 10px;
-            background: radial-gradient(circle, #1e295d 0%, #0d1329 100%); border-radius: 30px;
-            border: 2px solid rgba(255,215,0,0.2); box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+        .island-viewport {
+            max-width: 550px; margin: 0 auto; position: relative; padding: 40px 15px;
+            background: linear-gradient(180deg, rgba(46, 196, 182, 0.15) 0%, rgba(255, 0, 110, 0.15) 50%, rgba(58, 134, 255, 0.15) 100%);
+            border-radius: 40px; border: 2px solid rgba(243, 198, 73, 0.3); box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            overflow: hidden;
         }
 
-        /* SVG Fundo de Ilhas */
-        .ilha-svg-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.25; }
-
-        .caminho-container { position: relative; z-index: 2; display: flex; flex-direction: column-reverse; gap: 45px; }
-
-        .nodo-restaurante {
-            display: flex; align-items: center; justify-content: center; position: relative; width: 100%;
+        /* Camadas Decorativas da Ilha */
+        .island-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.2;
+            background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;
         }
 
-        /* Variações de alinhamento no mapa */
-        .nodo-restaurante:nth-child(odd) { justify-content: flex-start; padding-left: 10%; }
-        .nodo-restaurante:nth-child(even) { justify-content: flex-end; padding-right: 10%; }
-        .nodo-restaurante:nth-child(5n) { justify-content: center; padding: 0; }
+        .nodes-path { display: flex; flex-direction: column-reverse; gap: 40px; position: relative; z-index: 2; }
 
-        .card-ponto {
-            background: rgba(255,255,255,0.95); padding: 10px 14px; border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3); text-align: center; width: 170px;
-            position: relative; border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s transform;
+        .node-item { display: flex; align-items: center; justify-content: center; width: 100%; position: relative; }
+        .node-item:nth-child(odd) { justify-content: flex-start; padding-left: 8%; }
+        .node-item:nth-child(even) { justify-content: flex-end; padding-right: 8%; }
+        .node-item:nth-child(5n) { justify-content: center; padding: 0; }
+
+        /* Card Flutuante de Restaurante */
+        .node-card {
+            background: rgba(255, 255, 255, 0.95); padding: 10px 14px; border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4); text-align: center; min-width: 160px;
+            position: relative; border-bottom: 4px solid #888; transition: transform 0.3s; cursor: pointer;
         }
-        .card-ponto:hover { transform: scale(1.04); }
-        .card-ponto h4 { font-size: 13px; color: #111; font-weight: 700; margin-bottom: 2px; }
-        .card-ponto p { font-size: 10px; color: #666; font-weight: 600; text-transform: uppercase; }
+        .node-card:hover { transform: translateY(-4px) scale(1.03); }
+        .node-card h4 { font-size: 13px; color: #111; font-weight: 800; }
+        .node-card p { font-size: 9px; color: #555; text-transform: uppercase; font-weight: 700; margin-top: 2px; }
 
-        .ponto-btn {
-            width: 44px; height: 44px; border-radius: 50%; background: white;
-            border: 5px solid #fff; box-shadow: 0 0 0 4px #aaa, 0 8px 15px rgba(0,0,0,0.4);
-            cursor: pointer; position: absolute; margin-top: -5px; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;
+        /* Botões de Checkpoint Glow */
+        .node-btn {
+            width: 42px; height: 42px; border-radius: 50%; background: #fff;
+            border: 4px solid #fff; box-shadow: 0 0 0 4px #777, 0 5px 15px rgba(0,0,0,0.5);
+            position: absolute; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: transparent;
         }
-        .nodo-restaurante:nth-child(odd) .ponto-btn { right: 15%; }
-        .nodo-restaurante:nth-child(even) .ponto-btn { left: 15%; }
-        .nodo-restaurante:nth-child(5n) .ponto-btn { position: relative; margin-top: 10px; }
+        .node-item:nth-child(odd) .node-btn { right: 12%; }
+        .node-item:nth-child(even) .node-btn { left: 12%; }
+        .node-item:nth-child(5n) .node-btn { position: relative; margin-top: 10px; }
 
-        /* Estilos e Cores dos Polos */
-        .polo-0 .card-ponto { border-left-color: var(--polo-1); }
-        .polo-0 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-1), 0 8px 15px rgba(0,0,0,0.4); }
-        .polo-0 .ponto-btn.concluido { background: var(--polo-1); color: white; }
+        /* Cores de Bioma dos Checkpoints */
+        .polo-0 .node-card { border-bottom-color: var(--polo-1); }
+        .polo-0 .node-btn { box-shadow: 0 0 0 4px var(--polo-1), 0 0 15px var(--polo-1); }
+        .polo-0 .node-btn.checked { background: var(--polo-1); color: #fff; }
 
-        .polo-1 .card-ponto { border-left-color: var(--polo-2); }
-        .polo-1 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-2), 0 8px 15px rgba(0,0,0,0.4); }
-        .polo-1 .ponto-btn.concluido { background: var(--polo-2); color: white; }
+        .polo-1 .node-card { border-bottom-color: var(--polo-2); }
+        .polo-1 .node-btn { box-shadow: 0 0 0 4px var(--polo-2), 0 0 15px var(--polo-2); }
+        .polo-1 .node-btn.checked { background: var(--polo-2); color: #fff; }
 
-        .polo-2 .card-ponto { border-left-color: var(--polo-3); }
-        .polo-2 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-3), 0 8px 15px rgba(0,0,0,0.4); }
-        .polo-2 .ponto-btn.concluido { background: var(--polo-3); color: white; }
+        .polo-2 .node-card { border-bottom-color: var(--polo-3); }
+        .polo-2 .node-btn { box-shadow: 0 0 0 4px var(--polo-3), 0 0 15px var(--polo-3); }
+        .polo-2 .node-btn.checked { background: var(--polo-3); color: #fff; }
 
-        .polo-3 .card-ponto { border-left-color: var(--polo-4); }
-        .polo-3 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-4), 0 8px 15px rgba(0,0,0,0.4); }
-        .polo-3 .ponto-btn.concluido { background: var(--polo-4); color: white; }
+        .polo-3 .node-card { border-bottom-color: var(--polo-4); }
+        .polo-3 .node-btn { box-shadow: 0 0 0 4px var(--polo-4), 0 0 15px var(--polo-4); }
+        .polo-3 .node-btn.checked { background: var(--polo-4); color: #fff; }
 
-        .polo-4 .card-ponto { border-left-color: var(--polo-5); }
-        .polo-4 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-5), 0 8px 15px rgba(0,0,0,0.4); }
-        .polo-4 .ponto-btn.concluido { background: var(--polo-5); color: white; }
+        .polo-4 .node-card { border-bottom-color: var(--polo-5); }
+        .polo-4 .node-btn { box-shadow: 0 0 0 4px var(--polo-5), 0 0 15px var(--polo-5); }
+        .polo-4 .node-btn.checked { background: var(--polo-5); color: #fff; }
 
-        .ponto-btn.concluido::after { content: '✓'; }
+        .node-btn.checked::after { content: '✓'; }
 
-        /* MODAL CHECK-IN */
+        /* MODAL CHECKIN */
         #modal-checkin {
-            display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-cream);
-            border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 25px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 2000; max-width: 600px; left: 50%; transform: translateX(-50%);
+            display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 550px;
+            background: var(--paper-cream); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 25px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 3000; color: #222;
         }
-        .modal-header { background: var(--primary-blue); color: white; padding: 16px; border-radius: 16px; text-align: center; margin-bottom: 20px; }
-        .checklist { list-style: none; margin-bottom: 20px; }
-        .checklist li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #ccc; font-weight: 600; color: #333; }
-        #btn-confirmar { width: 100%; padding: 16px; background: linear-gradient(90deg, #ffd700, #ffa000); color: #000; border: none; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        #btn-confirmar:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-head { background: var(--primary-blue); color: #fff; padding: 15px; border-radius: 14px; text-align: center; margin-bottom: 15px; }
+        .check-steps { list-style: none; margin-bottom: 20px; }
+        .check-steps li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #bbb; font-weight: 600; }
+        #btn-confirmar { width: 100%; padding: 16px; background: linear-gradient(90deg, #f3c649, #e0a926); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 
-        /* NAV INFERIOR */
+        /* BARRA INFERIOR */
         .bottom-nav {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px;
-            background: rgba(15, 12, 32, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around;
-            padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100;
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 550px;
+            background: rgba(9, 19, 34, 0.95); backdrop-filter: blur(12px); display: flex; justify-content: space-around;
+            padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000;
         }
-        .nav-item { background: none; border: none; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); padding-bottom: 2px; }
+        .nav-btn { background: none; border: none; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; }
+        .nav-btn.active { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); padding-bottom: 2px; }
     </style>
 </head>
 <body>
 
-    <!-- LOBBY & REGISTRO -->
+    <!-- LOBBY -->
     <div id="lobby">
         <div class="lobby-box">
-            <h1>Date Quest SP</h1>
-            <p>O mapa de encontros do casal!</p>
+            <h1>Date Quest</h1>
+            <p>Sua jornada gastronômica a dois em SP</p>
 
-            <!-- ETAPA 1: Código -->
             <div id="step-codigo">
-                <button id="btn-gerar" class="btn-gerar">Gerar Novo Código de Casal</button>
+                <button id="btn-gerar" class="btn-gold">Gerar Código de Casal</button>
                 <div id="display-codigo"></div>
                 <hr style="border-color: rgba(255,255,255,0.15); margin: 15px 0;">
-                <p style="font-size: 12px; margin-bottom: 8px;">Ou digite o código da sua parceira:</p>
+                <p style="font-size: 12px; margin-bottom: 8px;">Ou insira o código da sua dupla:</p>
                 <input type="text" id="input-codigo" placeholder="EX: A4X9" maxlength="4">
-                <button id="btn-conectar" class="btn-conectar">Entrar com Código</button>
+                <button id="btn-conectar" class="btn-blue">Entrar na Sala</button>
             </div>
 
-            <!-- ETAPA 2: Seleção de Personagem -->
             <div id="step-perfil" class="step-perfil">
-                <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Quem é você?</h3>
-                <p style="font-size: 12px;">Escolha quem você representa na dupla:</p>
+                <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Configurar Passaporte</h3>
+                <p style="font-size: 12px;">Escolha quem você representa:</p>
                 
                 <div style="display: flex; gap: 10px; margin: 15px 0;">
-                    <button id="btn-p1" class="btn-conectar" style="margin:0;" onclick="selecionarSlot('p1')">Pessoa 1</button>
-                    <button id="btn-p2" class="btn-conectar" style="margin:0; background:#5c6bc0;" onclick="selecionarSlot('p2')">Pessoa 2</button>
+                    <button id="btn-p1" class="btn-blue" style="margin:0;" onclick="selecionarSlot('p1')">Pessoa 1</button>
+                    <button id="btn-p2" class="btn-blue" style="margin:0; background:#8338ec;" onclick="selecionarSlot('p2')">Pessoa 2</button>
                 </div>
 
-                <input type="text" id="input-nome" placeholder="Seu Nome ou Apelido" style="margin-bottom: 15px;">
+                <input type="text" id="input-nome" placeholder="Seu Nome para a Capa" style="margin-bottom: 15px;">
 
                 <p style="font-size: 12px;">Escolha seu Avatar:</p>
-                <div class="avatar-grid" id="avatar-grid">
+                <div class="avatar-grid">
                     <div class="avatar-card selected" onclick="escolherAvatar('👑', this)"><span>👑</span><p>Rainha</p></div>
                     <div class="avatar-card" onclick="escolherAvatar('🐱', this)"><span>🐱</span><p>Gatinha</p></div>
                     <div class="avatar-card" onclick="escolherAvatar('🦊', this)"><span>🦊</span><p>Raposa</p></div>
@@ -225,103 +246,109 @@
                     <div class="avatar-card" onclick="escolherAvatar('✨', this)"><span>✨</span><p>Brilho</p></div>
                 </div>
 
-                <button id="btn-finalizar-perfil" class="btn-gerar" onclick="salvarPerfilCompleto()">Entrar na Jornada!</button>
+                <button class="btn-gold" onclick="salvarPerfilCompleto()">Abrir Meu Passaporte!</button>
             </div>
         </div>
     </div>
 
     <!-- APP PRINCIPAL -->
     <div id="app">
-        <!-- TELA PASSAPORTES (DUPLO) -->
+        <!-- TELA PASSAPORTES 3D -->
         <div id="passaporte" class="screen active">
             <div class="pass-title">
-                <h2>Passaportes do Casal</h2>
-                <p style="font-size: 12px; color: #ccc;">Acompanhe a evolução individual de cada uma</p>
+                <h2>Passaportes Oficiais</h2>
+                <p style="font-size: 12px; color: #aaa;">Clique na capa para abrir ou fechar o passaporte</p>
             </div>
 
-            <div class="passaportes-container">
-                <!-- Passaporte Pessoa 1 -->
-                <div class="passaporte-card" id="card-p1">
-                    <div class="pass-header">
-                        <div class="pass-avatar" id="p1-avatar">👑</div>
-                        <div class="pass-nome" id="p1-nome">Pessoa 1</div>
-                        <div class="pass-cargo">Exploradora de SP</div>
+            <div class="passaportes-wrapper">
+                <!-- PASSAPORTE PESSOA 1 -->
+                <div class="passport-book" id="book-p1" onclick="toggleBook('p1')">
+                    <div class="passport-cover p1-skin">
+                        <div class="cover-emblem">🌐</div>
+                        <div class="cover-title">PASSAPORTE</div>
+                        <div class="cover-name" id="cover-p1-name">Pessoa 1</div>
+                        <div class="cover-hint">Clique para abrir ➔</div>
                     </div>
-                    <div class="xp-box">
-                        <div class="xp-text">
-                            <span id="p1-nivel">Nível 1</span>
-                            <span id="p1-xp">0 XP</span>
+                    <div class="passport-page">
+                        <div class="page-header">
+                            <div class="page-avatar" id="page-p1-avatar">👑</div>
+                            <div class="page-owner" id="page-p1-name">Pessoa 1</div>
                         </div>
-                        <div class="xp-bar"><div class="xp-fill" id="p1-fill"></div></div>
+                        <div class="page-stats">
+                            <div class="stats-row"><span id="p1-nivel">Nível 1</span><span id="p1-xp">0 XP</span></div>
+                            <div class="bar-bg"><div class="bar-fill" id="p1-fill"></div></div>
+                        </div>
+                        <div class="stamps-page" id="p1-stamps"></div>
+                        <div class="page-footer">
+                            <span>PÁG. <span id="p1-pag-num">1</span>/2</span>
+                            <button class="btn-page" onclick="event.stopPropagation(); virarPagina('p1')">Próxima Pág ➔</button>
+                        </div>
                     </div>
-                    <h5 style="color: var(--primary-blue); font-size: 11px; text-transform: uppercase;">Carimbos:</h5>
-                    <div class="carimbos-grid" id="p1-carimbos"></div>
                 </div>
 
-                <!-- Passaporte Pessoa 2 -->
-                <div class="passaporte-card" id="card-p2">
-                    <div class="pass-header">
-                        <div class="pass-avatar" id="p2-avatar">🐱</div>
-                        <div class="pass-nome" id="p2-nome">Pessoa 2</div>
-                        <div class="pass-cargo">Exploradora de SP</div>
+                <!-- PASSAPORTE PESSOA 2 -->
+                <div class="passport-book" id="book-p2" onclick="toggleBook('p2')">
+                    <div class="passport-cover p2-skin">
+                        <div class="cover-emblem">🌐</div>
+                        <div class="cover-title">PASSAPORTE</div>
+                        <div class="cover-name" id="cover-p2-name">Pessoa 2</div>
+                        <div class="cover-hint">Clique para abrir ➔</div>
                     </div>
-                    <div class="xp-box">
-                        <div class="xp-text">
-                            <span id="p2-nivel">Nível 1</span>
-                            <span id="p2-xp">0 XP</span>
+                    <div class="passport-page">
+                        <div class="page-header">
+                            <div class="page-avatar" id="page-p2-avatar">🐱</div>
+                            <div class="page-owner" id="page-p2-name">Pessoa 2</div>
                         </div>
-                        <div class="xp-bar"><div class="xp-fill" id="p2-fill"></div></div>
+                        <div class="page-stats">
+                            <div class="stats-row"><span id="p2-nivel">Nível 1</span><span id="p2-xp">0 XP</span></div>
+                            <div class="bar-bg"><div class="bar-fill" id="p2-fill"></div></div>
+                        </div>
+                        <div class="stamps-page" id="p2-stamps"></div>
+                        <div class="page-footer">
+                            <span>PÁG. <span id="p2-pag-num">1</span>/2</span>
+                            <button class="btn-page" onclick="event.stopPropagation(); virarPagina('p2')">Próxima Pág ➔</button>
+                        </div>
                     </div>
-                    <h5 style="color: var(--primary-blue); font-size: 11px; text-transform: uppercase;">Carimbos:</h5>
-                    <div class="carimbos-grid" id="p2-carimbos"></div>
                 </div>
             </div>
         </div>
 
-        <!-- TELA MAPA -->
+        <!-- TELA MAPA DA ILHA -->
         <div id="mapa" class="screen">
-            <div class="mapa-header">
+            <div class="mapa-title">
                 <h2>Ilha Gastronômica SP</h2>
-                <p style="font-size: 12px; color: #aaa;">Subam a montanha restaurante por restaurante!</p>
+                <p style="font-size: 12px; color: #888;">Naveguem pelos 22 pontos da ilha</p>
             </div>
 
-            <div class="ilha-wrapper">
-                <!-- Desenho Vetorial de Relevo da Ilha -->
-                <svg class="ilha-svg-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <path d="M10,90 Q30,95 50,85 T90,90 Q95,50 85,20 T50,5 Q10,10 5,50 Z" fill="#4caf50" />
-                    <path d="M20,80 Q40,85 50,75 T80,80 Q85,45 75,25 T50,15 Q20,20 15,45 Z" fill="#ff9800" />
-                    <path d="M30,70 Q45,72 50,65 T70,70 Q75,40 65,30 T50,22 Q30,25 25,40 Z" fill="#e91e63" />
-                </svg>
-
-                <div class="caminho-container" id="caminho-container">
-                    <!-- Gerado via JavaScript -->
-                </div>
+            <div class="island-viewport">
+                <div class="island-layer"></div>
+                <div class="nodes-path" id="nodes-path"></div>
             </div>
         </div>
 
         <!-- MODAL CHECKIN -->
         <div id="modal-checkin">
             <div style="text-align: right; cursor: pointer; font-weight: bold;" onclick="fecharModal()">✕</div>
-            <div class="modal-header">
+            <div class="modal-head">
                 <h3 id="modal-nome">Restaurante</h3>
-                <p id="modal-cat" style="font-size: 12px; opacity: 0.8;">Categoria</p>
+                <p id="modal-cat" style="font-size: 11px; opacity: 0.8;">Categoria</p>
             </div>
-            <ul class="checklist">
-                <li>Encontro Marcado <span class="chk">⏳</span></li>
-                <li>Mesa Reservada & Pedido <span class="chk">⏳</span></li>
-                <li>Experiência Incrível A Dois <span class="chk">⏳</span></li>
+            <ul class="check-steps">
+                <li>Chegada ao local <span class="chk">⏳</span></li>
+                <li>Pedido & Degustação <span class="chk">⏳</span></li>
+                <li>Carimbo Registrado <span class="chk">⏳</span></li>
             </ul>
-            <button id="btn-confirmar">Fazer Check-in (+100 XP)</button>
+            <button id="btn-confirmar">Confirmar Presença (+100 XP)</button>
         </div>
 
-        <!-- NAV -->
+        <!-- NAVEGAÇÃO -->
         <div class="bottom-nav">
-            <button class="nav-item active" onclick="mudarTela('passaporte', this)">Passaportes</button>
-            <button class="nav-item" onclick="mudarTela('mapa', this)">Mapa da Ilha</button>
+            <button class="nav-btn active" onclick="mudarTela('passaporte', this)">Passaportes</button>
+            <button class="nav-btn" onclick="mudarTela('mapa', this)">Mapa da Ilha</button>
         </div>
     </div>
 
-    <!-- FIREBASE & LOGIC -->
+    <!-- FIREBASE SDK & LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -337,7 +364,6 @@
   measurementId: "G-PMH0W7QCLC"
 
 };
-    
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -370,13 +396,14 @@
 
         let codigoAtual = null;
         let slotSelecionado = 'p1';
-        let avatarEscolhido = '👑';
+        let avatarEscolha = '👑';
         let dadosCasal = null;
+        let paginasState = { p1: 1, p2: 1 };
 
-        // Botoes do Lobby
+        // LÓGICA DO LOBBY
         document.getElementById("btn-gerar").addEventListener("click", async () => {
             const btn = document.getElementById("btn-gerar");
-            btn.innerText = "Conectando..."; btn.disabled = true;
+            btn.innerText = "Criando Sala..."; btn.disabled = true;
             try {
                 const codigo = Math.random().toString(36).substring(2, 6).toUpperCase();
                 await signInAnonymously(auth);
@@ -386,10 +413,10 @@
                 });
                 document.getElementById("display-codigo").innerText = codigo;
                 codigoAtual = codigo;
-                avancarParaPerfil();
+                irParaPerfil();
             } catch(e) {
                 alert("Erro ao conectar no Firebase. Verifique suas chaves.");
-                btn.innerText = "Gerar Novo Código"; btn.disabled = false;
+                btn.innerText = "Gerar Código de Casal"; btn.disabled = false;
             }
         });
 
@@ -400,26 +427,26 @@
                 const docSnap = await getDoc(doc(db, "vinculos", codigo));
                 if(docSnap.exists()) {
                     codigoAtual = codigo;
-                    avancarParaPerfil();
+                    irParaPerfil();
                 } else {
                     alert("Código não encontrado!");
                 }
             }
         });
 
-        function avancarParaPerfil() {
+        function irParaPerfil() {
             document.getElementById("step-codigo").style.display = "none";
             document.getElementById("step-perfil").style.display = "block";
         }
 
         window.selecionarSlot = function(slot) {
             slotSelecionado = slot;
-            document.getElementById("btn-p1").style.border = slot === 'p1' ? '2px solid #ffd700' : 'none';
-            document.getElementById("btn-p2").style.border = slot === 'p2' ? '2px solid #ffd700' : 'none';
+            document.getElementById("btn-p1").style.border = slot === 'p1' ? '2px solid #f3c649' : 'none';
+            document.getElementById("btn-p2").style.border = slot === 'p2' ? '2px solid #f3c649' : 'none';
         }
 
         window.escolherAvatar = function(emoji, el) {
-            avatarEscolhido = emoji;
+            avatarEscolha = emoji;
             document.querySelectorAll(".avatar-card").forEach(c => c.classList.remove("selected"));
             el.classList.add("selected");
         }
@@ -430,7 +457,7 @@
             
             await updateDoc(ref, {
                 [`${slotSelecionado}.nome`]: nome,
-                [`${slotSelecionado}.avatar`]: avatarEscolhido
+                [`${slotSelecionado}.avatar`]: avatarEscolha
             });
 
             iniciarApp();
@@ -449,11 +476,24 @@
             });
         }
 
+        // ANIMAÇÕES E NAVEGAÇÃO DOS PASSAPORTES
+        window.toggleBook = function(p) {
+            document.getElementById(`book-${p}`).classList.toggle("open");
+        }
+
+        window.virarPagina = function(p) {
+            paginasState[p] = paginasState[p] === 1 ? 2 : 1;
+            document.getElementById(`${p}-pag-num`).innerText = paginasState[p];
+            renderizarPassaportes();
+        }
+
         function renderizarPassaportes() {
             ['p1', 'p2'].forEach(p => {
                 const data = dadosCasal[p] || { nome: p, avatar: '👑', xp: 0, concluidos: [] };
-                document.getElementById(`${p}-avatar`).innerText = data.avatar;
-                document.getElementById(`${p}-nome`).innerText = data.nome;
+                
+                document.getElementById(`cover-${p}-name`).innerText = data.nome;
+                document.getElementById(`page-${p}-name`).innerText = data.nome;
+                document.getElementById(`page-${p}-avatar`).innerText = data.avatar;
 
                 let nivel = Math.floor(data.xp / 300) + 1;
                 let xpRestante = data.xp % 300;
@@ -461,14 +501,19 @@
                 document.getElementById(`${p}-xp`).innerText = `${xpRestante} / 300 XP`;
                 document.getElementById(`${p}-fill`).style.width = `${(xpRestante/300)*100}%`;
 
-                const grid = document.getElementById(`${p}-carimbos`);
-                grid.innerHTML = "";
-                restaurantes.slice(0, 9).forEach(r => {
-                    const conc = (data.concluidos || []).includes(r.id);
-                    grid.innerHTML += `
-                        <div class="carimbo ${conc ? 'concluido' : ''}">
-                            <span class="carimbo-icon">${conc ? '📍' : '🔒'}</span>
-                            <span class="carimbo-nome">${r.nome}</span>
+                // Renderiza Páginas de Carimbos (6 por página)
+                const container = document.getElementById(`${p}-stamps`);
+                container.innerHTML = "";
+                
+                const inicio = (paginasState[p] - 1) * 6;
+                const fim = inicio + 6;
+                
+                restaurantes.slice(inicio, fim).forEach(r => {
+                    const carimbado = (data.concluidos || []).includes(r.id);
+                    container.innerHTML += `
+                        <div class="stamp-mark ${carimbado ? 'stamped' : ''}">
+                            <span style="font-size: 14px;">${carimbado ? '📍' : '🔒'}</span>
+                            <h6>${r.nome}</h6>
                         </div>
                     `;
                 });
@@ -476,7 +521,7 @@
         }
 
         function renderizarMapa() {
-            const container = document.getElementById("caminho-container");
+            const container = document.getElementById("nodes-path");
             container.innerHTML = "";
 
             const meusConcluidos = (dadosCasal[slotSelecionado]?.concluidos) || [];
@@ -484,12 +529,12 @@
             restaurantes.forEach((r) => {
                 const conc = meusConcluidos.includes(r.id);
                 container.innerHTML += `
-                    <div class="nodo-restaurante polo-${r.polo}">
-                        <div class="card-ponto" onclick="abrirModal('${r.id}', '${r.nome}', '${r.cat}')">
+                    <div class="node-item polo-${r.polo}">
+                        <div class="node-card" onclick="abrirModal('${r.id}', '${r.nome}', '${r.cat}')">
                             <h4>${r.nome}</h4>
                             <p>${r.cat}</p>
                         </div>
-                        <div class="ponto-btn ${conc ? 'concluido' : ''}" onclick="abrirModal('${r.id}', '${r.nome}', '${r.cat}')"></div>
+                        <div class="node-btn ${conc ? 'checked' : ''}" onclick="abrirModal('${r.id}', '${r.nome}', '${r.cat}')"></div>
                     </div>
                 `;
             });
@@ -534,7 +579,7 @@
 
         window.mudarTela = function(tela, btn) {
             document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-            document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+            document.querySelectorAll(".nav-btn").forEach(n => n.classList.remove("active"));
             document.getElementById(tela).classList.add("active");
             btn.classList.add("active");
         }
