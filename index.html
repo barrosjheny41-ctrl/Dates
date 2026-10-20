@@ -14,7 +14,7 @@
             --paper-cream: #fbf8f3;
             --paper-border: #d4c5b0;
             
-            /* Cores das Ilhas */
+            /* Cores dos Checkpoints */
             --color-ilha-verde: #e83e8c;
             --color-ilha-laranja: #fd7e14;
             --color-ilha-amarela: #ffc107;
@@ -44,7 +44,7 @@
         .avatar-card.selected { border-color: var(--accent-gold); background: rgba(243, 198, 73, 0.25); }
 
         /* APP PRINCIPAL */
-        #app { display: none; padding: 15px 10px 90px; max-width: 900px; margin: 0 auto; }
+        #app { display: none; padding: 15px 10px 90px; max-width: 950px; margin: 0 auto; }
         .screen { display: none; }
         .screen.active { display: block; }
 
@@ -107,55 +107,105 @@
         .btn-nav-page { background: var(--primary-blue); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; }
         .btn-fechar-capa { background: transparent; border: 1px solid #b5a48b; color: #555; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; }
 
-        /* ABA MAPA DA ILHA COM ANIMAÇÃO DOS CHECKPOINTS */
-        #mapa { background: #137bb5; padding: 15px 10px 100px; border-radius: 20px; overflow-x: auto; }
-        .mapa-header-box { text-align: left; background: rgba(255,255,255,0.95); padding: 12px 20px; border-radius: 14px; color: #000; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .mapa-header-box h3 { font-family: 'Poppins', sans-serif; font-size: 18px; color: #0a146e; font-weight: 800; }
+        /* ABA MAPA DA ILHA EM 3D REALISTA */
+        #mapa {
+            background: linear-gradient(180deg, #0d3859 0%, #082238 100%);
+            padding: 15px 10px 100px; border-radius: 24px; overflow-x: auto;
+        }
+        .mapa-header-box {
+            text-align: left; background: rgba(255,255,255,0.95); padding: 14px 22px;
+            border-radius: 16px; color: #000; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .mapa-header-box h3 { font-family: 'Poppins', sans-serif; font-size: 20px; color: #0a146e; font-weight: 800; letter-spacing: 0.5px; }
         
-        .archipelago-map {
-            width: 860px; height: 520px; margin: 0 auto; position: relative;
-            background: #1bb2e8; border-radius: 24px; border: 5px solid #fff;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4); overflow: hidden;
+        /* VISUALIZAÇÃO PERSPECTIVA 3D DO ARQUIPÉLAGO */
+        .archipelago-viewport {
+            width: 880px; height: 560px; margin: 0 auto; position: relative;
+            background: radial-gradient(ellipse at center, #1fa2d6 0%, #0d5f8a 70%, #083c59 100%);
+            border-radius: 28px; border: 6px solid #e2f1f8;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.3);
+            overflow: hidden; perspective: 1000px;
         }
 
-        /* Formatos das Ilhas Flutuantes */
-        .island-shape { position: absolute; border-radius: 40% 60% 50% 50%; box-shadow: inset 0 -8px 0 rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.2); }
-        .ilha-1 { top: 30px; left: 30px; width: 280px; height: 210px; background: #68b030; border: 6px solid #509020; }
-        .ilha-2 { bottom: 30px; left: 80px; width: 260px; height: 190px; background: #88c030; border: 6px solid #68a020; }
-        .ilha-3 { top: 120px; left: 320px; width: 260px; height: 260px; background: #c2ab72; border: 6px solid #a28b52; }
-        .ilha-4 { top: 30px; right: 230px; width: 230px; height: 180px; background: #82d0e0; border: 6px solid #62b0c0; }
-        .ilha-5 { bottom: 30px; right: 30px; width: 260px; height: 220px; background: #b082d0; border: 6px solid #9062b0; }
+        .3d-stage {
+            width: 100%; height: 100%; position: absolute;
+            transform-style: preserve-3d;
+        }
 
-        .bridge { position: absolute; background: #8b5a2b; border: 2px solid #5c3a1a; height: 12px; z-index: 2; border-radius: 4px; }
-        .b1 { top: 220px; left: 240px; width: 60px; transform: rotate(45deg); }
-        .b2 { top: 260px; left: 300px; width: 50px; transform: rotate(-10deg); }
-        .b3 { top: 110px; left: 520px; width: 60px; transform: rotate(-30px); }
+        /* TEXTURAS E CAMADAS 3D DAS ILHAS FLUTUANTES */
+        .island-3d {
+            position: absolute; border-radius: 40% 60% 50% 50%;
+            transform-style: preserve-3d;
+            filter: drop-shadow(0px 15px 12px rgba(0,0,0,0.45));
+            border: 1px solid rgba(255,255,255,0.2);
+        }
 
-        /* ÍCONES ANIMADOS DOS RESTAURANTES NOS CHECKPOINTS */
+        /* Topografia e Borda de Praia/Penhasco 3D */
+        .ilha-1 {
+            top: 25px; left: 30px; width: 290px; height: 220px;
+            background: radial-gradient(circle at 30% 30%, #7ec832 0%, #4f8e1e 70%, #3a6816 100%);
+            box-shadow: inset 0 -12px 0 #2d5011, inset -8px 0 0 #233e0d, 0 15px 0 #c2a868;
+        }
+        .ilha-2 {
+            bottom: 25px; left: 80px; width: 270px; height: 200px;
+            background: radial-gradient(circle at 30% 30%, #9be038 0%, #68a81f 70%, #4b7a16 100%);
+            box-shadow: inset 0 -12px 0 #3a6011, inset -8px 0 0 #2a460c, 0 15px 0 #d1b674;
+        }
+        .ilha-3 {
+            top: 110px; left: 330px; width: 270px; height: 270px;
+            background: radial-gradient(circle at 30% 30%, #e3cb8d 0%, #b89c56 70%, #8a733c 100%);
+            box-shadow: inset 0 -12px 0 #6e5b2e, inset -8px 0 0 #524321, 0 15px 0 #947a41;
+        }
+        .ilha-4 {
+            top: 25px; right: 230px; width: 240px; height: 190px;
+            background: radial-gradient(circle at 30% 30%, #b3f0fb 0%, #6ec2d1 70%, #4893a1 100%);
+            box-shadow: inset 0 -12px 0 #326771, inset -8px 0 0 #23484f, 0 15px 0 #8cbac2;
+        }
+        .ilha-5 {
+            bottom: 25px; right: 30px; width: 270px; height: 230px;
+            background: radial-gradient(circle at 30% 30%, #c99bed 0%, #8f5ac4 70%, #673f8f 100%);
+            box-shadow: inset 0 -12px 0 #4a2c68, inset -8px 0 0 #351f4b, 0 15px 0 #7e5c9b;
+        }
+
+        /* Detalhes de Relevo/Montanhas no Solo */
+        .island-mountain {
+            position: absolute; border-radius: 50%;
+            background: rgba(0,0,0,0.15); box-shadow: inset 0 4px 8px rgba(255,255,255,0.25);
+            pointer-events: none;
+        }
+
+        /* Pontes 3D Conectando as Ilhas */
+        .bridge-3d {
+            position: absolute; background: linear-gradient(90deg, #6e4623, #a06837, #6e4623);
+            border: 2px solid #3d2511; height: 14px; z-index: 5; border-radius: 4px;
+            box-shadow: 0 8px 10px rgba(0,0,0,0.4);
+        }
+        .b1 { top: 225px; left: 245px; width: 65px; transform: rotate(42deg); }
+        .b2 { top: 275px; left: 310px; width: 55px; transform: rotate(-12deg); }
+        .b3 { top: 115px; left: 535px; width: 65px; transform: rotate(-28deg); }
+
+        /* CHECKPOINTS DE RESTAURANTES EM 3D REALISTA */
         .map-checkpoint {
-            position: absolute; z-index: 10; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s;
+            position: absolute; z-index: 20; display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 6px 6px rgba(0,0,0,0.4));
         }
-        .map-checkpoint:hover { transform: scale(1.15) translateY(-4px); }
+        .map-checkpoint:hover { transform: scale(1.2) translateY(-6px); z-index: 30; }
 
         .icon-badge {
-            font-size: 18px; background: #fff; width: 36px; height: 36px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            border: 3px solid currentColor; animation: pulseGlow 2s infinite alternate;
+            font-size: 19px; background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 3px solid currentColor; box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 6px 12px rgba(0,0,0,0.3);
         }
 
         .check-ring {
-            width: 28px; height: 28px; border-radius: 50%; background: #fff; margin-top: -8px;
-            border: 3px solid currentColor; box-shadow: 0 0 0 3px #fff; display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: bold; color: transparent;
+            width: 26px; height: 26px; border-radius: 50%; background: #fff; margin-top: -8px;
+            border: 3px solid currentColor; box-shadow: 0 0 0 3px #fff, 0 4px 8px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: transparent;
         }
         .map-checkpoint.checked .check-ring { background: currentColor; color: #fff; }
         .map-checkpoint.checked .check-ring::after { content: '✓'; }
-
-        /* Animação Flutuante nos Ícones */
-        @keyframes pulseGlow {
-            0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-            100% { transform: translateY(-5px); box-shadow: 0 8px 18px rgba(0,0,0,0.5); }
-        }
 
         .c-verde { color: var(--color-ilha-verde); }
         .c-laranja { color: var(--color-ilha-laranja); }
@@ -174,7 +224,7 @@
         .check-steps li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #bbb; font-weight: 600; }
         #btn-confirmar { width: 100%; padding: 16px; background: linear-gradient(90deg, #f3c649, #e0a926); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
 
-        /* BARRA DE NAVEGAÇÃO ABAIXO */
+        /* BARRA DE NAVEGAÇÃO */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
             background: rgba(9, 19, 34, 0.96); backdrop-filter: blur(12px); display: flex; justify-content: space-around;
@@ -275,60 +325,59 @@
             </div>
         </div>
 
-        <!-- ABA MAPA DA ILHA COM ANIMAÇÃO -->
+        <!-- ABA MAPA DA ILHA EM 3D REALISTA -->
         <div id="mapa" class="screen">
             <div class="mapa-header-box">
-                <div>
-                    <h3>MAPA DA JORNADA</h3>
-                    <p id="mapa-sub">Clique no ícone para realizar o check-in do casal.</p>
-                </div>
+                <h3>MAPA DA JORNADA</h3>
             </div>
 
-            <div class="archipelago-map">
-                <!-- Ilhas -->
-                <div class="island-shape ilha-1"></div>
-                <div class="island-shape ilha-2"></div>
-                <div class="island-shape ilha-3"></div>
-                <div class="island-shape ilha-4"></div>
-                <div class="island-shape ilha-5"></div>
+            <div class="archipelago-viewport">
+                <div class="3d-stage">
+                    <!-- Ilhas 3D com Relevos -->
+                    <div class="island-3d ilha-1"><div class="island-mountain" style="width:100px; height:80px; top:40px; left:60px;"></div></div>
+                    <div class="island-3d ilha-2"><div class="island-mountain" style="width:90px; height:70px; top:50px; left:80px;"></div></div>
+                    <div class="island-3d ilha-3"><div class="island-mountain" style="width:110px; height:90px; top:80px; left:80px;"></div></div>
+                    <div class="island-3d ilha-4"><div class="island-mountain" style="width:80px; height:60px; top:30px; left:70px;"></div></div>
+                    <div class="island-3d ilha-5"><div class="island-mountain" style="width:90px; height:80px; top:60px; left:80px;"></div></div>
 
-                <!-- Pontes -->
-                <div class="bridge b1"></div>
-                <div class="bridge b2"></div>
-                <div class="bridge b3"></div>
+                    <!-- Pontes 3D -->
+                    <div class="bridge-3d b1"></div>
+                    <div class="bridge-3d b2"></div>
+                    <div class="bridge-3d b3"></div>
 
-                <!-- 22 Checkpoints Animados com Ícones -->
-                <!-- Ilha 1 (Verde/Rosa) -->
-                <div class="map-checkpoint c-verde" id="cp-r1" style="top: 80px; left: 50px;" onclick="abrirModal('r1')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-verde" id="cp-r2" style="top: 45px; left: 130px;" onclick="abrirModal('r2')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-verde" id="cp-r3" style="top: 120px; left: 200px;" onclick="abrirModal('r3')"><div class="icon-badge">🍧</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-verde" id="cp-r4" style="top: 155px; left: 120px;" onclick="abrirModal('r4')"><div class="icon-badge">🥪</div><div class="check-ring"></div></div>
+                    <!-- 22 Checkpoints de Restaurantes -->
+                    <!-- Ilha 1 (Verde) -->
+                    <div class="map-checkpoint c-verde" id="cp-r1" style="top: 75px; left: 55px;" onclick="abrirModal('r1')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-verde" id="cp-r2" style="top: 45px; left: 135px;" onclick="abrirModal('r2')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-verde" id="cp-r3" style="top: 125px; left: 205px;" onclick="abrirModal('r3')"><div class="icon-badge">🍧</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-verde" id="cp-r4" style="top: 160px; left: 125px;" onclick="abrirModal('r4')"><div class="icon-badge">🥪</div><div class="check-ring"></div></div>
 
-                <!-- Ilha 2 (Laranja) -->
-                <div class="map-checkpoint c-laranja" id="cp-r5" style="bottom: 120px; left: 170px;" onclick="abrirModal('r5')"><div class="icon-badge">🧁</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-laranja" id="cp-r6" style="bottom: 60px; left: 220px;" onclick="abrirModal('r6')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-laranja" id="cp-r7" style="bottom: 140px; left: 260px;" onclick="abrirModal('r7')"><div class="icon-badge">🍝</div><div class="check-ring"></div></div>
+                    <!-- Ilha 2 (Verde Claro) -->
+                    <div class="map-checkpoint c-laranja" id="cp-r5" style="bottom: 125px; left: 175px;" onclick="abrirModal('r5')"><div class="icon-badge">🧁</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-laranja" id="cp-r6" style="bottom: 65px; left: 225px;" onclick="abrirModal('r6')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-laranja" id="cp-r7" style="bottom: 145px; left: 265px;" onclick="abrirModal('r7')"><div class="icon-badge">🍝</div><div class="check-ring"></div></div>
 
-                <!-- Ilha 3 (Amarela Centro) -->
-                <div class="map-checkpoint c-amarela" id="cp-r8" style="top: 230px; left: 340px;" onclick="abrirModal('r8')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-amarela" id="cp-r9" style="top: 300px; left: 390px;" onclick="abrirModal('r9')"><div class="icon-badge">⚔️</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-amarela" id="cp-r10" style="top: 250px; left: 460px;" onclick="abrirModal('r10')"><div class="icon-badge">🪄</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-amarela" id="cp-r11" style="top: 170px; left: 410px;" onclick="abrirModal('r11')"><div class="icon-badge">🧹</div><div class="check-ring"></div></div>
+                    <!-- Ilha 3 (Amarela/Areia) -->
+                    <div class="map-checkpoint c-amarela" id="cp-r8" style="top: 235px; left: 345px;" onclick="abrirModal('r8')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-amarela" id="cp-r9" style="top: 305px; left: 395px;" onclick="abrirModal('r9')"><div class="icon-badge">⚔️</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-amarela" id="cp-r10" style="top: 255px; left: 465px;" onclick="abrirModal('r10')"><div class="icon-badge">🪄</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-amarela" id="cp-r11" style="top: 175px; left: 415px;" onclick="abrirModal('r11')"><div class="icon-badge">🧹</div><div class="check-ring"></div></div>
 
-                <!-- Ilha 4 (Azul Gelada Topo) -->
-                <div class="map-checkpoint c-azul" id="cp-r12" style="top: 60px; right: 380px;" onclick="abrirModal('r12')"><div class="icon-badge">🏰</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-azul" id="cp-r13" style="top: 40px; right: 300px;" onclick="abrirModal('r13')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-azul" id="cp-r14" style="top: 110px; right: 340px;" onclick="abrirModal('r14')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-azul" id="cp-r15" style="top: 130px; right: 250px;" onclick="abrirModal('r15')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
+                    <!-- Ilha 4 (Azul Gelada) -->
+                    <div class="map-checkpoint c-azul" id="cp-r12" style="top: 65px; right: 385px;" onclick="abrirModal('r12')"><div class="icon-badge">🏰</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-azul" id="cp-r13" style="top: 45px; right: 305px;" onclick="abrirModal('r13')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-azul" id="cp-r14" style="top: 115px; right: 345px;" onclick="abrirModal('r14')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-azul" id="cp-r15" style="top: 135px; right: 255px;" onclick="abrirModal('r15')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
 
-                <!-- Ilha 5 (Roxa Direita) -->
-                <div class="map-checkpoint c-roxa" id="cp-r16" style="bottom: 130px; right: 190px;" onclick="abrirModal('r16')"><div class="icon-badge">🥐</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-roxa" id="cp-r17" style="bottom: 165px; right: 130px;" onclick="abrirModal('r17')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-roxa" id="cp-r18" style="bottom: 100px; right: 70px;" onclick="abrirModal('r18')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-roxa" id="cp-r19" style="bottom: 40px; right: 130px;" onclick="abrirModal('r19')"><div class="icon-badge">🌃</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-roxa" id="cp-r20" style="bottom: 175px; right: 230px;" onclick="abrirModal('r20')"><div class="icon-badge">🍽️</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-roxa" id="cp-r21" style="bottom: 75px; right: 210px;" onclick="abrirModal('r21')"><div class="icon-badge">🌟</div><div class="check-ring"></div></div>
-                <div class="map-checkpoint c-roxa" id="cp-r22" style="bottom: 115px; right: 120px;" onclick="abrirModal('r22')"><div class="icon-badge">🏙️</div><div class="check-ring"></div></div>
+                    <!-- Ilha 5 (Roxa) -->
+                    <div class="map-checkpoint c-roxa" id="cp-r16" style="bottom: 135px; right: 195px;" onclick="abrirModal('r16')"><div class="icon-badge">🥐</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-roxa" id="cp-r17" style="bottom: 170px; right: 135px;" onclick="abrirModal('r17')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-roxa" id="cp-r18" style="bottom: 105px; right: 75px;" onclick="abrirModal('r18')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-roxa" id="cp-r19" style="bottom: 45px; right: 135px;" onclick="abrirModal('r19')"><div class="icon-badge">🌃</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-roxa" id="cp-r20" style="bottom: 180px; right: 235px;" onclick="abrirModal('r20')"><div class="icon-badge">🍽️</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-roxa" id="cp-r21" style="bottom: 80px; right: 215px;" onclick="abrirModal('r21')"><div class="icon-badge">🌟</div><div class="check-ring"></div></div>
+                    <div class="map-checkpoint c-roxa" id="cp-r22" style="bottom: 120px; right: 125px;" onclick="abrirModal('r22')"><div class="icon-badge">🏙️</div><div class="check-ring"></div></div>
+                </div>
             </div>
         </div>
 
@@ -370,7 +419,6 @@
   measurementId: "G-PMH0W7QCLC"
 
 };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -544,8 +592,6 @@
                     }
                 }
             });
-
-            document.getElementById("mapa-sub").innerText = `${concluidos.length} de 22 locais carimbados por ${dadosCasal[perfilExibido]?.nome}.`;
         }
 
         let idSelecionado = null;
