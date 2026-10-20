@@ -816,6 +816,29 @@ const firebaseConfig = {
     window.confirmCheckin = confirmCheckin;
     window.createJourney = createJourney;
     window.joinJourney = joinJourney;
-</script>
+</script>// Procure a função de clique do botão "Gerar Código" no seu script:
+document.getElementById("seuBotaoDeGerar").addEventListener("click", async () => {
+    
+    // 1. COLOQUE ISSO BEM NO INÍCIO DA FUNÇÃO (Antes de chamar o Firebase)
+    const botaoGerar = document.getElementById("seuBotaoDeGerar");
+    botaoGerar.innerText = "Conectando à nuvem...";
+    botaoGerar.disabled = true; 
+
+    try {
+        // ... 
+        // Aqui no meio já vai estar o seu código original que gera 
+        // as 4 letras e salva no Firebase (não apague ele)
+        // ...
+
+        // 2. COLOQUE ISSO NO FINAL (Quando der tudo certo)
+        botaoGerar.innerText = "Código Gerado!";
+        
+    } catch (error) {
+        // Caso dê algum erro, o botão volta ao normal para você tentar de novo
+        console.error(error);
+        botaoGerar.innerText = "Gerar Código";
+        botaoGerar.disabled = false;
+    }
+});
 </body>
 </html>
