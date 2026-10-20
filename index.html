@@ -1,415 +1,327 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Date Quest SP - Aventura a Dois</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Playfair+Display:ital,wght@0,600;1,700&family=Poppins:wght@400;600;800&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Date Quest SP - Aventura a Dois</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Import Map do Three.js (Correção de módulos) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+      }
+    }
+  </script>
 
-        :root {
-            --bg-ocean: #091322;
-            --primary-blue: #0A146E;
-            --accent-gold: #f3c649;
-            --paper-cream: #fbf8f3;
-            --paper-border: #d4c5b0;
-            
-            /* Cores dos Checkpoints */
-            --color-ilha-verde: #e83e8c;
-            --color-ilha-laranja: #fd7e14;
-            --color-ilha-amarela: #ffc107;
-            --color-ilha-azul: #17a2b8;
-            --color-ilha-roxa: #6f42c1;
-        }
+  <style>
+    :root {
+      --color-primary: #1e3a8a; /* Azul marinho */
+      --color-accent: #d4af37; /* Dourado */
+      --color-paper: #f4ecd8; /* Pergaminho */
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg-ocean); color: #fff; overflow-x: hidden; min-height: 100vh; }
+    body {
+      font-family: 'Playfair Display', serif;
+      background-color: #0f172a;
+      color: #333;
+      overflow: hidden; /* Previne scroll no body inteiro (app mobile-like) */
+      touch-action: manipulation;
+    }
 
-        /* LOBBY */
-        #lobby {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; background: radial-gradient(circle at center, #1a2a4a 0%, #080d1a 100%);
-            color: white; text-align: center; padding: 20px; position: fixed; width: 100%; top: 0; left: 0; z-index: 2000;
-        }
-        .lobby-box { background: rgba(255,255,255,0.08); padding: 30px; border-radius: 24px; backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.15); max-width: 420px; width: 100%; }
-        .lobby-box h1 { font-family: 'Cinzel', serif; font-size: 2.2rem; color: var(--accent-gold); margin-bottom: 6px; }
-        .lobby-box input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 16px; text-align: center; text-transform: uppercase; font-weight: bold; }
-        .lobby-box button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; }
-        .btn-gold { background: linear-gradient(90deg, #f3c649, #e0a926); color: #000; }
-        .btn-blue { background: #3a86ff; color: white; }
-        #display-codigo { font-size: 28px; font-weight: 800; letter-spacing: 6px; margin: 15px 0; color: var(--accent-gold); background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px dashed var(--accent-gold); }
+    .font-cinzel { font-family: 'Cinzel', serif; }
 
-        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
-        .avatar-card { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 10px; cursor: pointer; border: 2px solid transparent; }
-        .avatar-card.selected { border-color: var(--accent-gold); background: rgba(243, 198, 73, 0.25); }
+    /* Estilos do Passaporte */
+    .passport-book {
+      perspective: 1000px;
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 3/4;
+      margin: 0 auto;
+      position: relative;
+    }
 
-        /* APP PRINCIPAL */
-        #app { display: none; padding: 15px 10px 90px; max-width: 950px; margin: 0 auto; }
-        .screen { display: none; }
-        .screen.active { display: block; }
+    .passport-page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: var(--color-paper);
+      border-radius: 4px 16px 16px 4px;
+      box-shadow: inset -5px 0 10px rgba(0,0,0,0.1), 5px 5px 15px rgba(0,0,0,0.3);
+      padding: 20px;
+      transform-origin: left center;
+      transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
 
-        /* ALTERNADOR DE USUÁRIO */
-        .user-switcher {
-            display: flex; justify-content: center; align-items: center; gap: 12px;
-            background: rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 50px;
-            margin: 0 auto 20px; max-width: 360px; border: 1px solid rgba(255,255,255,0.15);
-        }
-        .user-badge {
-            display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px;
-            cursor: pointer; opacity: 0.5; transition: 0.3s; font-size: 13px; font-weight: 600;
-        }
-        .user-badge.active { opacity: 1; background: var(--accent-gold); color: #000; box-shadow: 0 4px 12px rgba(243,198,73,0.4); }
+    .passport-cover {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: var(--color-accent);
+      z-index: 10;
+      border-radius: 8px 16px 16px 8px;
+      box-shadow: inset -2px 0 5px rgba(255,255,255,0.1), inset 5px 0 10px rgba(0,0,0,0.5), 10px 10px 20px rgba(0,0,0,0.5);
+      border: 2px solid var(--color-accent);
+    }
 
-        /* PASSAPORTE LIVRO */
-        .passport-container { display: flex; justify-content: center; position: relative; margin-top: 10px; }
-        .book-wrapper {
-            width: 340px; height: 500px; position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6); border-radius: 16px; overflow: hidden;
-            background: var(--paper-cream); border: 2px solid var(--paper-border);
-        }
-        .book-cover {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
-            background: linear-gradient(135deg, #0f1b38, #050a17); border-right: 2px solid var(--accent-gold);
-            border-left: 8px solid rgba(0,0,0,0.4); border-radius: 16px;
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 40px 20px; transition: transform 0.6s ease-in-out, opacity 0.4s;
-            box-shadow: 5px 0 25px rgba(0,0,0,0.5); cursor: pointer;
-        }
-        .book-cover.opened { transform: translateX(-105%); opacity: 0; pointer-events: none; }
-        .cover-emblem { font-size: 60px; color: var(--accent-gold); }
-        .cover-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--accent-gold); letter-spacing: 4px; font-weight: 800; text-align: center; }
-        .cover-name { font-family: 'Playfair Display', serif; font-size: 22px; color: #fff; border-bottom: 2px solid var(--accent-gold); padding-bottom: 6px; width: 85%; text-align: center; }
-        .cover-hint { font-size: 11px; color: var(--accent-gold); letter-spacing: 2px; font-weight: bold; }
+    .passport-page.flipped {
+      transform: rotateY(-180deg);
+    }
 
-        .book-page {
-            width: 100%; height: 100%; padding: 20px; color: #222;
-            display: flex; flex-direction: column; justify-content: space-between; background: var(--paper-cream);
-        }
-        .page-header { text-align: center; border-bottom: 2px dashed #b5a48b; padding-bottom: 12px; }
-        .page-avatar { font-size: 40px; background: #fff; width: 65px; height: 65px; line-height: 65px; border-radius: 50%; margin: 0 auto 6px; border: 2px solid var(--accent-gold); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .page-owner { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: bold; color: var(--primary-blue); }
-        .page-stats { background: #e8ded0; padding: 10px; border-radius: 10px; font-size: 11px; margin: 10px 0; }
-        .stats-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; color: var(--primary-blue); }
-        .bar-bg { height: 8px; background: #ccc; border-radius: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; background: var(--primary-blue); width: 0%; transition: width 0.4s; }
+    /* Grid de Carimbos */
+    .stamp-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      flex-grow: 1;
+      align-items: center;
+      justify-items: center;
+    }
 
-        .stamps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex-grow: 1; align-content: start; margin-top: 8px; }
-        .stamp-box {
-            aspect-ratio: 1; border-radius: 50%; border: 2px dashed #a0907a; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center; padding: 4px; opacity: 0.4; background: rgba(255,255,255,0.5);
-        }
-        .stamp-box.stamped {
-            opacity: 1; border: 3px double #0b1a48; color: #0b1a48; transform: rotate(-8deg); background: #f0f3ff;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-        }
-        .stamp-box h6 { font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: 2px; }
-        .page-navigation { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #d4c5b0; padding-top: 10px; }
-        .btn-nav-page { background: var(--primary-blue); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        .btn-fechar-capa { background: transparent; border: 1px solid #b5a48b; color: #555; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; }
+    .stamp {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px dashed rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.7rem;
+      color: rgba(0,0,0,0.4);
+      position: relative;
+    }
 
-        /* ABA MAPA DA ILHA EM 3D REALISTA */
-        #mapa {
-            background: linear-gradient(180deg, #0d3859 0%, #082238 100%);
-            padding: 15px 10px 100px; border-radius: 24px; overflow-x: auto;
-        }
-        .mapa-header-box {
-            text-align: left; background: rgba(255,255,255,0.95); padding: 14px 22px;
-            border-radius: 16px; color: #000; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-        .mapa-header-box h3 { font-family: 'Poppins', sans-serif; font-size: 20px; color: #0a146e; font-weight: 800; letter-spacing: 0.5px; }
-        
-        /* VISUALIZAÇÃO PERSPECTIVA 3D DO ARQUIPÉLAGO */
-        .archipelago-viewport {
-            width: 880px; height: 560px; margin: 0 auto; position: relative;
-            background: radial-gradient(ellipse at center, #1fa2d6 0%, #0d5f8a 70%, #083c59 100%);
-            border-radius: 28px; border: 6px solid #e2f1f8;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.3);
-            overflow: hidden; perspective: 1000px;
-        }
+    .stamp.completed {
+      border: 3px solid #b91c1c;
+      color: #b91c1c;
+      border-style: double;
+      transform: rotate(-10deg);
+      opacity: 0.8;
+      font-weight: bold;
+    }
 
-        .3d-stage {
-            width: 100%; height: 100%; position: absolute;
-            transform-style: preserve-3d;
-        }
+    .stamp.completed::after {
+      content: '✓';
+      position: absolute;
+      font-size: 2rem;
+      color: rgba(185, 28, 28, 0.3);
+      z-index: -1;
+    }
 
-        /* TEXTURAS E CAMADAS 3D DAS ILHAS FLUTUANTES */
-        .island-3d {
-            position: absolute; border-radius: 40% 60% 50% 50%;
-            transform-style: preserve-3d;
-            filter: drop-shadow(0px 15px 12px rgba(0,0,0,0.45));
-            border: 1px solid rgba(255,255,255,0.2);
-        }
+    /* Modal / Bottom Sheet Animado */
+    .modal-overlay {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
-        /* Topografia e Borda de Praia/Penhasco 3D */
-        .ilha-1 {
-            top: 25px; left: 30px; width: 290px; height: 220px;
-            background: radial-gradient(circle at 30% 30%, #7ec832 0%, #4f8e1e 70%, #3a6816 100%);
-            box-shadow: inset 0 -12px 0 #2d5011, inset -8px 0 0 #233e0d, 0 15px 0 #c2a868;
-        }
-        .ilha-2 {
-            bottom: 25px; left: 80px; width: 270px; height: 200px;
-            background: radial-gradient(circle at 30% 30%, #9be038 0%, #68a81f 70%, #4b7a16 100%);
-            box-shadow: inset 0 -12px 0 #3a6011, inset -8px 0 0 #2a460c, 0 15px 0 #d1b674;
-        }
-        .ilha-3 {
-            top: 110px; left: 330px; width: 270px; height: 270px;
-            background: radial-gradient(circle at 30% 30%, #e3cb8d 0%, #b89c56 70%, #8a733c 100%);
-            box-shadow: inset 0 -12px 0 #6e5b2e, inset -8px 0 0 #524321, 0 15px 0 #947a41;
-        }
-        .ilha-4 {
-            top: 25px; right: 230px; width: 240px; height: 190px;
-            background: radial-gradient(circle at 30% 30%, #b3f0fb 0%, #6ec2d1 70%, #4893a1 100%);
-            box-shadow: inset 0 -12px 0 #326771, inset -8px 0 0 #23484f, 0 15px 0 #8cbac2;
-        }
-        .ilha-5 {
-            bottom: 25px; right: 30px; width: 270px; height: 230px;
-            background: radial-gradient(circle at 30% 30%, #c99bed 0%, #8f5ac4 70%, #673f8f 100%);
-            box-shadow: inset 0 -12px 0 #4a2c68, inset -8px 0 0 #351f4b, 0 15px 0 #7e5c9b;
-        }
+    .modal-content {
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
 
-        /* Detalhes de Relevo/Montanhas no Solo */
-        .island-mountain {
-            position: absolute; border-radius: 50%;
-            background: rgba(0,0,0,0.15); box-shadow: inset 0 4px 8px rgba(255,255,255,0.25);
-            pointer-events: none;
-        }
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
 
-        /* Pontes 3D Conectando as Ilhas */
-        .bridge-3d {
-            position: absolute; background: linear-gradient(90deg, #6e4623, #a06837, #6e4623);
-            border: 2px solid #3d2511; height: 14px; z-index: 5; border-radius: 4px;
-            box-shadow: 0 8px 10px rgba(0,0,0,0.4);
-        }
-        .b1 { top: 225px; left: 245px; width: 65px; transform: rotate(42deg); }
-        .b2 { top: 275px; left: 310px; width: 55px; transform: rotate(-12deg); }
-        .b3 { top: 115px; left: 535px; width: 65px; transform: rotate(-28deg); }
+    /* Esconder scrollbar mas permitir scroll onde necessário */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* CHECKPOINTS DE RESTAURANTES EM 3D REALISTA */
-        .map-checkpoint {
-            position: absolute; z-index: 20; display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            filter: drop-shadow(0 6px 6px rgba(0,0,0,0.4));
-        }
-        .map-checkpoint:hover { transform: scale(1.2) translateY(-6px); z-index: 30; }
+    /* CSS2D Label do Three.js */
+    .map-label {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-family: sans-serif;
+      font-size: 10px;
+      font-weight: bold;
+      color: #333;
+      border: 1px solid white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      pointer-events: none;
+      white-space: nowrap;
+      margin-top: -20px; /* Posiciona acima do pino */
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
 
-        .icon-badge {
-            font-size: 19px; background: linear-gradient(135deg, #ffffff, #f0f0f0);
-            width: 38px; height: 38px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 3px solid currentColor; box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 6px 12px rgba(0,0,0,0.3);
-        }
-
-        .check-ring {
-            width: 26px; height: 26px; border-radius: 50%; background: #fff; margin-top: -8px;
-            border: 3px solid currentColor; box-shadow: 0 0 0 3px #fff, 0 4px 8px rgba(0,0,0,0.3);
-            display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: transparent;
-        }
-        .map-checkpoint.checked .check-ring { background: currentColor; color: #fff; }
-        .map-checkpoint.checked .check-ring::after { content: '✓'; }
-
-        .c-verde { color: var(--color-ilha-verde); }
-        .c-laranja { color: var(--color-ilha-laranja); }
-        .c-amarela { color: var(--color-ilha-amarela); }
-        .c-azul { color: var(--color-ilha-azul); }
-        .c-roxa { color: var(--color-ilha-roxa); }
-
-        /* MODAL DE CHECK-IN */
-        #modal-checkin {
-            display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
-            background: var(--paper-cream); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 25px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 3000; color: #222;
-        }
-        .modal-head { background: var(--primary-blue); color: #fff; padding: 15px; border-radius: 14px; text-align: center; margin-bottom: 15px; }
-        .check-steps { list-style: none; margin-bottom: 20px; }
-        .check-steps li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #bbb; font-weight: 600; }
-        #btn-confirmar { width: 100%; padding: 16px; background: linear-gradient(90deg, #f3c649, #e0a926); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
-
-        /* BARRA DE NAVEGAÇÃO */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
-            background: rgba(9, 19, 34, 0.96); backdrop-filter: blur(12px); display: flex; justify-content: space-around;
-            padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000;
-        }
-        .nav-btn { background: none; border: none; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; }
-        .nav-btn.active { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); padding-bottom: 2px; }
-    </style>
+    .map-label span.emoji { font-size: 14px; }
+  </style>
 </head>
-<body>
+<body class="h-screen w-screen flex flex-col text-slate-100 relative">
 
-    <!-- LOBBY -->
-    <div id="lobby">
-        <div class="lobby-box">
-            <h1>Date Quest</h1>
-            <p>Seu Passaporte Oficial de Encontros</p>
-
-            <div id="step-codigo">
-                <button id="btn-gerar" class="btn-gold">Gerar Código do Casal</button>
-                <div id="display-codigo"></div>
-                <hr style="border-color: rgba(255,255,255,0.15); margin: 15px 0;">
-                <p style="font-size: 12px; margin-bottom: 8px;">Ou insira o código da sua parceira:</p>
-                <input type="text" id="input-codigo" placeholder="EX: A4X9" maxlength="4">
-                <button id="btn-conectar" class="btn-blue">Conectar Passaportes</button>
-            </div>
-
-            <div id="step-perfil" style="display:none;">
-                <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Configurar Seu Perfil</h3>
-                <p style="font-size: 12px;">Escolha quem você é na dupla:</p>
-                
-                <div style="display: flex; gap: 10px; margin: 15px 0;">
-                    <button id="btn-p1" class="btn-blue" style="margin:0;" onclick="selecionarSlot('p1')">Pessoa 1</button>
-                    <button id="btn-p2" class="btn-blue" style="margin:0; background:#8338ec;" onclick="selecionarSlot('p2')">Pessoa 2</button>
-                </div>
-
-                <input type="text" id="input-nome" placeholder="Seu Nome no Passaporte" style="margin-bottom: 15px;">
-
-                <p style="font-size: 12px;">Escolha seu Avatar:</p>
-                <div class="avatar-grid">
-                    <div class="avatar-card selected" onclick="escolherAvatar('👑', this)"><span>👑</span></div>
-                    <div class="avatar-card" onclick="escolherAvatar('🐱', this)"><span>🐱</span></div>
-                    <div class="avatar-card" onclick="escolherAvatar('🦊', this)"><span>🦊</span></div>
-                    <div class="avatar-card" onclick="escolherAvatar('🌸', this)"><span>🌸</span></div>
-                    <div class="avatar-card" onclick="escolherAvatar('🍷', this)"><span>🍷</span></div>
-                    <div class="avatar-card" onclick="escolherAvatar('✨', this)"><span>✨</span></div>
-                </div>
-
-                <button class="btn-gold" onclick="salvarPerfilCompleto()">Abrir Passaporte</button>
-            </div>
-        </div>
+  <!-- ==================== LOBBY / LOGIN (Conta do Casal) ==================== -->
+  <div id="view-lobby" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+    <div class="text-center mb-8">
+      <h1 class="font-cinzel text-3xl text-[#d4af37] mb-2">Date Quest SP</h1>
+      <p class="text-slate-300">Uma Aventura a Dois</p>
     </div>
 
-    <!-- APP PRINCIPAL -->
-    <div id="app">
-        <!-- ALTERNADOR DE PERFIL -->
-        <div class="user-switcher">
-            <div class="user-badge active" id="badge-p1" onclick="mudarPerfilExibido('p1')">
-                <span id="switcher-avatar-p1">👑</span> <span id="switcher-nome-p1">Pessoa 1</span>
-            </div>
-            <div class="user-badge" id="badge-p2" onclick="mudarPerfilExibido('p2')">
-                <span id="switcher-avatar-p2">🐱</span> <span id="switcher-nome-p2">Pessoa 2</span>
-            </div>
+    <div class="bg-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-700">
+      <div class="mb-4">
+        <label class="block text-sm text-slate-400 mb-1">Chave do Casal (ex: AMOR2024)</label>
+        <input type="text" id="couple-key" class="w-full bg-slate-900 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none uppercase text-center tracking-widest font-bold" placeholder="CÓDIGO ÚNICO">
+        <p class="text-xs text-slate-500 mt-2 text-center">Use a mesma chave para sincronizar os dois celulares!</p>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-sm text-slate-400 mb-2">Quem é você?</label>
+        <div class="grid grid-cols-2 gap-3">
+          <button class="role-btn bg-slate-700 py-3 rounded-lg border-2 border-transparent transition" data-role="p1">Pessoa 1 🦊</button>
+          <button class="role-btn bg-slate-700 py-3 rounded-lg border-2 border-transparent transition" data-role="p2">Pessoa 2 🌸</button>
         </div>
+        <input type="text" id="user-name" class="w-full mt-3 bg-slate-900 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="Seu Nome ou Apelido">
+      </div>
 
-        <!-- ABA PASSAPORTE -->
-        <div id="passaporte" class="screen active">
-            <div class="passport-container">
-                <div class="book-wrapper">
-                    <div class="book-cover" id="book-cover" onclick="abrirCapa()">
-                        <div class="cover-emblem">🌐</div>
-                        <div class="cover-title">PASSAPORTE</div>
-                        <div class="cover-name" id="cover-active-name">Pessoa 1</div>
-                        <div class="cover-hint">CLIQUE PARA ABRIR ➔</div>
-                    </div>
-                    <div class="book-page">
-                        <div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <button class="btn-fechar-capa" onclick="fecharCapa()">⬅ Capa</button>
-                                <span style="font-size: 10px; color: #888; font-weight: bold;">DOCUMENTO OFICIAL</span>
-                            </div>
-                            <div class="page-header">
-                                <div class="page-avatar" id="page-active-avatar">👑</div>
-                                <div class="page-owner" id="page-active-name">Pessoa 1</div>
-                            </div>
-                            <div class="page-stats">
-                                <div class="stats-row"><span id="active-nivel">Nível 1</span><span id="active-xp">0 XP</span></div>
-                                <div class="bar-bg"><div class="bar-fill" id="active-fill"></div></div>
-                            </div>
-                        </div>
-                        <div class="stamps-grid" id="stamps-container"></div>
-                        <div class="page-navigation">
-                            <button class="btn-nav-page" id="btn-prev-page" onclick="paginaAnterior()">◀ Anterior</button>
-                            <span class="page-indicator" style="font-size:11px; font-weight:bold; color:#666;">PÁG. <span id="pag-num">1</span> DE 4</span>
-                            <button class="btn-nav-page" id="btn-next-page" onclick="proximaPagina()">Próxima ▶</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ABA MAPA DA ILHA EM 3D REALISTA -->
-        <div id="mapa" class="screen">
-            <div class="mapa-header-box">
-                <h3>MAPA DA JORNADA</h3>
-            </div>
-
-            <div class="archipelago-viewport">
-                <div class="3d-stage">
-                    <!-- Ilhas 3D com Relevos -->
-                    <div class="island-3d ilha-1"><div class="island-mountain" style="width:100px; height:80px; top:40px; left:60px;"></div></div>
-                    <div class="island-3d ilha-2"><div class="island-mountain" style="width:90px; height:70px; top:50px; left:80px;"></div></div>
-                    <div class="island-3d ilha-3"><div class="island-mountain" style="width:110px; height:90px; top:80px; left:80px;"></div></div>
-                    <div class="island-3d ilha-4"><div class="island-mountain" style="width:80px; height:60px; top:30px; left:70px;"></div></div>
-                    <div class="island-3d ilha-5"><div class="island-mountain" style="width:90px; height:80px; top:60px; left:80px;"></div></div>
-
-                    <!-- Pontes 3D -->
-                    <div class="bridge-3d b1"></div>
-                    <div class="bridge-3d b2"></div>
-                    <div class="bridge-3d b3"></div>
-
-                    <!-- 22 Checkpoints de Restaurantes -->
-                    <!-- Ilha 1 (Verde) -->
-                    <div class="map-checkpoint c-verde" id="cp-r1" style="top: 75px; left: 55px;" onclick="abrirModal('r1')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-verde" id="cp-r2" style="top: 45px; left: 135px;" onclick="abrirModal('r2')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-verde" id="cp-r3" style="top: 125px; left: 205px;" onclick="abrirModal('r3')"><div class="icon-badge">🍧</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-verde" id="cp-r4" style="top: 160px; left: 125px;" onclick="abrirModal('r4')"><div class="icon-badge">🥪</div><div class="check-ring"></div></div>
-
-                    <!-- Ilha 2 (Verde Claro) -->
-                    <div class="map-checkpoint c-laranja" id="cp-r5" style="bottom: 125px; left: 175px;" onclick="abrirModal('r5')"><div class="icon-badge">🧁</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-laranja" id="cp-r6" style="bottom: 65px; left: 225px;" onclick="abrirModal('r6')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-laranja" id="cp-r7" style="bottom: 145px; left: 265px;" onclick="abrirModal('r7')"><div class="icon-badge">🍝</div><div class="check-ring"></div></div>
-
-                    <!-- Ilha 3 (Amarela/Areia) -->
-                    <div class="map-checkpoint c-amarela" id="cp-r8" style="top: 235px; left: 345px;" onclick="abrirModal('r8')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-amarela" id="cp-r9" style="top: 305px; left: 395px;" onclick="abrirModal('r9')"><div class="icon-badge">⚔️</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-amarela" id="cp-r10" style="top: 255px; left: 465px;" onclick="abrirModal('r10')"><div class="icon-badge">🪄</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-amarela" id="cp-r11" style="top: 175px; left: 415px;" onclick="abrirModal('r11')"><div class="icon-badge">🧹</div><div class="check-ring"></div></div>
-
-                    <!-- Ilha 4 (Azul Gelada) -->
-                    <div class="map-checkpoint c-azul" id="cp-r12" style="top: 65px; right: 385px;" onclick="abrirModal('r12')"><div class="icon-badge">🏰</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-azul" id="cp-r13" style="top: 45px; right: 305px;" onclick="abrirModal('r13')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-azul" id="cp-r14" style="top: 115px; right: 345px;" onclick="abrirModal('r14')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-azul" id="cp-r15" style="top: 135px; right: 255px;" onclick="abrirModal('r15')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
-
-                    <!-- Ilha 5 (Roxa) -->
-                    <div class="map-checkpoint c-roxa" id="cp-r16" style="bottom: 135px; right: 195px;" onclick="abrirModal('r16')"><div class="icon-badge">🥐</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-roxa" id="cp-r17" style="bottom: 170px; right: 135px;" onclick="abrirModal('r17')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-roxa" id="cp-r18" style="bottom: 105px; right: 75px;" onclick="abrirModal('r18')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-roxa" id="cp-r19" style="bottom: 45px; right: 135px;" onclick="abrirModal('r19')"><div class="icon-badge">🌃</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-roxa" id="cp-r20" style="bottom: 180px; right: 235px;" onclick="abrirModal('r20')"><div class="icon-badge">🍽️</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-roxa" id="cp-r21" style="bottom: 80px; right: 215px;" onclick="abrirModal('r21')"><div class="icon-badge">🌟</div><div class="check-ring"></div></div>
-                    <div class="map-checkpoint c-roxa" id="cp-r22" style="bottom: 120px; right: 125px;" onclick="abrirModal('r22')"><div class="icon-badge">🏙️</div><div class="check-ring"></div></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- MODAL DE CHECK-IN -->
-        <div id="modal-checkin">
-            <div style="text-align: right; cursor: pointer; font-weight: bold;" onclick="fecharModal()">✕</div>
-            <div class="modal-head">
-                <h3 id="modal-nome">Restaurante</h3>
-                <p id="modal-cat" style="font-size: 11px; opacity: 0.8;">Categoria</p>
-            </div>
-            <ul class="check-steps">
-                <li>Chegada ao local <span class="chk">⏳</span></li>
-                <li>Experiência Vivenciada <span class="chk">⏳</span></li>
-                <li>Carimbo Gravado <span class="chk">⏳</span></li>
-            </ul>
-            <button id="btn-confirmar">Confirmar Presença (+100 XP)</button>
-        </div>
-
-        <!-- NAV BARRA -->
-        <div class="bottom-nav">
-            <button class="nav-btn active" onclick="alternarAba('passaporte', this)">Passaporte</button>
-            <button class="nav-btn" onclick="alternarAba('mapa', this)">Mapa da Ilha</button>
-        </div>
+      <button id="btn-entrar" class="w-full bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 font-bold py-3 rounded-lg shadow-lg active:scale-95 transition">
+        Iniciar Jornada
+      </button>
+      <p id="lobby-status" class="text-center text-[#d4af37] text-sm mt-4 hidden animate-pulse">Conectando...</p>
     </div>
+  </div>
 
-    <!-- FIREBASE SDK & LÓGICA -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  <!-- ==================== MAIN APP ==================== -->
+  <div id="view-app" class="hidden flex-col h-full w-full">
+    
+    <!-- HEADER -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-20">
+      <h1 class="font-cinzel text-[#d4af37] font-bold text-lg">Date Quest</h1>
+      <div class="bg-slate-800 rounded-full p-1 flex">
+        <button id="tab-p1" class="px-4 py-1 rounded-full text-xs font-bold bg-[#d4af37] text-slate-900 transition">P1</button>
+        <button id="tab-p2" class="px-4 py-1 rounded-full text-xs font-bold text-slate-400 transition">P2</button>
+      </div>
+    </header>
 
-      const firebaseConfig = {
+    <!-- CONTENT AREA -->
+    <main class="flex-grow relative overflow-hidden bg-slate-800">
+      
+      <!-- ABA 1: PASSAPORTE -->
+      <div id="aba-passaporte" class="absolute inset-0 flex flex-col items-center justify-center p-4 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
+        
+        <div class="passport-book" id="passport-container">
+          <!-- Capa -->
+          <div class="passport-page passport-cover flex items-center justify-center text-center cursor-pointer" id="page-cover" onclick="openPassport()">
+            <div>
+              <div class="text-4xl mb-4">👑</div>
+              <h2 class="font-cinzel text-2xl mb-2">Passaporte Gastronômico</h2>
+              <p class="font-sans text-xs text-slate-300 mb-8" id="passport-owner-name">Propriedade de: ---</p>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-4 border border-slate-700">
+                <div id="xp-bar" class="bg-[#d4af37] h-full" style="width: 0%;"></div>
+              </div>
+              <p class="text-xs mt-2" id="xp-text">0 / 2200 XP</p>
+              <p class="text-[10px] mt-6 text-slate-400 animate-pulse">Toque para abrir</p>
+            </div>
+          </div>
+
+          <!-- Páginas Internas geradas via JS -->
+          <div id="pages-wrapper" class="absolute inset-0 hidden"></div>
+        </div>
+
+        <div class="flex gap-4 mt-6 z-10 hidden" id="passport-controls">
+          <button onclick="prevPage()" class="bg-slate-800 text-[#d4af37] px-4 py-2 rounded-full shadow border border-slate-700">◀ Ant</button>
+          <button onclick="nextPage()" class="bg-slate-800 text-[#d4af37] px-4 py-2 rounded-full shadow border border-slate-700">Próx ▶</button>
+        </div>
+      </div>
+
+      <!-- ABA 2: MAPA 3D (Three.js) -->
+      <div id="aba-mapa" class="absolute inset-0 hidden">
+        <!-- HUD Romântico -->
+        <div class="absolute top-4 left-4 right-4 z-10 pointer-events-none">
+          <div class="bg-white/10 backdrop-blur-md border border-[#d4af37]/30 rounded-xl p-4 shadow-lg text-center">
+            <h3 class="font-cinzel text-[#d4af37] text-sm font-bold mb-1">O Arquipélago dos Sabores</h3>
+            <p class="text-xs text-slate-200 italic">Cada ilha guarda um momento. Cada parada, uma nova memória a dois. Toque nos ícones para registrar seu encontro.</p>
+          </div>
+        </div>
+        <!-- Container do Canvas 3D -->
+        <div id="three-canvas-container" class="w-full h-full"></div>
+      </div>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bg-slate-900 border-t border-slate-800 p-2 pb-safe z-20 flex justify-around">
+      <button id="nav-passport" class="flex flex-col items-center p-2 text-[#d4af37]">
+        <span class="text-xl">📖</span>
+        <span class="text-[10px] mt-1 font-bold">Passaporte</span>
+      </button>
+      <button id="nav-map" class="flex flex-col items-center p-2 text-slate-500">
+        <span class="text-xl">🗺️</span>
+        <span class="text-[10px] mt-1">Mapa 3D</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- MODAL DE CHECK-IN -->
+  <div id="checkin-modal" class="modal-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div class="modal-content bg-slate-900 w-full sm:max-w-md p-6 rounded-t-3xl sm:rounded-3xl border border-slate-700 border-b-0 sm:border-b">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <span id="modal-icon" class="text-3xl">🍽️</span>
+          <p id="modal-category" class="text-xs text-[#d4af37] font-bold mt-2 uppercase tracking-wide">Categoria</p>
+          <h2 id="modal-title" class="font-cinzel text-xl font-bold text-white">Nome do Restaurante</h2>
+        </div>
+        <button onclick="closeModal()" class="text-slate-500 hover:text-white text-2xl">&times;</button>
+      </div>
+
+      <div class="space-y-3 mb-6 bg-slate-800 p-4 rounded-xl">
+        <label class="flex items-center space-x-3 text-sm">
+          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-5 w-5 rounded border-slate-600 bg-slate-700">
+          <span class="text-slate-300">Chegamos ao local 📍</span>
+        </label>
+        <label class="flex items-center space-x-3 text-sm">
+          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-5 w-5 rounded border-slate-600 bg-slate-700">
+          <span class="text-slate-300">Pedido realizado 😋</span>
+        </label>
+        <label class="flex items-center space-x-3 text-sm">
+          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-5 w-5 rounded border-slate-600 bg-slate-700">
+          <span class="text-slate-300">Encontro concluído ❤️</span>
+        </label>
+      </div>
+
+      <button id="btn-checkin" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2">
+        <span>Bloqueado</span>
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    // ==========================================
+    // IMPORTS DO THREE.JS & FIREBASE
+    // ==========================================
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    import { initializeApp } from "firebase/app";
+    import { getAuth, signInAnonymously } from "firebase/auth";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "firebase/firestore";
+
+   
+const firebaseConfig = {
   apiKey: "AIzaSyBKeGPY0nBPpV_uo6N-vGuK-zNbmLP14wE",
   authDomain: "date-quest-sp.firebaseapp.com",
   projectId: "date-quest-sp",
@@ -419,225 +331,615 @@
   measurementId: "G-PMH0W7QCLC"
 
 };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
 
-        const restaurantes = [
-            { id: "r1", nome: "Madero", cat: "Burgers" }, { id: "r2", nome: "Outback", cat: "Steakhouse" },
-            { id: "r3", nome: "Bacio di Latte", cat: "Gelato" }, { id: "r4", nome: "Z Deli", cat: "Sanduíches" },
-            { id: "r5", nome: "Carlo's Bakery", cat: "Doceria" }, { id: "r6", nome: "Le Bife", cat: "Bistrô" },
-            { id: "r7", nome: "Eataly", cat: "Italiano" }, { id: "r8", nome: "Patties", cat: "Smashed" },
-            { id: "r9", nome: "Taverna Medieval", cat: "Temático" }, { id: "r10", nome: "Beco Hexagonal", cat: "Bruxo" },
-            { id: "r11", nome: "Vassoura Quebrada", cat: "Magia" }, { id: "r12", nome: "Magia & Bruxaria", cat: "Castelo" },
-            { id: "r13", nome: "Hannover", cat: "Fondue" }, { id: "r14", nome: "Chalezinho", cat: "Fondue" },
-            { id: "r15", nome: "Famiglia Mancini", cat: "Cantina" }, { id: "r16", nome: "L'Entrecôte", cat: "Francês" },
-            { id: "r17", nome: "Paris 6", cat: "Bistrô 24h" }, { id: "r18", nome: "Figueira Rubaiyat", cat: "Carnes" },
-            { id: "r19", nome: "Skye Bar", cat: "Rooftop" }, { id: "r20", nome: "Maní", cat: "Alta Gastronomia" },
-            { id: "r21", nome: "D.O.M.", cat: "Michelin" }, { id: "r22", nome: "Terraço Itália", cat: "Topo de SP" }
+    let app, db, auth;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      console.log("Tentando inicializar Firebase...");
+    } catch (error) {
+      console.warn("Firebase não configurado ou erro, rodando em modo LocalStorage:", error);
+    }
+
+    // ==========================================
+    // BASE DE DADOS DOS RESTAURANTES (22 Locais - 5 Ilhas)
+    // ==========================================
+    const RESTAURANTS = [
+      { id: 1, name: "Madero", category: "Burgers", icon: "🍔", island: 1, color: 0x22c55e }, // Verde
+      { id: 2, name: "Outback", category: "Steakhouse", icon: "🥩", island: 1, color: 0x22c55e },
+      { id: 4, name: "Z Deli", category: "Sanduíches", icon: "🥪", island: 1, color: 0x22c55e },
+      { id: 8, name: "Patties", category: "Smashed", icon: "🍔", island: 1, color: 0x22c55e },
+
+      { id: 3, name: "Bacio di Latte", category: "Gelato", icon: "🍧", island: 2, color: 0xf472b6 }, // Rosa
+      { id: 5, name: "Carlo's Bakery", category: "Doceria", icon: "🧁", island: 2, color: 0xf472b6 },
+      { id: 6, name: "Le Bife", category: "Bistrô", icon: "🍽️", island: 2, color: 0xf472b6 },
+      { id: 17, name: "Paris 6", category: "Bistrô 24h", icon: "🍰", island: 2, color: 0xf472b6 },
+      { id: 16, name: "L'Entrecôte", category: "Francês", icon: "🍷", island: 2, color: 0xf472b6 },
+
+      { id: 9, name: "Taverna Medieval", category: "Temático", icon: "⚔️", island: 3, color: 0xfacc15 }, // Amarelo/Ouro
+      { id: 10, name: "Beco Hexagonal", category: "Bruxo", icon: "🪄", island: 3, color: 0xfacc15 },
+      { id: 11, name: "Vassoura Quebrada", category: "Magia", icon: "🧹", island: 3, color: 0xfacc15 },
+      { id: 12, name: "Magia & Bruxaria", category: "Castelo", icon: "🏰", island: 3, color: 0xfacc15 },
+
+      { id: 13, name: "Hannover", category: "Fondue", icon: "🫕", island: 4, color: 0x38bdf8 }, // Azul Gelo
+      { id: 14, name: "Chalezinho", category: "Fondue Romântico", icon: "🧀", island: 4, color: 0x38bdf8 },
+      { id: 7, name: "Eataly", category: "Italiano", icon: "🍕", island: 4, color: 0x38bdf8 },
+      { id: 15, name: "Famiglia Mancini", category: "Cantina", icon: "🍝", island: 4, color: 0x38bdf8 },
+
+      { id: 18, name: "Figueira Rubaiyat", category: "Carnes", icon: "🍖", island: 5, color: 0xa855f7 }, // Roxo
+      { id: 19, name: "Skye Bar", category: "Rooftop", icon: "🌃", island: 5, color: 0xa855f7 },
+      { id: 20, name: "Maní", category: "Alta Gastronomia", icon: "✨", island: 5, color: 0xa855f7 },
+      { id: 21, name: "D.O.M.", category: "Michelin", icon: "🌟", island: 5, color: 0xa855f7 },
+      { id: 22, name: "Terraço Itália", category: "Topo de SP", icon: "🥂", island: 5, color: 0xa855f7 }
+    ];
+
+    // ==========================================
+    // ESTADO E ARMAZENAMENTO (Fallback System)
+    // ==========================================
+    const State = {
+      coupleKey: null,
+      myRole: null, // 'p1' ou 'p2'
+      myName: "",
+      viewingRole: 'p1', // Qual aba está aberta no momento
+      data: {
+        p1: { name: "Pessoa 1", avatar: "🦊", completed: [] },
+        p2: { name: "Pessoa 2", avatar: "🌸", completed: [] }
+      }
+    };
+
+    const StorageManager = {
+      useLocalOnly: !db, // Se não tem db instanciado, vai direto pro local
+      unsubscribe: null,
+
+      async init(coupleKey, role, name) {
+        State.coupleKey = coupleKey;
+        State.myRole = role;
+        State.myName = name;
+        State.viewingRole = role; // Inicia vendo o próprio passaporte
+        
+        State.data[role].name = name;
+
+        // Salvar login local persistente
+        localStorage.setItem('datequest_session', JSON.stringify({ coupleKey, role, name }));
+
+        if (!this.useLocalOnly) {
+          try {
+            await signInAnonymously(auth);
+            const docRef = doc(db, "couples", coupleKey);
+            const docSnap = await getDoc(docRef);
+            
+            if (!docSnap.exists()) {
+              // Cria nova chave
+              await setDoc(docRef, State.data);
+            }
+            
+            // Listen em tempo real
+            this.unsubscribe = onSnapshot(docRef, (snapshot) => {
+              if (snapshot.exists()) {
+                State.data = snapshot.data();
+                AppUI.renderAll();
+              }
+            }, (error) => {
+              console.error("Erro no onSnapshot Firebase (Permissões?):", error);
+              this.fallbackToLocal();
+            });
+
+            return true;
+          } catch (e) {
+            console.error("Erro na comunicação com Firebase, caindo para local:", e);
+            this.fallbackToLocal();
+          }
+        } else {
+          this.fallbackToLocal();
+        }
+      },
+
+      fallbackToLocal() {
+        this.useLocalOnly = true;
+        const localData = localStorage.getItem(`dq_data_${State.coupleKey}`);
+        if (localData) {
+          State.data = JSON.parse(localData);
+          State.data[State.myRole].name = State.myName; // Força atualização do nome atual
+        }
+        this.saveLocal();
+        AppUI.renderAll();
+      },
+
+      async save() {
+        if (this.useLocalOnly) {
+          this.saveLocal();
+          AppUI.renderAll();
+        } else {
+          try {
+            const docRef = doc(db, "couples", State.coupleKey);
+            await setDoc(docRef, State.data, { merge: true });
+          } catch(e) {
+            console.error("Erro ao salvar no firebase", e);
+            this.fallbackToLocal();
+          }
+        }
+      },
+
+      saveLocal() {
+        localStorage.setItem(`dq_data_${State.coupleKey}`, JSON.stringify(State.data));
+      }
+    };
+
+    // ==========================================
+    // CLASSE DO MAPA 3D (Three.js)
+    // ==========================================
+    class Map3D {
+      constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.scene = new THREE.Scene();
+        
+        // Fundo e Neblina
+        this.scene.background = new THREE.Color(0x87CEEB);
+        this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
+
+        // Câmera
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+        this.camera.position.set(0, 40, 60);
+
+        // WebGL Renderer
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.container.appendChild(this.renderer.domElement);
+
+        // CSS2D Renderer (Para as labels HTML flutuantes)
+        this.labelRenderer = new CSS2DRenderer();
+        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        this.labelRenderer.domElement.style.position = 'absolute';
+        this.labelRenderer.domElement.style.top = '0px';
+        this.labelRenderer.domElement.style.pointerEvents = 'none'; // Não roubar o clique da tela
+        this.container.appendChild(this.labelRenderer.domElement);
+
+        // Controles Mobile-Friendly
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        this.controls.enablePan = false; // Impede que arraste o mapa pra longe
+        this.controls.minDistance = 20;  // Zoom máximo
+        this.controls.maxDistance = 90;  // Zoom mínimo
+        this.controls.maxPolarAngle = Math.PI / 2 - 0.1; // Não deixa ver por baixo da terra
+
+        // Iluminação
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        this.scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(20, 50, 20);
+        this.scene.add(dirLight);
+
+        // Variáveis de Animação e Interação
+        this.clock = new THREE.Clock();
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        this.pins = [];
+
+        this.buildEnvironment();
+        this.buildCheckpoints();
+
+        // Eventos
+        window.addEventListener('resize', () => this.onWindowResize());
+        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onClick(e));
+
+        this.animate();
+      }
+
+      buildEnvironment() {
+        // Oceano
+        const oceanGeometry = new THREE.PlaneGeometry(300, 300);
+        const oceanMaterial = new THREE.MeshStandardMaterial({ 
+          color: 0x006994, transparent: true, opacity: 0.8, roughness: 0.1, metalness: 0.1
+        });
+        const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
+        ocean.rotation.x = -Math.PI / 2;
+        ocean.position.y = -2;
+        this.scene.add(ocean);
+
+        // Posições das 5 Ilhas
+        this.islandPositions = [
+          { x: 0, z: 0, color: 0x22c55e },     // Ilha 1 Centro
+          { x: -25, z: -20, color: 0xf472b6 }, // Ilha 2 Esq Cima
+          { x: 25, z: -15, color: 0xfacc15 },  // Ilha 3 Dir Cima
+          { x: -20, z: 25, color: 0x38bdf8 },  // Ilha 4 Esq Baixo
+          { x: 20, z: 25, color: 0xa855f7 }    // Ilha 5 Dir Baixo
         ];
 
-        let codigoAtual = null;
-        let slotMeu = 'p1';
-        let perfilExibido = 'p1';
-        let avatarEscolha = '👑';
-        let dadosCasal = null;
-        let paginaAtual = 1;
+        this.islandPositions.forEach(pos => {
+          // Base Cilindrica
+          const baseGeo = new THREE.CylinderGeometry(12, 10, 4, 32);
+          const baseMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
+          const base = new THREE.Mesh(baseGeo, baseMat);
+          base.position.set(pos.x, 0, pos.z);
+          this.scene.add(base);
 
-        // LOBBY
-        document.getElementById("btn-gerar").addEventListener("click", async () => {
-            const btn = document.getElementById("btn-gerar");
-            btn.innerText = "Conectando..."; btn.disabled = true;
-            try {
-                const codigo = Math.random().toString(36).substring(2, 6).toUpperCase();
-                await signInAnonymously(auth);
-                await setDoc(doc(db, "vinculos", codigo), {
-                    p1: { nome: "Pessoa 1", avatar: "👑", xp: 0, concluidos: [] },
-                    p2: { nome: "Pessoa 2", avatar: "🐱", xp: 0, concluidos: [] }
-                });
-                document.getElementById("display-codigo").innerText = codigo;
-                codigoAtual = codigo;
-                irParaPerfil();
-            } catch(e) {
-                alert("Verifique suas chaves do Firebase!");
-                btn.innerText = "Gerar Código do Casal"; btn.disabled = false;
+          // Topo/Colina
+          const topGeo = new THREE.SphereGeometry(12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+          const topMat = new THREE.MeshStandardMaterial({ color: pos.color, roughness: 0.8 });
+          const top = new THREE.Mesh(topGeo, topMat);
+          top.position.set(pos.x, 2, pos.z);
+          top.scale.y = 0.3; // Achatada
+          this.scene.add(top);
+        });
+
+        // Pontes
+        const bridgeGeo = new THREE.BoxGeometry(2, 0.5, 20);
+        const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+        
+        const b1 = new THREE.Mesh(bridgeGeo, bridgeMat);
+        b1.position.set(-12.5, 2, -10); b1.rotation.y = Math.PI / 4;
+        this.scene.add(b1);
+
+        const b2 = new THREE.Mesh(bridgeGeo, bridgeMat);
+        b2.position.set(12.5, 2, -7.5); b2.rotation.y = -Math.PI / 3;
+        this.scene.add(b2);
+      }
+
+      buildCheckpoints() {
+        RESTAURANTS.forEach(rest => {
+          const islandBase = this.islandPositions[rest.island - 1];
+          // Posição aleatória na ilha (raio pequeno para não cair na água)
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * 8;
+          const posX = islandBase.x + Math.cos(angle) * radius;
+          const posZ = islandBase.z + Math.sin(angle) * radius;
+
+          const pinGroup = new THREE.Group();
+          pinGroup.position.set(posX, 5, posZ);
+          pinGroup.userData = rest; // Salva os dados para o clique
+
+          // Pino visual
+          const sphereGeo = new THREE.SphereGeometry(0.8, 16, 16);
+          const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5 });
+          const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+          sphere.position.y = 1.5;
+
+          const coneGeo = new THREE.ConeGeometry(0.5, 1.5, 16);
+          const coneMat = new THREE.MeshStandardMaterial({ color: rest.color });
+          const cone = new THREE.Mesh(coneGeo, coneMat);
+          cone.rotation.x = Math.PI; // Vira de cabeça pra baixo
+
+          const ringGeo = new THREE.TorusGeometry(0.8, 0.1, 8, 24);
+          const ringMat = new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.3 });
+          const ring = new THREE.Mesh(ringGeo, ringMat);
+          ring.rotation.x = Math.PI / 2;
+          ring.position.y = -0.5;
+
+          pinGroup.add(sphere);
+          pinGroup.add(cone);
+          pinGroup.add(ring);
+
+          // Rótulo HTML flutuante
+          const labelDiv = document.createElement('div');
+          labelDiv.className = 'map-label';
+          // Transforma cor hexa 0xRRGGBB para rgba
+          const colorHex = '#' + rest.color.toString(16).padStart(6, '0');
+          labelDiv.style.backgroundColor = colorHex;
+          labelDiv.innerHTML = `<span class="emoji">${rest.icon}</span> ${rest.name}`;
+          
+          const labelObj = new CSS2DObject(labelDiv);
+          labelObj.position.set(0, 3, 0); // Acima do pino
+          pinGroup.add(labelObj);
+
+          this.scene.add(pinGroup);
+          this.pins.push(pinGroup);
+        });
+      }
+
+      onClick(event) {
+        // Normaliza posição do mouse (-1 a +1)
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        
+        // Pega todos os meshes dentro dos pinGroups
+        const meshesToCheck = [];
+        this.pins.forEach(p => p.children.forEach(c => {
+          if(c.isMesh) meshesToCheck.push(c);
+        }));
+
+        const intersects = this.raycaster.intersectObjects(meshesToCheck);
+        
+        if (intersects.length > 0) {
+          // O object é o mesh (cone/esfera), o parent é o Group que tem o userData
+          const clickedPin = intersects[0].object.parent;
+          const restaurantData = clickedPin.userData;
+          
+          if(restaurantData && restaurantData.id) {
+            AppUI.openCheckinModal(restaurantData);
+          }
+        }
+      }
+
+      onWindowResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        const time = this.clock.getElapsedTime();
+        
+        // Animação dos pinos: Flutuar (Y) e Girar
+        this.pins.forEach((pin, i) => {
+          pin.position.y = 5 + Math.sin(time * 2 + i) * 0.5;
+          pin.rotation.y += 0.02;
+        });
+
+        this.controls.update();
+        this.renderer.render(this.scene, this.camera);
+        this.labelRenderer.render(this.scene, this.camera);
+      }
+    }
+
+
+    // ==========================================
+    // UI CONTROLLER
+    // ==========================================
+    const AppUI = {
+      currentPage: 0,
+      mapInstance: null,
+      currentModalRestaurant: null,
+
+      init() {
+        this.bindEvents();
+        this.checkSession();
+      },
+
+      checkSession() {
+        const session = localStorage.getItem('datequest_session');
+        if (session) {
+          const { coupleKey, role, name } = JSON.parse(session);
+          document.getElementById('lobby-status').classList.remove('hidden');
+          StorageManager.init(coupleKey, role, name).then(() => {
+            this.showApp();
+          });
+        }
+      },
+
+      bindEvents() {
+        // Lobby Roles
+        document.querySelectorAll('.role-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('border-[#d4af37]'));
+            e.target.classList.add('border-[#d4af37]');
+            State.myRole = e.target.dataset.role;
+          });
+        });
+
+        // Entrar
+        document.getElementById('btn-entrar').addEventListener('click', () => {
+          const key = document.getElementById('couple-key').value.trim().toUpperCase();
+          const name = document.getElementById('user-name').value.trim();
+          if(!key || !State.myRole || !name) return alert('Preencha a Chave, escolha quem é você e digite seu nome!');
+          
+          document.getElementById('lobby-status').classList.remove('hidden');
+          StorageManager.init(key, State.myRole, name).then(() => {
+            this.showApp();
+          });
+        });
+
+        // Header Tabs
+        document.getElementById('tab-p1').addEventListener('click', () => this.switchViewRole('p1'));
+        document.getElementById('tab-p2').addEventListener('click', () => this.switchViewRole('p2'));
+
+        // Bottom Nav Tabs
+        document.getElementById('nav-passport').addEventListener('click', () => this.switchMainTab('passaporte'));
+        document.getElementById('nav-map').addEventListener('click', () => this.switchMainTab('mapa'));
+
+        // Checkbox do Modal
+        document.querySelectorAll('.task-check').forEach(cb => {
+          cb.addEventListener('change', () => {
+            const allChecked = Array.from(document.querySelectorAll('.task-check')).every(c => c.checked);
+            const btn = document.getElementById('btn-checkin');
+            if(allChecked) {
+              btn.disabled = false;
+              btn.className = "w-full bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 font-bold py-4 rounded-xl shadow-lg transform active:scale-95 transition flex items-center justify-center gap-2";
+              btn.innerHTML = "✨ Registrar Encontro (+100 XP)";
+            } else {
+              btn.disabled = true;
+              btn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2";
+              btn.innerHTML = "Complete as etapas...";
             }
+          });
         });
 
-        document.getElementById("btn-conectar").addEventListener("click", async () => {
-            const codigo = document.getElementById("input-codigo").value.toUpperCase();
-            if(codigo.length === 4) {
-                await signInAnonymously(auth);
-                const docSnap = await getDoc(doc(db, "vinculos", codigo));
-                if(docSnap.exists()) {
-                    codigoAtual = codigo;
-                    irParaPerfil();
-                } else {
-                    alert("Código não encontrado!");
-                }
-            }
+        // Confirmar Checkin
+        document.getElementById('btn-checkin').addEventListener('click', () => {
+          if(!this.currentModalRestaurant) return;
+          const restId = this.currentModalRestaurant.id;
+          
+          if(!State.data[State.myRole].completed.includes(restId)) {
+            State.data[State.myRole].completed.push(restId);
+            StorageManager.save();
+          }
+          window.closeModal();
+        });
+      },
+
+      showApp() {
+        document.getElementById('view-lobby').classList.add('hidden');
+        document.getElementById('view-app').classList.remove('hidden');
+        document.getElementById('view-app').classList.add('flex');
+        
+        // Atualiza UI baseada no meu role real (Para nomes nos botões do header)
+        document.getElementById('tab-p1').innerText = State.data.p1.name.split(' ')[0] || "P1";
+        document.getElementById('tab-p2').innerText = State.data.p2.name.split(' ')[0] || "P2";
+
+        this.switchViewRole(State.myRole);
+        this.switchMainTab('passaporte'); // Passaporte inicia por padrão
+      },
+
+      switchMainTab(tab) {
+        if(tab === 'passaporte') {
+          document.getElementById('aba-passaporte').classList.remove('hidden');
+          document.getElementById('aba-mapa').classList.add('hidden');
+          
+          document.getElementById('nav-passport').classList.replace('text-slate-500', 'text-[#d4af37]');
+          document.getElementById('nav-map').classList.replace('text-[#d4af37]', 'text-slate-500');
+        } else {
+          document.getElementById('aba-passaporte').classList.add('hidden');
+          document.getElementById('aba-mapa').classList.remove('hidden');
+          
+          document.getElementById('nav-map').classList.replace('text-slate-500', 'text-[#d4af37]');
+          document.getElementById('nav-passport').classList.replace('text-[#d4af37]', 'text-slate-500');
+
+          // Instancia o mapa 3D apenas na primeira vez que abre a aba
+          if(!this.mapInstance) {
+            this.mapInstance = new Map3D('three-canvas-container');
+          }
+        }
+      },
+
+      switchViewRole(role) {
+        State.viewingRole = role;
+        
+        // Atualiza Header visualmente
+        ['p1', 'p2'].forEach(r => {
+          const btn = document.getElementById(`tab-${r}`);
+          if(r === role) {
+            btn.className = "px-4 py-1 rounded-full text-xs font-bold bg-[#d4af37] text-slate-900 transition shadow";
+          } else {
+            btn.className = "px-4 py-1 rounded-full text-xs font-bold text-slate-400 transition hover:text-white";
+          }
         });
 
-        function irParaPerfil() {
-            document.getElementById("step-codigo").style.display = "none";
-            document.getElementById("step-perfil").style.display = "block";
-        }
+        this.renderPassport();
+      },
 
-        window.selecionarSlot = function(slot) {
-            slotMeu = slot; perfilExibido = slot;
-            document.getElementById("btn-p1").style.border = slot === 'p1' ? '2px solid #f3c649' : 'none';
-            document.getElementById("btn-p2").style.border = slot === 'p2' ? '2px solid #f3c649' : 'none';
-        }
+      renderAll() {
+        this.renderPassport();
+      },
 
-        window.escolherAvatar = function(emoji, el) {
-            avatarEscolha = emoji;
-            document.querySelectorAll(".avatar-card").forEach(c => c.classList.remove("selected"));
-            el.classList.add("selected");
-        }
+      renderPassport() {
+        const userData = State.data[State.viewingRole];
+        const completed = userData.completed || [];
+        
+        // Atualiza Capa
+        document.getElementById('passport-owner-name').innerText = `Propriedade de: ${userData.name}`;
+        
+        // XP System
+        const totalXP = completed.length * 100;
+        const maxXP = 2200;
+        document.getElementById('xp-text').innerText = `${totalXP} / ${maxXP} XP`;
+        document.getElementById('xp-bar').style.width = `${(totalXP / maxXP) * 100}%`;
 
-        window.salvarPerfilCompleto = async function() {
-            const nome = document.getElementById("input-nome").value || (slotMeu === 'p1' ? 'Pessoa 1' : 'Pessoa 2');
-            const ref = doc(db, "vinculos", codigoAtual);
-            
-            await updateDoc(ref, {
-                [`${slotMeu}.nome`]: nome,
-                [`${slotMeu}.avatar`]: avatarEscolha
-            });
+        // Gera Páginas
+        const wrapper = document.getElementById('pages-wrapper');
+        wrapper.innerHTML = '';
+        
+        // Paginação: 6 por pág (pág 1 a 3), 4 por pág (pág 4) = 22 total
+        const chunks = [
+          RESTAURANTS.slice(0, 6),
+          RESTAURANTS.slice(6, 12),
+          RESTAURANTS.slice(12, 18),
+          RESTAURANTS.slice(18, 22)
+        ];
 
-            iniciarApp();
-        }
+        chunks.forEach((chunk, index) => {
+          const div = document.createElement('div');
+          div.className = 'passport-page';
+          div.style.zIndex = chunks.length - index;
+          if(index < this.currentPage) div.classList.add('flipped');
 
-        function iniciarApp() {
-            document.getElementById("lobby").style.display = "none";
-            document.getElementById("app").style.display = "block";
+          let stampsHtml = chunk.map(rest => {
+            const isDone = completed.includes(rest.id);
+            return `
+              <div class="stamp ${isDone ? 'completed' : ''}">
+                <span class="text-2xl mb-1">${rest.icon}</span>
+                <span class="truncate w-full px-1">${rest.name}</span>
+              </div>
+            `;
+          }).join('');
 
-            onSnapshot(doc(db, "vinculos", codigoAtual), (docSnap) => {
-                if(docSnap.exists()) {
-                    dadosCasal = docSnap.data();
-                    renderizarInterface();
-                }
-            });
-        }
-
-        // CONTROLES DE CAPA E PÁGINAS
-        window.abrirCapa = function() { document.getElementById("book-cover").classList.add("opened"); }
-        window.fecharCapa = function() { document.getElementById("book-cover").classList.remove("opened"); }
-
-        window.mudarPerfilExibido = function(slot) {
-            perfilExibido = slot;
-            document.querySelectorAll(".user-badge").forEach(b => b.classList.remove("active"));
-            document.getElementById(`badge-${slot}`).classList.add("active");
-            paginaAtual = 1;
-            renderizarPassaporte();
-            renderizarMapa();
-        }
-
-        window.proximaPagina = function() { if(paginaAtual < 4) { paginaAtual++; renderizarPassaporte(); } }
-        window.paginaAnterior = function() { if(paginaAtual > 1) { paginaAtual--; renderizarPassaporte(); } }
-
-        function renderizarInterface() {
-            document.getElementById("switcher-avatar-p1").innerText = dadosCasal.p1.avatar;
-            document.getElementById("switcher-nome-p1").innerText = dadosCasal.p1.nome;
-            document.getElementById("switcher-avatar-p2").innerText = dadosCasal.p2.avatar;
-            document.getElementById("switcher-nome-p2").innerText = dadosCasal.p2.nome;
-
-            renderizarPassaporte();
-            renderizarMapa();
-        }
-
-        function renderizarPassaporte() {
-            const data = dadosCasal[perfilExibido] || { nome: perfilExibido, avatar: '👑', xp: 0, concluidos: [] };
-
-            document.getElementById("cover-active-name").innerText = data.nome;
-            document.getElementById("page-active-name").innerText = data.nome;
-            document.getElementById("page-active-avatar").innerText = data.avatar;
-
-            let nivel = Math.floor(data.xp / 300) + 1;
-            let xpRestante = data.xp % 300;
-            document.getElementById("active-nivel").innerText = `Nível ${nivel}`;
-            document.getElementById("active-xp").innerText = `${xpRestante} / 300 XP`;
-            document.getElementById("active-fill").style.width = `${(xpRestante/300)*100}%`;
-
-            document.getElementById("pag-num").innerText = paginaAtual;
-            document.getElementById("btn-prev-page").disabled = (paginaAtual === 1);
-            document.getElementById("btn-next-page").disabled = (paginaAtual === 4);
-
-            const container = document.getElementById("stamps-container");
-            container.innerHTML = "";
-
-            const inicio = (paginaAtual - 1) * 6;
-            const fim = inicio + 6;
-
-            restaurantes.slice(inicio, fim).forEach(r => {
-                const carimbado = (data.concluidos || []).includes(r.id);
-                container.innerHTML += `
-                    <div class="stamp-box ${carimbado ? 'stamped' : ''}">
-                        <span style="font-size: 16px;">${carimbado ? '📍' : '🔒'}</span>
-                        <h6>${r.nome}</h6>
-                    </div>
-                `;
-            });
-        }
-
-        function renderizarMapa() {
-            const concluidos = (dadosCasal[perfilExibido]?.concluidos) || [];
-            
-            restaurantes.forEach((r) => {
-                const el = document.getElementById(`cp-${r.id}`);
-                if(el) {
-                    if(concluidos.includes(r.id)) {
-                        el.classList.add("checked");
-                    } else {
-                        el.classList.remove("checked");
-                    }
-                }
-            });
-        }
-
-        let idSelecionado = null;
-        window.abrirModal = function(id) {
-            const rest = restaurantes.find(r => r.id === id);
-            idSelecionado = id;
-            document.getElementById("modal-nome").innerText = rest.nome;
-            document.getElementById("modal-cat").innerText = rest.cat;
-            document.querySelectorAll(".chk").forEach(c => c.innerText = "⏳");
-            document.getElementById("btn-confirmar").disabled = false;
-            document.getElementById("modal-checkin").style.display = "block";
-        }
-
-        window.fecharModal = function() {
-            document.getElementById("modal-checkin").style.display = "none";
-        }
-
-        document.getElementById("btn-confirmar").addEventListener("click", async () => {
-            if(!idSelecionado) return;
-            const btn = document.getElementById("btn-confirmar");
-            btn.disabled = true;
-
-            let chks = document.querySelectorAll(".chk");
-            setTimeout(() => chks[0].innerText = "✅", 400);
-            setTimeout(() => chks[1].innerText = "✅", 800);
-            setTimeout(async () => {
-                chks[2].innerText = "✅";
-
-                const ref = doc(db, "vinculos", codigoAtual);
-                const xpAtual = dadosCasal[slotMeu].xp || 0;
-
-                await updateDoc(ref, {
-                    [`${slotMeu}.xp`]: xpAtual + 100,
-                    [`${slotMeu}.concluidos`]: arrayUnion(idSelecionado)
-                });
-
-                setTimeout(() => { fecharModal(); }, 600);
-            }, 1200);
+          div.innerHTML = `
+            <div class="flex justify-between items-center mb-4 border-b border-slate-300 pb-2">
+              <span class="font-cinzel text-[#1e3a8a] font-bold">Visto ${index + 1}</span>
+              <span class="text-xs text-slate-400">Pág ${index + 1}</span>
+            </div>
+            <div class="stamp-grid">${stampsHtml}</div>
+          `;
+          wrapper.appendChild(div);
         });
 
-        window.alternarAba = function(aba, btn) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(aba).classList.add('active');
-            btn.classList.add('active');
+        // Mostra controles se estiver aberto
+        if(!document.getElementById('page-cover').classList.contains('flipped')) {
+           document.getElementById('passport-controls').classList.add('hidden');
+        } else {
+           document.getElementById('passport-controls').classList.remove('hidden');
         }
-    </script>
+      },
+
+      openCheckinModal(rest) {
+        this.currentModalRestaurant = rest;
+        document.getElementById('modal-icon').innerText = rest.icon;
+        document.getElementById('modal-category').innerText = rest.category;
+        document.getElementById('modal-title').innerText = rest.name;
+        
+        // Reseta checkboxes
+        document.querySelectorAll('.task-check').forEach(cb => cb.checked = false);
+        const btn = document.getElementById('btn-checkin');
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2";
+        btn.innerHTML = "Complete as etapas...";
+
+        // Se eu já fiz, mostra concluído
+        if(State.data[State.myRole].completed.includes(rest.id)) {
+           document.querySelectorAll('.task-check').forEach(cb => { cb.checked = true; cb.disabled = true; });
+           btn.className = "w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2";
+           btn.innerHTML = "✓ Encontro Já Realizado!";
+        } else {
+           document.querySelectorAll('.task-check').forEach(cb => { cb.disabled = false; });
+        }
+
+        document.getElementById('checkin-modal').classList.add('active');
+      }
+    };
+
+    // Global Functions for HTML onClick
+    window.openPassport = () => {
+      document.getElementById('page-cover').classList.add('flipped');
+      document.getElementById('pages-wrapper').classList.remove('hidden');
+      document.getElementById('passport-controls').classList.remove('hidden');
+    };
+
+    window.nextPage = () => {
+      const pages = document.querySelectorAll('#pages-wrapper .passport-page');
+      if(AppUI.currentPage < pages.length - 1) {
+        pages[AppUI.currentPage].classList.add('flipped');
+        AppUI.currentPage++;
+      }
+    };
+
+    window.prevPage = () => {
+      if(AppUI.currentPage > 0) {
+        AppUI.currentPage--;
+        const pages = document.querySelectorAll('#pages-wrapper .passport-page');
+        pages[AppUI.currentPage].classList.remove('flipped');
+      } else {
+        // Fecha o livro
+        document.getElementById('page-cover').classList.remove('flipped');
+        setTimeout(() => {
+          document.getElementById('pages-wrapper').classList.add('hidden');
+          document.getElementById('passport-controls').classList.add('hidden');
+        }, 300);
+      }
+    };
+
+    window.closeModal = () => {
+      document.getElementById('checkin-modal').classList.remove('active');
+    };
+
+    // Inicia App
+    AppUI.init();
+
+  </script>
 </body>
 </html>
