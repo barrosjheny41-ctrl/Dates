@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Date Quest SP - Passaporte & Ilha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-cream: #f4eee0;
+            --text-blue: #0a146e;
+            --accent-yellow: #fcd34d;
+            --accent-teal: #2dd4bf;
+            --ocean-blue: #3b82f6;
+            --island-purple: #6b21a8;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #050a30; /* Fundo geral escuro em volta do app */
+            color: var(--text-blue);
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        h1, h2, h3, .font-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+        }
+
+        .font-serif-name {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+        
+        .view-section {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-cream);
+        }
+
+        .view-active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos do Passaporte */
+        .passport-page {
+            background-color: var(--bg-cream);
+            position: relative;
+        }
+        
+        .stamp-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid currentColor;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform: rotate(-10deg);
+            opacity: 0.9;
+        }
+        .stamp-circle::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border: 1px dashed currentColor;
+            border-radius: 50%;
+        }
+        
+        /* Mapa e Ilhas */
+        .bg-ocean {
+            background: #93c5fd; /* Azul claro estilo água do mar */
+        }
+
+        .node-wrapper {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        /* ESTILO DOS CHECKPOINTS (IGUAL A IMAGEM) */
+        .map-node {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--node-color);
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--node-color), 0 4px 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .map-node:hover { transform: scale(1.15); }
+        
+        .map-node.active {
+            animation: pulse-node 1.5s infinite;
+        }
+
+        @keyframes pulse-node {
+            0% { box-shadow: 0 0 0 3px var(--node-color), 0 0 0 0px rgba(255,255,255,0.7); }
+            70% { box-shadow: 0 0 0 3px var(--node-color), 0 0 0 15px rgba(255,255,255,0); }
+            100% { box-shadow: 0 0 0 3px var(--node-color), 0 0 0 0px rgba(255,255,255,0); }
+        }
+
+        .map-node.locked {
+            background-color: #cbd5e1;
+            border-color: white;
+            box-shadow: 0 0 0 3px #94a3b8, 0 4px 6px rgba(0,0,0,0.2);
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Modal Card tipo "Licitação" */
+        .info-card {
+            background-color: var(--text-blue);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 90%;
+            max-w: 350px;
+        }
+        
+        /* Estilos dos Cards dos Restaurantes no Mapa */
+        .node-card {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            z-index: 20;
+            border-top: 3px solid var(--node-color);
+            backdrop-filter: blur(4px);
+        }
+        
+        .node-card::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+        }
+        
+        .node-card-cat {
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+        
+        .node-card-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0a146e;
+            white-space: nowrap;
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- VIEW: LOBBY (Login do Casal) -->
+    <main id="view-lobby" class="view-section flex flex-col items-center justify-center p-6 text-center z-[100] relative bg-[#0a146e] text-white">
+        <i class="fa-solid fa-heart text-6xl text-pink-500 mb-6 animate-pulse"></i>
+        <h1 class="text-4xl font-title mb-2">Jornada a Dois</h1>
+        <p class="mb-8 text-gray-300 text-sm max-w-xs mx-auto">Crie um vínculo para compartilharem o mesmo mapa e passaporte em aparelhos diferentes!</p>
+        
+        <div class="bg-white/10 p-6 rounded-2xl w-full max-w-sm backdrop-blur-md mb-6 border border-white/20">
+            <h2 class="font-bold text-lg mb-4 text-yellow-400">Criar Novo Vínculo</h2>
+            <button onclick="createJourney()" id="btn-create-journey" class="w-full py-3 bg-pink-500 text-white font-bold rounded-lg uppercase tracking-wider hover:bg-pink-600 transition-colors">Gerar Código</button>
+            <div id="generated-code-box" class="mt-4 hidden">
+                <p class="text-xs text-gray-300 uppercase mb-1">Código do Casal</p>
+                <p id="generated-code" class="text-3xl font-bold tracking-widest text-white bg-black/30 py-2 rounded-lg"></p>
+                <p class="text-[10px] text-gray-400 mt-2">Envie este código para o seu parceiro(a)</p>
+            </div>
+        </div>
+
+        <div class="bg-white/10 p-6 rounded-2xl w-full max-w-sm backdrop-blur-md border border-white/20">
+            <h2 class="font-bold text-lg mb-4 text-teal-300">Já tem um código?</h2>
+            <input type="text" id="input-join-code" placeholder="Digite o código" class="w-full text-center py-3 rounded-lg text-[#0a146e] font-bold text-xl uppercase mb-3 outline-none">
+            <button onclick="joinJourney()" id="btn-join-journey" class="w-full py-3 bg-teal-400 text-[#0a146e] font-bold rounded-lg uppercase tracking-wider hover:bg-teal-500 transition-colors">Conectar Conta</button>
+        </div>
+        
+        <p id="lobby-error" class="mt-4 text-red-400 font-bold hidden bg-red-900/50 p-2 rounded"></p>
+    </main>
+
+    <!-- VIEW: PASSAPORTE -->
+    <main id="view-passport" class="view-section view-active">
+        <!-- Estrutura de Páginas do Passaporte (Mobile: Stacked, Desktop: Side-by-side) -->
+        <div class="max-w-4xl mx-auto min-h-full flex flex-col md:flex-row pb-20">
+            
+            <!-- Página Direita (Informações - No mobile aparece primeiro) -->
+            <div class="passport-page flex-1 p-8 md:border-l-2 border-dashed border-gray-300 md:order-2">
+                <div class="flex items-center gap-3 mb-6">
+                    <i class="fa-solid fa-globe text-4xl text-yellow-500"></i>
+                    <div>
+                        <h1 class="text-3xl font-title text-[#0a146e] tracking-widest leading-none">PASSAPORTE</h1>
+                        <p class="text-sm tracking-widest text-gray-500 mt-1">DA JORNADA A DOIS</p>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-300 pb-4 mb-4 flex items-center justify-between">
+                    <div class="flex flex-col w-full">
+                        <div class="flex items-center gap-2 mb-2">
+                            <input type="text" id="name1" value="Amor 1" class="bg-transparent text-2xl font-serif-name text-[#0a146e] focus:outline-none focus:border-b border-[#0a146e] w-full" onchange="saveNames()">
+                            <span class="text-xl text-yellow-500">&</span>
+                            <input type="text" id="name2" value="Amor 2" class="bg-transparent text-2xl font-serif-name text-[#0a146e] focus:outline-none focus:border-b border-[#0a146e] w-full text-right" onchange="saveNames()">
+                        </div>
+                        <p class="text-xs font-bold text-gray-500 tracking-wider uppercase" id="passport-title">Nível: Iniciantes</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="font-bold tracking-widest text-sm text-[#0a146e]">CARIMBOS</span>
+                        <span class="text-2xl font-bold text-[#0a146e]" id="stamp-counter">0<span class="text-sm text-gray-500">/8</span></span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="passport-xp-bar" class="h-full bg-teal-400 w-0 transition-all duration-700"></div>
+                    </div>
+                </div>
+
+                <!-- Lista de Trechos (Restaurantes) -->
+                <div id="trechos-list" class="space-y-4">
+                    <!-- Gerado via JS -->
+                </div>
+            </div>
+
+            <!-- Página Esquerda (Carimbos) -->
+            <div class="passport-page flex-1 p-8 border-b-2 md:border-b-0 border-dashed border-gray-300 md:order-1 relative">
+                <div class="text-center mb-8">
+                    <span class="text-yellow-500 text-sm">★</span>
+                    <span class="font-bold tracking-widest text-sm text-gray-500 mx-2">CARIMBOS DOS ENCONTROS</span>
+                    <span class="text-yellow-500 text-sm">★</span>
+                </div>
+                
+                <div id="stamps-container" class="grid grid-cols-2 gap-8 place-items-center opacity-80">
+                    <!-- Gerado via JS -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- VIEW: MAPA DA ILHA -->
+    <main id="view-map" class="view-section bg-ocean">
+        <!-- Container com scroll para o mapa grande -->
+        <div class="relative w-full max-w-3xl mx-auto h-[1800px] overflow-hidden">
+            <!-- Ilhas em SVG simulando 5 regiões temáticas -->
+            <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                <!-- Conexões (Caminho tracejado) -->
+                <path d="M 50 96 L 25 90 L 45 84 L 75 80 L 80 68 L 50 70 L 25 65 L 20 50 L 45 52 L 75 48 L 80 35 L 55 30 L 25 32 L 20 20 L 45 15 L 75 18 L 85 8 L 50 4 L 30 5" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="0.8" stroke-dasharray="1.5, 1.5"/>
+                
+                <!-- Ilha 1: Rosa/Vermelho (Base) -->
+                <path d="M 10 98 C 30 100, 70 98, 85 92 C 95 85, 80 78, 60 76 C 30 74, 5 82, 10 98 Z" fill="#fbcfe8" opacity="0.9"/>
+                <path d="M 15 95 C 35 97, 65 95, 75 89 C 85 83, 70 79, 55 78 C 25 76, 10 82, 15 95 Z" fill="#f472b6"/>
+
+                <!-- Ilha 2: Laranja -->
+                <path d="M 15 75 C 5 65, 20 58, 40 60 C 60 62, 95 68, 90 75 C 85 82, 35 80, 15 75 Z" fill="#fed7aa" opacity="0.9"/>
+                <path d="M 22 72 C 12 66, 25 60, 42 62 C 58 64, 85 68, 82 73 C 78 78, 38 76, 22 72 Z" fill="#fb923c"/>
+
+                <!-- Ilha 3: Amarelo/Ouro -->
+                <path d="M 5 55 C -5 45, 15 35, 45 38 C 75 41, 95 48, 85 58 C 75 68, 25 65, 5 55 Z" fill="#fef08a" opacity="0.9"/>
+                <path d="M 12 52 C 5 46, 22 38, 48 40 C 72 42, 85 48, 78 55 C 70 62, 28 60, 12 52 Z" fill="#facc15"/>
+
+                <!-- Ilha 4: Ciano/Gelo -->
+                <path d="M 10 38 C 0 28, 30 20, 60 25 C 90 30, 100 40, 85 45 C 70 50, 25 48, 10 38 Z" fill="#cffafe" opacity="0.9"/>
+                <path d="M 18 35 C 10 28, 35 22, 62 27 C 85 31, 90 38, 78 42 C 68 46, 30 44, 18 35 Z" fill="#22d3ee"/>
+
+                <!-- Ilha 5: Roxo/Cristais (Topo) -->
+                <path d="M 20 20 C 5 10, 25 0, 55 5 C 85 10, 95 20, 80 25 C 65 30, 35 28, 20 20 Z" fill="#e9d5ff" opacity="0.9"/>
+                <path d="M 28 17 C 15 10, 32 2, 58 7 C 82 11, 88 18, 75 22 C 62 26, 38 24, 28 17 Z" fill="#a855f7"/>
+            </svg>
+
+            <!-- Container dos Nós (Restaurantes) -->
+            <div id="nodes-container" class="absolute inset-0 w-full h-full">
+                <!-- Gerado via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Navegação Inferior Branca/Azul -->
+    <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 pb-safe z-50">
+        <div class="flex justify-around items-center h-16 max-w-md mx-auto">
+            <button onclick="switchView('view-passport')" id="nav-passport" class="flex flex-col items-center justify-center w-full h-full text-[#0a146e] transition-colors">
+                <i class="fa-solid fa-passport text-xl mb-1"></i>
+                <span class="text-[10px] font-bold uppercase">Passaporte</span>
+            </button>
+            <button onclick="switchView('view-map')" id="nav-map" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-[#0a146e] transition-colors">
+                <i class="fa-solid fa-map text-xl mb-1"></i>
+                <span class="text-[10px] font-bold uppercase">Mapa</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal Card "Estilo Licitação" -->
+    <div id="checkin-modal" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="info-card p-0 overflow-hidden relative modal-enter">
+            <!-- Cabeçalho do Card -->
+            <div class="bg-[#0a146e] p-5 border-b-4 border-yellow-500 relative">
+                <div class="absolute top-4 right-4 cursor-pointer text-gray-400 hover:text-white" onclick="closeModal('checkin-modal')">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </div>
+                <p class="text-xs text-gray-300 font-bold uppercase tracking-wider mb-1" id="modal-category">Categoria</p>
+                <h2 id="modal-title" class="text-xl font-title text-white uppercase">Nome do Local</h2>
+            </div>
+            
+            <!-- Corpo do Card -->
+            <div class="bg-[#f4eee0] p-5 text-[#0a146e]">
+                <div class="mb-4">
+                    <div class="flex justify-between font-bold text-sm mb-1">
+                        <span id="modal-status-text">Pendente</span>
+                        <span>100% xp</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-gray-300 rounded-full">
+                        <div id="modal-progress" class="h-full bg-pink-500 w-0"></div>
+                    </div>
+                </div>
+
+                <ul class="space-y-2 text-sm font-semibold mb-6">
+                    <li class="flex justify-between border-b border-gray-300 pb-1">
+                        <span>Chegaram no local</span>
+                        <i class="fa-solid fa-check text-green-500" id="check-1" style="display:none;"></i>
+                    </li>
+                    <li class="flex justify-between border-b border-gray-300 pb-1">
+                        <span>Fizeram o pedido</span>
+                        <i class="fa-solid fa-check text-green-500" id="check-2" style="display:none;"></i>
+                    </li>
+                    <li class="flex justify-between border-b border-gray-300 pb-1">
+                        <span>Aproveitaram juntos</span>
+                        <i class="fa-solid fa-check text-green-500" id="check-3" style="display:none;"></i>
+                    </li>
+                </ul>
+
+                <button onclick="confirmCheckin()" id="btn-checkin" class="w-full py-3 bg-[#0a146e] text-white font-bold rounded-lg uppercase tracking-wider hover:bg-blue-900 transition-colors">
+                Registrar Presença
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyBKeGPY0nBPpV_uo6N-vGuK-zNbmLP14wE",
+  authDomain: "date-quest-sp.firebaseapp.com",
+  projectId: "date-quest-sp",
+  storageBucket: "date-quest-sp.firebasestorage.app",
+  messagingSenderId: "813648855167",
+  appId: "1:813648855167:web:122ba98df663347620ff4a",
+  measurementId: "G-PMH0W7QCLC"
+};
+    
+    // --- MODO DEMO: Simula o banco de dados se a chave for falsa ---
+    const isDemoMode = firebaseConfig.apiKey === "SUA_API_KEY_AQUI";
+    
+    let app, db, auth;
+    if (!isDemoMode) {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+    }
+
+    let userId = null;
+    let currentJourneyId = null;
+    let journeyUnsubscribe = null;
+
+    // Funções adaptadoras: Escolhem entre Firebase real ou LocalStorage (Modo Demo)
+    let mockListeners = {};
+    
+    async function apiSignIn() {
+        if (isDemoMode) {
+            let uid = localStorage.getItem('demo_uid');
+            if (!uid) { uid = 'user_' + Math.random().toString(36).substring(2); localStorage.setItem('demo_uid', uid); }
+            return { user: { uid } };
+        }
+        return await signInAnonymously(auth);
+    }
+
+    function apiDoc(...path) {
+        if (isDemoMode) return path.join('/');
+        return doc(db, ...path);
+    }
+
+    async function apiGetDoc(ref) {
+        if (isDemoMode) {
+            const data = localStorage.getItem(ref);
+            return { exists: () => !!data, data: () => data ? JSON.parse(data) : null };
+        }
+        return await getDoc(ref);
+    }
+
+    async function apiSetDoc(ref, data, options) {
+        if (isDemoMode) {
+            let existing = options?.merge ? JSON.parse(localStorage.getItem(ref) || '{}') : {};
+            const newData = { ...existing, ...data };
+            localStorage.setItem(ref, JSON.stringify(newData));
+            if (mockListeners[ref]) mockListeners[ref]({ exists: () => true, data: () => newData });
+            return;
+        }
+        return await setDoc(ref, data, options);
+    }
+
+    async function apiUpdateDoc(ref, data) {
+        if (isDemoMode) {
+            let existing = JSON.parse(localStorage.getItem(ref) || '{}');
+            const newData = { ...existing, ...data };
+            localStorage.setItem(ref, JSON.stringify(newData));
+            if (mockListeners[ref]) mockListeners[ref]({ exists: () => true, data: () => newData });
+            return;
+        }
+        return await updateDoc(ref, data);
+    }
+
+    function apiOnSnapshot(ref, callback) {
+        if (isDemoMode) {
+            mockListeners[ref] = callback;
+            const data = localStorage.getItem(ref);
+            if (data) callback({ exists: () => true, data: () => JSON.parse(data) });
+            return () => { delete mockListeners[ref]; };
+        }
+        return onSnapshot(ref, callback);
+    }
+
+    const GAME_STATE = {
+        completedNodes: [],
+        level: 1
+    };
+
+    const TITLES = ["Turistas do Amor", "Aventureiros Culinários", "Casal Gourmet", "Especialistas em Encontros", "Realeza Gastronômica"];
+
+    const RESTAURANTS = [
+        // Ilha 1: Rosa (Básicos/Descontraídos)
+        { id: 1, name: "Madero", category: "Burgers", color: "#e11d48", stampColor: "#be123c", x: 50, y: 96 },
+        { id: 2, name: "Bacio di Latte", category: "Gelateria", color: "#e11d48", stampColor: "#be123c", x: 25, y: 90 },
+        { id: 3, name: "Z Deli Sandwiches", category: "Sanduíches", color: "#e11d48", stampColor: "#be123c", x: 45, y: 84 },
+        { id: 4, name: "Guarita Bar", category: "Drinks", color: "#e11d48", stampColor: "#be123c", x: 75, y: 80 },
+        
+        // Ilha 2: Laranja (Carnes & Temáticos)
+        { id: 5, name: "Outback", category: "Steakhouse", color: "#ea580c", stampColor: "#c2410c", x: 80, y: 68 },
+        { id: 6, name: "Jamie's Italian", category: "Italiano", color: "#ea580c", stampColor: "#c2410c", x: 50, y: 70 },
+        { id: 7, name: "Le Bife", category: "Carnes", color: "#ea580c", stampColor: "#c2410c", x: 25, y: 65 },
+        { id: 8, name: "Taverna Medieval", category: "Temático", color: "#ea580c", stampColor: "#c2410c", x: 20, y: 50 },
+        
+        // Ilha 3: Amarelo (Clássicos Brasileiros)
+        { id: 9, name: "Famiglia Mancini", category: "Italiano", color: "#ca8a04", stampColor: "#a16207", x: 45, y: 52 },
+        { id: 10, name: "Fogo de Chão", category: "Churrascaria", color: "#ca8a04", stampColor: "#a16207", x: 75, y: 48 },
+        { id: 11, name: "Mocotó", category: "Brasileiro", color: "#ca8a04", stampColor: "#a16207", x: 80, y: 35 },
+        { id: 12, name: "Sal Gastronomia", category: "Contemporâneo", color: "#ca8a04", stampColor: "#a16207", x: 55, y: 30 },
+        
+        // Ilha 4: Ciano (Bistrôs e Românticos)
+        { id: 13, name: "Ruella", category: "Bistrô", color: "#0891b2", stampColor: "#0e7490", x: 25, y: 32 },
+        { id: 14, name: "L'Entrecôte de Paris", category: "Francês", color: "#0891b2", stampColor: "#0e7490", x: 20, y: 20 },
+        { id: 15, name: "Chalezinho", category: "Fondue", color: "#0891b2", stampColor: "#0e7490", x: 45, y: 15 },
+        { id: 16, name: "Nino Cucina", category: "Italiano", color: "#0891b2", stampColor: "#0e7490", x: 75, y: 18 },
+        { id: 17, name: "Chou", category: "Intimista", color: "#0891b2", stampColor: "#0e7490", x: 85, y: 8 },
+        
+        // Ilha 5: Roxo (Alta Gastronomia & Rooftops)
+        { id: 18, name: "Skye Bar", category: "Rooftop", color: "#7c3aed", stampColor: "#6d28d9", x: 50, y: 4 },
+        { id: 19, name: "Seen", category: "Rooftop", color: "#7c3aed", stampColor: "#6d28d9", x: 30, y: 5 },
+        { id: 20, name: "D.O.M.", category: "Alta Gastronomia", color: "#7c3aed", stampColor: "#6d28d9", x: 15, y: 8 },
+        { id: 21, name: "Figueira Rubaiyat", category: "Premium", color: "#7c3aed", stampColor: "#6d28d9", x: 35, y: 12 },
+        { id: 22, name: "Terraço Itália", category: "Panorâmico", color: "#7c3aed", stampColor: "#6d28d9", x: 60, y: 10 }
+    ];
+
+    let currentNodeToComplete = null;
+
+    window.onload = async function() {
+        // Oculta a navegação inferior antes de logar
+        document.querySelector('nav').style.display = 'none';
+        document.getElementById('view-passport').classList.remove('view-active');
+        document.getElementById('view-map').classList.remove('view-active');
+        document.getElementById('view-lobby').classList.add('view-active');
+
+        try {
+            // Utiliza o login adaptável
+            const userCredential = await apiSignIn();
+            userId = userCredential.user.uid;
+            
+            if (!userId) return;
+
+            // Busca se a conta atual já faz parte de um casal
+            const profileRef = apiDoc('artifacts', appId, 'users', userId, 'profile', 'data');
+            const profileSnap = await apiGetDoc(profileRef);
+            
+            if (profileSnap.exists() && profileSnap.data().journeyId) {
+                connectToJourney(profileSnap.data().journeyId);
+            }
+        } catch (e) {
+            console.error("Erro de Auth:", e);
+        }
+    };
+
+    async function createJourney() {
+        if (!userId) return;
+        document.getElementById('btn-create-journey').textContent = 'Gerando...';
+        
+        // Gera um código de 4 letras/números
+        const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+        
+        // Salva a jornada
+        const journeyRef = apiDoc('artifacts', appId, 'public', 'data', 'journeys', code);
+        await apiSetDoc(journeyRef, {
+            completedNodes: [],
+            name1: "Amor 1",
+            name2: "Amor 2",
+            createdAt: new Date().toISOString()
+        });
+        
+        document.getElementById('btn-create-journey').textContent = 'Gerar Código';
+        document.getElementById('generated-code').textContent = code;
+        document.getElementById('generated-code-box').classList.remove('hidden');
+        
+        await saveProfileJourney(code);
+        connectToJourney(code);
+    }
+    
+    async function joinJourney() {
+        if (!userId) return;
+        const code = document.getElementById('input-join-code').value.trim().toUpperCase();
+        const errorMsg = document.getElementById('lobby-error');
+        errorMsg.classList.add('hidden');
+
+        if (!code) {
+            errorMsg.textContent = "Digite um código válido!";
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+        
+        document.getElementById('btn-join-journey').textContent = 'Buscando...';
+        
+        const journeyRef = apiDoc('artifacts', appId, 'public', 'data', 'journeys', code);
+        const snap = await apiGetDoc(journeyRef);
+        
+        document.getElementById('btn-join-journey').textContent = 'Conectar Conta';
+
+        if (snap.exists()) {
+            await saveProfileJourney(code);
+            connectToJourney(code);
+        } else {
+            errorMsg.textContent = "Código não encontrado. Verifique se você digitou certo!";
+            errorMsg.classList.remove('hidden');
+        }
+    }
+    
+    async function saveProfileJourney(code) {
+        const profileRef = apiDoc('artifacts', appId, 'users', userId, 'profile', 'data');
+        await apiSetDoc(profileRef, { journeyId: code }, { merge: true });
+    }
+    
+    function connectToJourney(code) {
+        currentJourneyId = code;
+        const journeyRef = apiDoc('artifacts', appId, 'public', 'data', 'journeys', code);
+        
+        if (journeyUnsubscribe) journeyUnsubscribe();
+        
+        journeyUnsubscribe = apiOnSnapshot(journeyRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                GAME_STATE.completedNodes = data.completedNodes || [];
+                
+                if (document.activeElement !== document.getElementById('name1')) {
+                    document.getElementById('name1').value = data.name1 || "Amor 1";
+                }
+                if (document.activeElement !== document.getElementById('name2')) {
+                    document.getElementById('name2').value = data.name2 || "Amor 2";
+                }
+                
+                updateHUD();
+                renderMap();
+                renderPassport();
+                
+                document.querySelector('nav').style.display = 'block'; 
+                if (document.getElementById('view-lobby').classList.contains('view-active')) {
+                    switchView('view-passport');
+                }
+            }
+        });
+    }
+
+    async function confirmCheckin() {
+        if (!currentNodeToComplete || !currentJourneyId) return;
+        
+        const btn = document.getElementById('btn-checkin');
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+        const nodeToComplete = currentNodeToComplete;
+        currentNodeToComplete = null;
+        
+        document.getElementById('check-1').style.display = 'block';
+        setTimeout(() => document.getElementById('check-2').style.display = 'block', 300);
+        setTimeout(() => {
+            document.getElementById('check-3').style.display = 'block';
+            document.getElementById('modal-progress').style.width = '100%';
+            document.getElementById('modal-progress').style.backgroundColor = '#10b981';
+            document.getElementById('modal-status-text').textContent = '100% Concluído';
+            document.getElementById('modal-status-text').style.color = '#10b981';
+            
+            setTimeout(async () => {
+                const newNodes = [...GAME_STATE.completedNodes, nodeToComplete.id];
+                const uniqueNodes = [...new Set(newNodes)]; 
+
+                const journeyRef = apiDoc('artifacts', appId, 'public', 'data', 'journeys', currentJourneyId);
+                await apiUpdateDoc(journeyRef, {
+                    completedNodes: uniqueNodes
+                });
+                
+                closeModal('checkin-modal');
+                setTimeout(() => switchView('view-passport'), 300);
+            }, 800);
+        }, 600);
+    }
+
+    async function saveNames() {
+        if (!currentJourneyId) return;
+        const name1 = document.getElementById('name1').value;
+        const name2 = document.getElementById('name2').value;
+        const journeyRef = apiDoc('artifacts', appId, 'public', 'data', 'journeys', currentJourneyId);
+        await apiUpdateDoc(journeyRef, { name1, name2 });
+    }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('view-active'));
+        document.getElementById(viewId).classList.add('view-active');
+        
+        const isPassport = viewId === 'view-passport';
+        document.getElementById('nav-passport').className = `flex flex-col items-center justify-center w-full h-full transition-colors ${isPassport ? 'text-[#0a146e]' : 'text-gray-400 hover:text-[#0a146e]'}`;
+        document.getElementById('nav-map').className = `flex flex-col items-center justify-center w-full h-full transition-colors ${!isPassport ? 'text-[#0a146e]' : 'text-gray-400 hover:text-[#0a146e]'}`;
+    }
+
+    function renderMap() {
+        const container = document.getElementById('nodes-container');
+        container.innerHTML = ''; 
+        
+        let highestUnlocked = GAME_STATE.completedNodes.length + 1;
+
+        RESTAURANTS.forEach((rest) => {
+            const isCompleted = GAME_STATE.completedNodes.includes(rest.id);
+            const isActive = rest.id === highestUnlocked;
+            const isLocked = rest.id > highestUnlocked;
+
+            let stateClass = '';
+            let iconHTML = '';
+            
+            if (isCompleted) {
+                stateClass = 'completed';
+                iconHTML = '<i class="fa-solid fa-check text-sm font-bold text-white"></i>';
+            } else if (isActive) {
+                stateClass = 'active';
+                iconHTML = '<div class="w-3 h-3 bg-white rounded-full pulse-dot"></div>';
+            } else {
+                stateClass = 'locked';
+                iconHTML = '';
+            }
+
+            const html = `
+                <div class="node-wrapper" style="left: ${rest.x}%; top: ${rest.y}%; --node-color: ${rest.color};">
+                    <div class="node-card">
+                        <div class="node-card-cat" style="color: ${rest.color}; border-bottom: 1px solid ${rest.color}; padding-bottom: 2px;">${rest.category}</div>
+                        <span class="node-card-name">${rest.name}</span>
+                    </div>
+                    <div onclick="handleNodeClick(${rest.id}, ${isActive}, ${isCompleted})" class="map-node ${stateClass}">
+                        ${iconHTML}
+                    </div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+
+    function renderPassport() {
+        const listContainer = document.getElementById('trechos-list');
+        const stampsContainer = document.getElementById('stamps-container');
+        listContainer.innerHTML = '';
+        stampsContainer.innerHTML = '';
+
+        RESTAURANTS.forEach((rest, index) => {
+            const isCompleted = GAME_STATE.completedNodes.includes(rest.id);
+            
+            listContainer.innerHTML += `
+                <div class="flex items-center justify-between text-sm font-semibold hover:bg-black/5 p-1 rounded transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${rest.color}"></div>
+                        <span class="text-gray-700">Trecho ${index + 1} · <span class="font-normal text-[#0a146e]">${rest.name}</span></span>
+                    </div>
+                    <span class="${isCompleted ? 'text-green-600 font-bold' : 'text-gray-400'}">${isCompleted ? '1/1' : '0/1'}</span>
+                </div>
+            `;
+
+            if (isCompleted) {
+                const date = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                stampsContainer.innerHTML += `
+                    <div class="stamp-circle text-xs text-center font-bold" style="color: ${rest.stampColor}; transform: rotate(${Math.random() * 20 - 10}deg);">
+                        <span class="uppercase tracking-widest text-[8px] mt-2">${rest.category}</span>
+                        <i class="fa-solid fa-utensils my-1 text-lg"></i>
+                        <span class="text-[7px] uppercase">${date}</span>
+                        <span class="text-[6px] tracking-widest mt-1 opacity-80">CONCLUÍDO</span>
+                    </div>
+                `;
+            } else {
+                stampsContainer.innerHTML += `
+                    <div class="stamp-circle border-gray-300 text-gray-300 flex items-center justify-center">
+                        <i class="fa-solid fa-plane text-xl opacity-30"></i>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    function handleNodeClick(id, isActive, isCompleted) {
+        if (!isActive && !isCompleted) return;
+        
+        const rest = RESTAURANTS.find(r => r.id === id);
+        currentNodeToComplete = isActive ? rest : null;
+        
+        document.getElementById('modal-category').textContent = rest.category;
+        document.getElementById('modal-title').textContent = rest.name;
+        
+        const btn = document.getElementById('btn-checkin');
+        const prog = document.getElementById('modal-progress');
+        const status = document.getElementById('modal-status-text');
+        
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        
+        if (isCompleted) {
+            prog.style.width = '100%';
+            prog.style.backgroundColor = '#10b981';
+            status.textContent = '100% Concluído';
+            status.style.color = '#10b981';
+            [1,2,3].forEach(i => document.getElementById(`check-${i}`).style.display = 'block');
+            btn.style.display = 'none';
+        } else {
+            prog.style.width = '33%';
+            prog.style.backgroundColor = '#ec4899';
+            status.textContent = 'Em Andamento';
+            status.style.color = '#ec4899';
+            [1,2,3].forEach(i => document.getElementById(`check-${i}`).style.display = 'none');
+            btn.style.display = 'block';
+            btn.textContent = 'Registrar Presença';
+        }
+
+        openModal('checkin-modal');
+    }
+
+    function updateHUD() {
+        const total = RESTAURANTS.length;
+        const done = GAME_STATE.completedNodes.length;
+        
+        document.getElementById('stamp-counter').innerHTML = `${done}<span class="text-sm text-gray-400">/${total}</span>`;
+        document.getElementById('passport-xp-bar').style.width = `${(done / total) * 100}%`;
+        
+        const titleIndex = Math.min(Math.floor(done / 3), TITLES.length - 1);
+        document.getElementById('passport-title').textContent = `Nível: ${TITLES[titleIndex]}`;
+    }
+
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    window.switchView = switchView;
+    window.saveNames = saveNames;
+    window.handleNodeClick = handleNodeClick;
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.confirmCheckin = confirmCheckin;
+    window.createJourney = createJourney;
+    window.joinJourney = joinJourney;
+</script>
+</body>
+</html>
