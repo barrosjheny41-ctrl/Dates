@@ -35,197 +35,181 @@
     }
     .font-cinzel { font-family: 'Cinzel', serif; }
 
-    .splash-screen { transition: opacity 1s ease-out; }
+    /* Animações Globais */
+    .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     
-    .player-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      transition: all 0.3s ease;
+    .floating { animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    .splash-screen { transition: opacity 0.8s ease-out; }
+    
+    /* Efeito de Vidro (Glassmorphism) */
+    .glass-card {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     }
+
+    /* Cards dos Jogadores */
+    .player-card {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .player-card::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+      transform: skewX(-25deg); transition: 0.5s;
+    }
+    .player-card:hover::before, .player-card:active::before { left: 125%; }
     .player-card:hover, .player-card:active {
       transform: translateY(-5px);
       border-color: rgba(212, 175, 55, 0.8);
       box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(212, 175, 55, 0.2);
     }
 
+    /* Passaporte 3D */
     .passport-book {
-      perspective: 1000px;
+      perspective: 1200px;
       width: 100%;
-      max-width: 400px;
+      max-width: 380px;
       aspect-ratio: 3/4;
       margin: 0 auto;
       position: relative;
     }
     .passport-page {
-      position: absolute;
-      width: 100%;
-      height: 100%;
+      position: absolute; width: 100%; height: 100%;
       background: var(--color-paper);
       border-radius: 4px 16px 16px 4px;
-      box-shadow: inset -5px 0 10px rgba(0,0,0,0.1), 5px 5px 15px rgba(0,0,0,0.3);
+      box-shadow: inset -5px 0 10px rgba(0,0,0,0.1), 5px 5px 15px rgba(0,0,0,0.4);
       padding: 20px;
       transform-origin: left center;
-      transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+      transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
       backface-visibility: hidden;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       border: 1px solid rgba(212, 175, 55, 0.3);
     }
     .passport-cover {
-      background: linear-gradient(135deg, #0f172a, #1e3a8a);
-      color: var(--color-accent);
-      z-index: 10;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a, #0f172a);
+      color: var(--color-accent); z-index: 10;
       border-radius: 8px 16px 16px 8px;
-      box-shadow: inset -2px 0 5px rgba(255,255,255,0.1), inset 5px 0 10px rgba(0,0,0,0.5), 10px 10px 20px rgba(0,0,0,0.5);
+      box-shadow: inset -2px 0 5px rgba(255,255,255,0.1), inset 5px 0 10px rgba(0,0,0,0.5), 15px 15px 25px rgba(0,0,0,0.6);
       border: 2px solid var(--color-accent);
     }
     .passport-page.flipped { transform: rotateY(-180deg); }
 
-    .stamp-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      flex-grow: 1;
-      align-items: center;
-      justify-items: center;
-    }
+    .stamp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; flex-grow: 1; align-items: center; justify-items: center; }
     .stamp {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+      width: 80px; height: 80px; border-radius: 50%;
       border: 2px dashed rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 0.7rem;
-      color: rgba(0,0,0,0.4);
-      position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; font-size: 0.7rem; color: rgba(0,0,0,0.4); position: relative;
     }
     .stamp.completed {
-      border: 3px solid #b91c1c;
-      color: #b91c1c;
-      border-style: double;
-      transform: rotate(-10deg);
-      opacity: 0.8;
-      font-weight: bold;
+      border: 3px solid #b91c1c; color: #b91c1c; border-style: double;
+      transform: rotate(-10deg); opacity: 0.9; font-weight: bold;
+      background: rgba(185, 28, 28, 0.05);
     }
-    .stamp.completed::after {
-      content: '✓';
-      position: absolute;
-      font-size: 2rem;
-      color: rgba(185, 28, 28, 0.3);
-      z-index: -1;
-    }
+    .stamp.completed::after { content: '✓'; position: absolute; font-size: 2.5rem; color: rgba(185, 28, 28, 0.2); z-index: -1; }
 
-    .modal-overlay {
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .modal-content {
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .modal-overlay.active .modal-content {
-      transform: translateY(0);
-    }
-
+    /* Modais e UI */
+    .modal-overlay { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-content { transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .modal-overlay.active .modal-content { transform: translateY(0); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+    /* CSS2D Label do Three.js */
     .map-label {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-family: sans-serif;
-      font-size: 10px;
-      font-weight: bold;
-      color: #333;
-      border: 1px solid white;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      pointer-events: none;
-      white-space: nowrap;
-      margin-top: -20px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      background: rgba(255, 255, 255, 0.95); padding: 4px 10px; border-radius: 12px;
+      font-family: sans-serif; font-size: 11px; font-weight: bold; color: #111;
+      border: 1px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      pointer-events: none; white-space: nowrap; margin-top: -25px;
+      display: flex; align-items: center; gap: 5px;
     }
-    .map-label span.emoji { font-size: 14px; }
+    .map-label span.emoji { font-size: 16px; }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col text-slate-100 relative">
+<body class="h-screen w-screen flex flex-col text-slate-100 relative bg-slate-900">
 
   <!-- ==================== SPLASH SCREEN ==================== -->
   <div id="view-splash" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center splash-screen">
-    <div class="text-6xl mb-4 animate-bounce">👑</div>
-    <h1 class="font-cinzel text-4xl text-[#d4af37] tracking-widest">Date Quest</h1>
-    <p class="text-slate-400 mt-2 tracking-widest text-sm uppercase animate-pulse">Carregando jornada...</p>
+    <div class="text-6xl mb-4 floating">👑</div>
+    <h1 class="font-cinzel text-4xl text-[#d4af37] tracking-widest text-center">Date Quest<br><span class="text-xl text-slate-300">SP</span></h1>
   </div>
 
-  <!-- ==================== LOBBY / LOGIN (Email) ==================== -->
-  <div id="view-lobby" class="fixed inset-0 z-50 bg-slate-900 hidden flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] overflow-y-auto">
-    <div class="text-center mb-6 mt-4">
-      <h1 class="font-cinzel text-3xl text-[#d4af37] mb-2">Date Quest SP</h1>
-      <p class="text-slate-300">Nossa Jornada Gastronômica</p>
+  <!-- ==================== LOBBY / LOGIN (Design Premium) ==================== -->
+  <div id="view-lobby" class="fixed inset-0 z-50 hidden flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-[#0f172a] to-[#1e3a8a] overflow-y-auto">
+    <!-- Estrelas de fundo puramente visuais -->
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 pointer-events-none"></div>
+    
+    <div class="text-center mb-8 fade-in relative z-10">
+      <div class="text-5xl mb-2 floating">👑</div>
+      <h1 class="font-cinzel text-4xl text-[#d4af37] mb-2 drop-shadow-lg">Date Quest</h1>
+      <p class="text-slate-300 font-light italic">A jornada gastronômica definitiva a dois.</p>
     </div>
 
-    <div class="bg-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-700">
+    <div class="glass-card p-6 rounded-3xl w-full max-w-md fade-in relative z-10" style="animation-delay: 0.2s;">
       
-      <!-- Alternador de Abas (Login / Cadastro) -->
-      <div class="flex bg-slate-900 rounded-lg p-1 mb-6 border border-slate-700">
-        <button id="btn-tab-login" class="flex-1 py-2 text-sm font-bold bg-slate-700 text-white rounded-md shadow transition">Entrar</button>
-        <button id="btn-tab-register" class="flex-1 py-2 text-sm font-bold text-slate-400 rounded-md transition hover:text-white">Criar Conta</button>
+      <!-- Alternador de Abas -->
+      <div class="flex bg-slate-900/80 rounded-xl p-1 mb-6 border border-slate-700/50">
+        <button id="btn-tab-login" class="flex-1 py-3 text-sm font-bold bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 rounded-lg shadow-lg transition">Entrar</button>
+        <button id="btn-tab-register" class="flex-1 py-3 text-sm font-bold text-slate-400 rounded-lg transition hover:text-white">Criar Conta</button>
       </div>
 
       <!-- Campos Comuns -->
       <div class="space-y-4">
         <div>
-          <label class="block text-sm text-slate-400 mb-1">E-mail</label>
-          <input type="email" id="auth-email" class="w-full bg-slate-900 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="seu@email.com">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 pl-1">E-mail</label>
+          <input type="email" id="auth-email" class="w-full bg-slate-900/60 text-white px-4 py-3 rounded-xl border border-slate-600 focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] focus:outline-none transition" placeholder="casal@email.com">
         </div>
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Senha</label>
-          <input type="password" id="auth-password" class="w-full bg-slate-900 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="******">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 pl-1">Senha</label>
+          <input type="password" id="auth-password" class="w-full bg-slate-900/60 text-white px-4 py-3 rounded-xl border border-slate-600 focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] focus:outline-none transition" placeholder="••••••••">
         </div>
       </div>
 
       <!-- Campos Apenas Cadastro -->
-      <div id="register-fields" class="hidden mt-4 space-y-4 border-t border-slate-700 pt-4">
+      <div id="register-fields" class="hidden mt-4 space-y-4 border-t border-slate-700/50 pt-5">
         <div>
-          <label class="block text-sm text-slate-400 mb-2">Quem é você na jornada?</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 pl-1">Escolha seu Avatar</label>
           <div class="grid grid-cols-2 gap-3">
-            <button class="role-btn bg-slate-700 py-2 rounded-lg border-2 border-transparent transition text-sm" data-role="p1">Pessoa 1 🦊</button>
-            <button class="role-btn bg-slate-700 py-2 rounded-lg border-2 border-transparent transition text-sm" data-role="p2">Pessoa 2 🌸</button>
+            <button class="role-btn bg-slate-800/80 py-3 rounded-xl border border-slate-600 hover:border-[#d4af37] transition text-sm flex flex-col items-center gap-1" data-role="p1"><span class="text-2xl pointer-events-none">🦊</span> Raposa</button>
+            <button class="role-btn bg-slate-800/80 py-3 rounded-xl border border-slate-600 hover:border-[#d4af37] transition text-sm flex flex-col items-center gap-1" data-role="p2"><span class="text-2xl pointer-events-none">🌸</span> Flor</button>
           </div>
         </div>
         <div>
-          <label class="block text-sm text-slate-400 mb-1">Seu Nome / Apelido</label>
-          <input type="text" id="auth-name" class="w-full bg-slate-900 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="Como quer ser chamado?">
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 pl-1">Como quer ser chamado?</label>
+          <input type="text" id="auth-name" class="w-full bg-slate-900/60 text-white px-4 py-3 rounded-xl border border-slate-600 focus:border-[#d4af37] focus:outline-none transition" placeholder="Seu nome ou apelido">
         </div>
       </div>
 
-      <button id="btn-auth-action" class="w-full mt-6 bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 font-bold py-3 rounded-lg shadow-lg active:scale-95 transition">
-        Acessar Jornada
+      <button id="btn-auth-action" class="w-full mt-8 bg-gradient-to-r from-[#d4af37] via-[#facc15] to-[#b8860b] text-slate-900 font-black text-lg py-4 rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.4)] active:scale-95 transition-transform">
+        Começar Aventura
       </button>
-      <p id="lobby-status" class="text-center text-[#d4af37] text-sm mt-4 hidden animate-pulse">Conectando...</p>
-      <p id="lobby-error" class="text-center text-red-400 text-xs mt-4 hidden"></p>
+      
+      <!-- Botão para bypass caso Firebase não esteja configurado ainda -->
+      <button id="btn-bypass" class="w-full mt-4 text-xs text-slate-400 underline hover:text-white transition">Problemas na rede? Entrar no modo Offline</button>
+
+      <p id="lobby-status" class="text-center text-[#d4af37] text-sm mt-4 hidden animate-pulse font-bold">Autenticando...</p>
+      <p id="lobby-error" class="text-center text-red-400 text-xs mt-4 hidden bg-red-900/30 p-2 rounded"></p>
     </div>
   </div>
 
   <!-- ==================== MAIN APP ==================== -->
   <div id="view-app" class="hidden flex-col h-full w-full">
+    
+    <!-- HEADER -->
     <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-20 shadow-md">
-      <h1 class="font-cinzel text-[#d4af37] font-bold text-lg">Date Quest</h1>
-      <div id="header-tabs" class="bg-slate-800 rounded-full p-1 flex hidden">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">👑</span>
+        <h1 class="font-cinzel text-[#d4af37] font-bold text-lg tracking-wider">Date Quest</h1>
+      </div>
+      <div id="header-tabs" class="bg-slate-800 rounded-full p-1 flex hidden border border-slate-700">
         <button id="tab-p1" class="px-4 py-1 rounded-full text-xs font-bold bg-[#d4af37] text-slate-900 transition">P1</button>
         <button id="tab-p2" class="px-4 py-1 rounded-full text-xs font-bold text-slate-400 transition">P2</button>
       </div>
@@ -233,68 +217,96 @@
 
     <main class="flex-grow relative overflow-hidden bg-slate-800">
       
-      <!-- ABA 0: INÍCIO / HUB -->
-      <div id="aba-home" class="absolute inset-0 flex flex-col p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] overflow-y-auto no-scrollbar">
-        <div class="text-center mt-4 mb-8">
-          <h2 class="font-cinzel text-2xl text-white mb-1">Nossa Jornada</h2>
-          <p class="text-slate-400 text-sm">Progresso do Casal</p>
-          
-          <div class="mt-6 bg-slate-900 rounded-2xl p-4 border border-slate-700 shadow-lg">
-            <div class="flex justify-between items-end mb-2">
-              <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Restaurantes Visitados</span>
-              <span id="hub-total-score" class="text-xl font-cinzel font-bold text-[#d4af37]">0/22</span>
-            </div>
-            <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-600">
-              <div id="hub-progress-bar" class="bg-gradient-to-r from-[#d4af37] to-[#b8860b] h-full" style="width: 0%;"></div>
-            </div>
+      <!-- ABA 0: INÍCIO / HUB (Resumo do App) -->
+      <div id="aba-home" class="absolute inset-0 flex flex-col p-6 bg-gradient-to-b from-slate-800 to-slate-900 overflow-y-auto no-scrollbar fade-in">
+        
+        <div class="text-center mt-2 mb-6">
+          <h2 class="font-cinzel text-3xl text-white mb-1 drop-shadow-md">Nossa Jornada</h2>
+          <p class="text-[#d4af37] text-sm font-semibold tracking-widest uppercase">Progresso Oficial</p>
+        </div>
+
+        <!-- Barra de Progresso Global -->
+        <div class="glass-card rounded-2xl p-5 mb-6">
+          <div class="flex justify-between items-end mb-3">
+            <span class="text-xs text-slate-300 font-bold uppercase tracking-wider flex items-center gap-2">
+              <span>🏆</span> Locais Descobertos
+            </span>
+            <span id="hub-total-score" class="text-2xl font-cinzel font-bold text-[#d4af37]">0/22</span>
+          </div>
+          <div class="w-full bg-slate-900 h-4 rounded-full overflow-hidden border border-slate-700 shadow-inner">
+            <div id="hub-progress-bar" class="bg-gradient-to-r from-[#d4af37] via-[#facc15] to-[#b8860b] h-full shadow-[0_0_10px_rgba(212,175,55,0.8)] transition-all duration-1000" style="width: 0%;"></div>
           </div>
         </div>
 
-        <h3 class="font-cinzel text-[#d4af37] text-center mb-4">Escolha um Passaporte</h3>
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <button onclick="AppUI.openPlayerPassport('p1')" class="player-card rounded-2xl p-4 flex flex-col items-center text-center">
-            <div class="text-5xl mb-3 drop-shadow-lg" id="hub-avatar-p1">🦊</div>
-            <h4 class="font-bold text-white mb-1 truncate w-full" id="hub-name-p1">Pessoa 1</h4>
-            <p class="text-xs text-slate-400" id="hub-xp-p1">0 XP</p>
+        <!-- Painel Explicativo: Como Funciona -->
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 mb-8 shadow-lg relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl pointer-events-none">🗺️</div>
+          <h3 class="font-cinzel text-[#d4af37] text-lg font-bold mb-3 border-b border-slate-700 pb-2">Como funciona o App?</h3>
+          <ul class="text-sm text-slate-300 space-y-3 font-light">
+            <li class="flex items-start gap-3"><span class="text-xl">🏝️</span> <span><b>Explorem o Mapa 3D:</b> Encontrem 22 restaurantes espalhados por 5 ilhas temáticas na Grande SP.</span></li>
+            <li class="flex items-start gap-3"><span class="text-xl">✅</span> <span><b>Façam o Check-in:</b> Ao chegarem no local, registrem o encontro e ganhem XP.</span></li>
+            <li class="flex items-start gap-3"><span class="text-xl">📖</span> <span><b>Carimbem o Passaporte:</b> Cada um tem seu passaporte virtual oficial. Completem todas as páginas!</span></li>
+            <li class="flex items-start gap-3"><span class="text-xl">✍️</span> <span><b>Memórias:</b> Usem o bloco de notas de cada restaurante para guardar os melhores momentos.</span></li>
+          </ul>
+        </div>
+
+        <h3 class="font-cinzel text-center text-slate-400 text-sm tracking-widest mb-4 uppercase">Selecione um Perfil</h3>
+        
+        <!-- Cards dos Jogadores -->
+        <div class="grid grid-cols-2 gap-4 pb-8">
+          <button onclick="AppUI.openPlayerPassport('p1')" class="player-card glass-card rounded-2xl p-5 flex flex-col items-center text-center group border border-slate-600">
+            <div class="text-5xl mb-3 drop-shadow-xl group-hover:scale-110 transition-transform" id="hub-avatar-p1">🦊</div>
+            <h4 class="font-bold text-white text-lg mb-1 truncate w-full" id="hub-name-p1">Pessoa 1</h4>
+            <p class="text-xs font-bold text-[#d4af37] bg-[#d4af37]/10 px-3 py-1 rounded-full" id="hub-xp-p1">0 XP</p>
+            <span class="text-[10px] uppercase text-slate-400 mt-4 opacity-50 group-hover:opacity-100 transition">Ver Passaporte</span>
           </button>
-          <button onclick="AppUI.openPlayerPassport('p2')" class="player-card rounded-2xl p-4 flex flex-col items-center text-center">
-            <div class="text-5xl mb-3 drop-shadow-lg" id="hub-avatar-p2">🌸</div>
-            <h4 class="font-bold text-white mb-1 truncate w-full" id="hub-name-p2">Pessoa 2</h4>
-            <p class="text-xs text-slate-400" id="hub-xp-p2">0 XP</p>
+          
+          <button onclick="AppUI.openPlayerPassport('p2')" class="player-card glass-card rounded-2xl p-5 flex flex-col items-center text-center group border border-slate-600">
+            <div class="text-5xl mb-3 drop-shadow-xl group-hover:scale-110 transition-transform" id="hub-avatar-p2">🌸</div>
+            <h4 class="font-bold text-white text-lg mb-1 truncate w-full" id="hub-name-p2">Pessoa 2</h4>
+            <p class="text-xs font-bold text-[#d4af37] bg-[#d4af37]/10 px-3 py-1 rounded-full" id="hub-xp-p2">0 XP</p>
+            <span class="text-[10px] uppercase text-slate-400 mt-4 opacity-50 group-hover:opacity-100 transition">Ver Passaporte</span>
           </button>
         </div>
       </div>
 
       <!-- ABA 1: PASSAPORTE -->
-      <div id="aba-passaporte" class="absolute inset-0 hidden flex-col items-center justify-center p-4 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
+      <div id="aba-passaporte" class="absolute inset-0 hidden flex-col items-center justify-center p-4 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] fade-in">
         <div class="passport-book" id="passport-container">
+          <!-- Capa Oficial -->
           <div class="passport-page passport-cover flex items-center justify-center text-center cursor-pointer" id="page-cover" onclick="openPassport()">
-            <div>
-              <div class="text-4xl mb-4">👑</div>
-              <h2 class="font-cinzel text-2xl mb-2">Passaporte Gastronômico</h2>
-              <p class="font-sans text-xs text-slate-300 mb-8" id="passport-owner-name">Propriedade de: ---</p>
-              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-4 border border-slate-700">
-                <div id="xp-bar" class="bg-[#d4af37] h-full" style="width: 0%;"></div>
+            <div class="p-6 border-4 border-double border-[#d4af37] rounded-lg h-full w-full flex flex-col items-center justify-center relative">
+              <div class="absolute top-4 left-4 text-[#d4af37] opacity-30 text-2xl">✈️</div>
+              <div class="absolute bottom-4 right-4 text-[#d4af37] opacity-30 text-2xl">🍽️</div>
+              <div class="text-5xl mb-6 floating">👑</div>
+              <h2 class="font-cinzel text-2xl mb-2 font-black tracking-widest">PASSAPORTE<br>OFICIAL</h2>
+              <p class="font-sans text-xs text-slate-300 mb-8 uppercase tracking-widest" id="passport-owner-name">Nome ---</p>
+              
+              <div class="w-3/4 bg-slate-900/50 h-3 rounded-full overflow-hidden mt-4 border border-[#d4af37]/50">
+                <div id="xp-bar" class="bg-gradient-to-r from-[#d4af37] to-[#b8860b] h-full shadow-[0_0_8px_rgba(212,175,55,0.8)]" style="width: 0%;"></div>
               </div>
-              <p class="text-xs mt-2" id="xp-text">0 / 2200 XP</p>
-              <p class="text-[10px] mt-6 text-slate-400 animate-pulse">Toque para abrir</p>
+              <p class="text-xs mt-2 font-bold" id="xp-text">0 / 2200 XP</p>
+              
+              <p class="text-[10px] mt-8 text-white bg-[#d4af37]/20 px-4 py-1 rounded-full animate-pulse border border-[#d4af37]/50">Toque para abrir as páginas</p>
             </div>
           </div>
+          <!-- Folhas -->
           <div id="pages-wrapper" class="absolute inset-0 hidden"></div>
         </div>
 
-        <div class="flex gap-4 mt-6 z-10 hidden" id="passport-controls">
-          <button onclick="prevPage()" class="bg-slate-800 text-[#d4af37] px-4 py-2 rounded-full shadow border border-slate-700">◀ Ant</button>
-          <button onclick="nextPage()" class="bg-slate-800 text-[#d4af37] px-4 py-2 rounded-full shadow border border-slate-700">Próx ▶</button>
+        <div class="flex gap-6 mt-8 z-10 hidden fade-in" id="passport-controls">
+          <button onclick="prevPage()" class="glass-card text-[#d4af37] font-bold px-6 py-3 rounded-full shadow-lg active:scale-95 transition flex items-center gap-2 border-[#d4af37]/30">◀ Anterior</button>
+          <button onclick="nextPage()" class="glass-card text-[#d4af37] font-bold px-6 py-3 rounded-full shadow-lg active:scale-95 transition flex items-center gap-2 border-[#d4af37]/30">Próxima ▶</button>
         </div>
       </div>
 
       <!-- ABA 2: MAPA 3D -->
-      <div id="aba-mapa" class="absolute inset-0 hidden">
+      <div id="aba-mapa" class="absolute inset-0 hidden fade-in bg-sky-900">
+        <!-- HUD do Mapa -->
         <div class="absolute top-4 left-4 right-4 z-10 pointer-events-none">
-          <div class="bg-white/10 backdrop-blur-md border border-[#d4af37]/30 rounded-xl p-4 shadow-lg text-center">
-            <h3 class="font-cinzel text-[#d4af37] text-sm font-bold mb-1">O Arquipélago dos Sabores</h3>
-            <p class="text-xs text-slate-200 italic">Explore, registre e deixe suas anotações.</p>
+          <div class="glass-card rounded-2xl p-4 shadow-xl text-center border-[#d4af37]/30 flex flex-col items-center">
+            <h3 class="font-cinzel text-[#d4af37] text-base font-bold mb-1 tracking-widest drop-shadow-md">O Arquipélago</h3>
+            <p class="text-[11px] text-white/90 font-light">Deslize para girar. Toque nos ícones para fazer Check-in e ler as anotações.</p>
           </div>
         </div>
         <div id="three-canvas-container" class="w-full h-full"></div>
@@ -302,59 +314,64 @@
     </main>
 
     <!-- NAVEGAÇÃO BOTTOM -->
-    <nav class="bg-slate-900 border-t border-slate-800 p-2 pb-safe z-20 flex justify-around">
-      <button id="nav-home" class="flex flex-col items-center p-2 text-[#d4af37] transition-colors">
-        <span class="text-xl">🏰</span><span class="text-[10px] mt-1 font-bold">Início</span>
+    <nav class="bg-slate-900 border-t border-slate-800 p-2 pb-safe z-30 flex justify-around shadow-[0_-10px_20px_rgba(0,0,0,0.3)]">
+      <button id="nav-home" class="flex flex-col items-center p-2 w-1/3 text-[#d4af37] transition-all hover:bg-slate-800 rounded-xl">
+        <span class="text-2xl mb-1 drop-shadow-md">🏰</span><span class="text-[10px] font-bold uppercase tracking-wider">Início</span>
       </button>
-      <button id="nav-passport" class="flex flex-col items-center p-2 text-slate-500 transition-colors">
-        <span class="text-xl">📖</span><span class="text-[10px] mt-1">Passaporte</span>
+      <button id="nav-passport" class="flex flex-col items-center p-2 w-1/3 text-slate-500 transition-all hover:bg-slate-800 rounded-xl">
+        <span class="text-2xl mb-1">📖</span><span class="text-[10px] font-bold uppercase tracking-wider">Passaporte</span>
       </button>
-      <button id="nav-map" class="flex flex-col items-center p-2 text-slate-500 transition-colors">
-        <span class="text-xl">🗺️</span><span class="text-[10px] mt-1">Mapa 3D</span>
+      <button id="nav-map" class="flex flex-col items-center p-2 w-1/3 text-slate-500 transition-all hover:bg-slate-800 rounded-xl">
+        <span class="text-2xl mb-1">🗺️</span><span class="text-[10px] font-bold uppercase tracking-wider">Mapa 3D</span>
       </button>
     </nav>
   </div>
 
   <!-- MODAL DE CHECK-IN COM ANOTAÇÕES -->
   <div id="checkin-modal" class="modal-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-    <div class="modal-content bg-slate-900 w-full sm:max-w-md p-6 rounded-t-3xl sm:rounded-3xl border border-slate-700 border-b-0 sm:border-b max-h-[90vh] overflow-y-auto no-scrollbar">
-      <div class="flex justify-between items-start mb-4">
-        <div>
-          <span id="modal-icon" class="text-3xl">🍽️</span>
-          <p id="modal-category" class="text-xs text-[#d4af37] font-bold mt-2 uppercase tracking-wide">Categoria</p>
-          <h2 id="modal-title" class="font-cinzel text-xl font-bold text-white">Nome do Restaurante</h2>
+    <div class="modal-content bg-slate-900 w-full sm:max-w-md p-6 rounded-t-3xl sm:rounded-3xl border border-slate-700 sm:border shadow-[0_-10px_40px_rgba(0,0,0,0.5)] max-h-[90vh] overflow-y-auto no-scrollbar relative">
+      <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-700 rounded-full sm:hidden"></div>
+      
+      <div class="flex justify-between items-start mb-5 mt-2">
+        <div class="flex items-center gap-4">
+          <div class="text-5xl bg-slate-800 p-3 rounded-2xl border border-slate-700 shadow-inner" id="modal-icon">🍽️</div>
+          <div>
+            <p id="modal-category" class="text-[10px] text-[#d4af37] font-black uppercase tracking-widest bg-[#d4af37]/10 inline-block px-2 py-0.5 rounded mb-1">Categoria</p>
+            <h2 id="modal-title" class="font-cinzel text-xl font-bold text-white leading-tight">Nome do Restaurante</h2>
+          </div>
         </div>
-        <button onclick="closeModal()" class="text-slate-500 hover:text-white text-2xl">&times;</button>
+        <button onclick="closeModal()" class="text-slate-500 hover:text-white text-3xl bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center leading-none pb-1">&times;</button>
       </div>
 
       <!-- Checklist -->
-      <div class="space-y-3 mb-4 bg-slate-800 p-4 rounded-xl">
-        <label class="flex items-center space-x-3 text-sm">
-          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-5 w-5 rounded border-slate-600 bg-slate-700">
-          <span class="text-slate-300">Chegamos ao local 📍</span>
+      <div class="space-y-3 mb-5 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50">
+        <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-2">Checklist do Encontro</h4>
+        <label class="flex items-center space-x-3 text-sm cursor-pointer group">
+          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-6 w-6 rounded-md border-slate-600 bg-slate-700 focus:ring-0 focus:ring-offset-0 transition">
+          <span class="text-slate-300 group-hover:text-white transition">Chegamos ao local 📍</span>
         </label>
-        <label class="flex items-center space-x-3 text-sm">
-          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-5 w-5 rounded border-slate-600 bg-slate-700">
-          <span class="text-slate-300">Pedido realizado 😋</span>
+        <label class="flex items-center space-x-3 text-sm cursor-pointer group">
+          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-6 w-6 rounded-md border-slate-600 bg-slate-700 focus:ring-0 focus:ring-offset-0 transition">
+          <span class="text-slate-300 group-hover:text-white transition">Pedido realizado 😋</span>
         </label>
-        <label class="flex items-center space-x-3 text-sm">
-          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-5 w-5 rounded border-slate-600 bg-slate-700">
-          <span class="text-slate-300">Encontro concluído ❤️</span>
+        <label class="flex items-center space-x-3 text-sm cursor-pointer group">
+          <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-6 w-6 rounded-md border-slate-600 bg-slate-700 focus:ring-0 focus:ring-offset-0 transition">
+          <span class="text-slate-300 group-hover:text-white transition">Encontro concluído ❤️</span>
         </label>
       </div>
 
       <!-- Anotações do Casal -->
-      <div class="mb-4">
-        <label class="text-xs text-[#d4af37] font-bold uppercase tracking-widest flex justify-between">
-          <span>Nossas Anotações</span>
-          <span id="notes-saved-feedback" class="text-green-400 text-[10px] hidden">Salvo!</span>
+      <div class="mb-5 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50">
+        <label class="text-xs text-[#d4af37] font-bold uppercase tracking-widest flex justify-between items-center mb-3">
+          <span class="flex items-center gap-2">✍️ Nossas Memórias</span>
+          <span id="notes-saved-feedback" class="text-green-400 text-[10px] hidden bg-green-400/10 px-2 py-1 rounded">Salvo! ✓</span>
         </label>
-        <textarea id="modal-notes" class="w-full bg-slate-800 text-slate-200 p-3 rounded-xl mt-2 text-sm border border-slate-600 focus:border-[#d4af37] focus:outline-none" rows="3" placeholder="Escrevam sobre a experiência, o que pediram, o que acharam..."></textarea>
-        <button id="btn-save-notes" class="w-full mt-2 bg-slate-700 hover:bg-slate-600 text-white text-xs py-2 rounded-lg transition border border-slate-600">💾 Salvar Anotações</button>
+        <textarea id="modal-notes" class="w-full bg-slate-900/80 text-slate-200 p-4 rounded-xl text-sm border border-slate-600 focus:border-[#d4af37] focus:outline-none focus:ring-1 focus:ring-[#d4af37] transition shadow-inner resize-none" rows="3" placeholder="Escrevam sobre a experiência, o prato favorito, algo engraçado..."></textarea>
+        <button id="btn-save-notes" class="w-full mt-3 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs py-3 rounded-xl transition border border-slate-600 flex items-center justify-center gap-2">💾 Guardar Anotação</button>
       </div>
 
-      <button id="btn-checkin" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2">
-        <span>Bloqueado</span>
+      <button id="btn-checkin" disabled class="w-full bg-slate-800 border border-slate-700 text-slate-500 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2 uppercase tracking-widest text-sm">
+        <span>Complete as etapas</span>
       </button>
     </div>
   </div>
@@ -368,7 +385,7 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
     import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "firebase/firestore";
 
-   const firebaseConfig = {
+  const firebaseConfig = {
   apiKey: "AIzaSyBKeGPY0nBPpV_uo6N-vGuK-zNbmLP14wE",
   authDomain: "date-quest-sp.firebaseapp.com",
   projectId: "date-quest-sp",
@@ -385,559 +402,3 @@
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       auth = getAuth(app);
-    } catch (error) {
-      console.warn("Firebase não configurado. Fallback local.", error);
-    }
-
-    const RESTAURANTS = [
-      { id: 1, name: "Madero", category: "Burgers", icon: "🍔", island: 1, color: 0x22c55e },
-      { id: 2, name: "Outback", category: "Steakhouse", icon: "🥩", island: 1, color: 0x22c55e },
-      { id: 4, name: "Z Deli", category: "Sanduíches", icon: "🥪", island: 1, color: 0x22c55e },
-      { id: 8, name: "Patties", category: "Smashed", icon: "🍔", island: 1, color: 0x22c55e },
-      { id: 3, name: "Bacio di Latte", category: "Gelato", icon: "🍧", island: 2, color: 0xf472b6 },
-      { id: 5, name: "Carlo's Bakery", category: "Doceria", icon: "🧁", island: 2, color: 0xf472b6 },
-      { id: 6, name: "Le Bife", category: "Bistrô", icon: "🍽️", island: 2, color: 0xf472b6 },
-      { id: 17, name: "Paris 6", category: "Bistrô 24h", icon: "🍰", island: 2, color: 0xf472b6 },
-      { id: 16, name: "L'Entrecôte", category: "Francês", icon: "🍷", island: 2, color: 0xf472b6 },
-      { id: 9, name: "Taverna Medieval", category: "Temático", icon: "⚔️", island: 3, color: 0xfacc15 },
-      { id: 10, name: "Beco Hexagonal", category: "Bruxo", icon: "🪄", island: 3, color: 0xfacc15 },
-      { id: 11, name: "Vassoura Quebrada", category: "Magia", icon: "🧹", island: 3, color: 0xfacc15 },
-      { id: 12, name: "Magia & Bruxaria", category: "Castelo", icon: "🏰", island: 3, color: 0xfacc15 },
-      { id: 13, name: "Hannover", category: "Fondue", icon: "🫕", island: 4, color: 0x38bdf8 },
-      { id: 14, name: "Chalezinho", category: "Fondue Rom", icon: "🧀", island: 4, color: 0x38bdf8 },
-      { id: 7, name: "Eataly", category: "Italiano", icon: "🍕", island: 4, color: 0x38bdf8 },
-      { id: 15, name: "Famiglia Mancini", category: "Cantina", icon: "🍝", island: 4, color: 0x38bdf8 },
-      { id: 18, name: "Figueira Rubaiyat", category: "Carnes", icon: "🍖", island: 5, color: 0xa855f7 },
-      { id: 19, name: "Skye Bar", category: "Rooftop", icon: "🌃", island: 5, color: 0xa855f7 },
-      { id: 20, name: "Maní", category: "Alta Gastron.", icon: "✨", island: 5, color: 0xa855f7 },
-      { id: 21, name: "D.O.M.", category: "Michelin", icon: "🌟", island: 5, color: 0xa855f7 },
-      { id: 22, name: "Terraço Itália", category: "Topo SP", icon: "🥂", island: 5, color: 0xa855f7 }
-    ];
-
-    // ==========================================
-    // ESTADO E ARMAZENAMENTO (SALA ÚNICA DO CASAL)
-    // ==========================================
-    const ROOM_ID = "NOSSA_JORNADA"; // ID Fixo no banco de dados para os dois
-    
-    const State = {
-      myRole: null, 
-      viewingRole: 'p1', 
-      data: {
-        p1: { name: "Pessoa 1", avatar: "🦊", completed: [] },
-        p2: { name: "Pessoa 2", avatar: "🌸", completed: [] },
-        notes: {}, // { "1": "anotação", "2": "anotação" }
-        userRoles: {} // Mapeia Firebase UID para "p1" ou "p2"
-      }
-    };
-
-    const StorageManager = {
-      unsubscribe: null,
-
-      async initRealtime(uid) {
-        if (!db) return this.fallbackToLocal();
-
-        try {
-          const docRef = doc(db, "couples", ROOM_ID);
-          
-          this.unsubscribe = onSnapshot(docRef, (snapshot) => {
-            if (snapshot.exists()) {
-              const serverData = snapshot.data();
-              // Mesclar com base local para garantir estrutura
-              State.data = { ...State.data, ...serverData };
-              
-              // Descobre meu papel baseado no UID salvo no banco
-              if (State.data.userRoles && State.data.userRoles[uid]) {
-                State.myRole = State.data.userRoles[uid];
-              }
-              
-              AppUI.renderAll();
-            } else {
-              // Primeira vez que o banco é criado
-              setDoc(docRef, State.data);
-            }
-          });
-        } catch (e) {
-          console.error("Erro Realtime:", e);
-        }
-      },
-
-      async save() {
-        if (!db) return this.saveLocal();
-        try {
-          const docRef = doc(db, "couples", ROOM_ID);
-          await setDoc(docRef, State.data, { merge: true });
-        } catch(e) { console.error("Erro ao salvar:", e); }
-      },
-
-      saveLocal() {
-        localStorage.setItem(`dq_data_local`, JSON.stringify(State.data));
-        AppUI.renderAll();
-      },
-
-      fallbackToLocal() {
-        const localData = localStorage.getItem(`dq_data_local`);
-        if (localData) State.data = JSON.parse(localData);
-        AppUI.renderAll();
-      }
-    };
-
-    // ==========================================
-    // MAPA 3D (CÓDIGO THREE.JS MANTIDO)
-    // ==========================================
-    class Map3D {
-      // (Mantido idêntico ao anterior para o Mapa funcionar perfeitamente)
-      constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x87CEEB);
-        this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 500);
-        this.camera.position.set(0, 40, 60);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        this.container.appendChild(this.renderer.domElement);
-        this.labelRenderer = new CSS2DRenderer();
-        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        this.labelRenderer.domElement.style.position = 'absolute';
-        this.labelRenderer.domElement.style.top = '0px';
-        this.labelRenderer.domElement.style.pointerEvents = 'none';
-        this.container.appendChild(this.labelRenderer.domElement);
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true;
-        this.controls.enablePan = false;
-        this.controls.minDistance = 20; this.controls.maxDistance = 90; 
-        this.controls.maxPolarAngle = Math.PI/2 - 0.1;
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        this.scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(20, 50, 20);
-        this.scene.add(dirLight);
-        this.clock = new THREE.Clock();
-        this.raycaster = new THREE.Raycaster();
-        this.mouse = new THREE.Vector2();
-        this.pins = [];
-        this.buildEnvironment();
-        this.buildCheckpoints();
-        window.addEventListener('resize', () => this.onWindowResize());
-        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onClick(e));
-        this.animate();
-      }
-      buildEnvironment() {
-        const oceanGeometry = new THREE.PlaneGeometry(300, 300);
-        const oceanMaterial = new THREE.MeshStandardMaterial({ color: 0x006994, transparent: true, opacity: 0.8 });
-        const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
-        ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2; this.scene.add(ocean);
-        this.islandPositions = [
-          { x: 0, z: 0, color: 0x22c55e }, { x: -25, z: -20, color: 0xf472b6 }, 
-          { x: 25, z: -15, color: 0xfacc15 }, { x: -20, z: 25, color: 0x38bdf8 }, { x: 20, z: 25, color: 0xa855f7 }    
-        ];
-        this.islandPositions.forEach(pos => {
-          const base = new THREE.Mesh(new THREE.CylinderGeometry(12, 10, 4, 32), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
-          base.position.set(pos.x, 0, pos.z); this.scene.add(base);
-          const top = new THREE.Mesh(new THREE.SphereGeometry(12, 32, 16, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({ color: pos.color }));
-          top.position.set(pos.x, 2, pos.z); top.scale.y = 0.3; this.scene.add(top);
-        });
-        const bridgeGeo = new THREE.BoxGeometry(2, 0.5, 20);
-        const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
-        const b1 = new THREE.Mesh(bridgeGeo, bridgeMat); b1.position.set(-12.5, 2, -10); b1.rotation.y = Math.PI/4; this.scene.add(b1);
-        const b2 = new THREE.Mesh(bridgeGeo, bridgeMat); b2.position.set(12.5, 2, -7.5); b2.rotation.y = -Math.PI/3; this.scene.add(b2);
-      }
-      buildCheckpoints() {
-        RESTAURANTS.forEach(rest => {
-          const base = this.islandPositions[rest.island - 1];
-          const angle = Math.random() * Math.PI * 2; const radius = Math.random() * 8;
-          const pinGroup = new THREE.Group();
-          pinGroup.position.set(base.x + Math.cos(angle)*radius, 5, base.z + Math.sin(angle)*radius);
-          pinGroup.userData = rest;
-          const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-          sphere.position.y = 1.5;
-          const cone = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.5, 16), new THREE.MeshStandardMaterial({ color: rest.color }));
-          cone.rotation.x = Math.PI;
-          pinGroup.add(sphere); pinGroup.add(cone);
-          
-          const labelDiv = document.createElement('div'); labelDiv.className = 'map-label';
-          labelDiv.style.backgroundColor = '#' + rest.color.toString(16).padStart(6, '0');
-          labelDiv.innerHTML = `<span class="emoji">${rest.icon}</span> ${rest.name}`;
-          const labelObj = new CSS2DObject(labelDiv); labelObj.position.set(0, 3, 0); pinGroup.add(labelObj);
-          this.scene.add(pinGroup); this.pins.push(pinGroup);
-        });
-      }
-      onClick(event) {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1; this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        const meshes = []; this.pins.forEach(p => p.children.forEach(c => { if(c.isMesh) meshes.push(c); }));
-        const intersects = this.raycaster.intersectObjects(meshes);
-        if (intersects.length > 0) {
-          const rest = intersects[0].object.parent.userData;
-          if(rest && rest.id) AppUI.openCheckinModal(rest);
-        }
-      }
-      onWindowResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight; this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight); this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
-      }
-      animate() {
-        requestAnimationFrame(() => this.animate());
-        const time = this.clock.getElapsedTime();
-        this.pins.forEach((pin, i) => { pin.position.y = 5 + Math.sin(time*2 + i)*0.5; pin.rotation.y += 0.02; });
-        this.controls.update(); this.renderer.render(this.scene, this.camera); this.labelRenderer.render(this.scene, this.camera);
-      }
-    }
-
-
-    // ==========================================
-    // UI CONTROLLER & AUTHENTICATION
-    // ==========================================
-    const AppUI = {
-      currentPage: 0,
-      mapInstance: null,
-      currentModalRestaurant: null,
-      isLoginMode: true,
-      selectedRoleRegister: null,
-
-      init() {
-        this.bindEvents();
-        
-        // Verifica Sessão Firebase
-        if(auth) {
-          onAuthStateChanged(auth, (user) => {
-            const splash = document.getElementById('view-splash');
-            if (user) {
-              StorageManager.initRealtime(user.uid).then(() => {
-                splash.style.opacity = '0';
-                setTimeout(() => { splash.classList.add('hidden'); this.showApp(); }, 1000);
-              });
-            } else {
-              splash.style.opacity = '0';
-              setTimeout(() => {
-                splash.classList.add('hidden');
-                document.getElementById('view-lobby').classList.remove('hidden');
-                document.getElementById('view-lobby').classList.add('flex');
-              }, 1000);
-            }
-          });
-        } else {
-          // Fallback Local
-          StorageManager.fallbackToLocal();
-          document.getElementById('view-splash').classList.add('hidden');
-          this.showApp();
-        }
-      },
-
-      bindEvents() {
-        // Toggle Login/Register
-        document.getElementById('btn-tab-login').addEventListener('click', () => this.toggleAuthMode(true));
-        document.getElementById('btn-tab-register').addEventListener('click', () => this.toggleAuthMode(false));
-
-        // Seleção de Role no Cadastro
-        document.querySelectorAll('.role-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('border-[#d4af37]'));
-            e.target.classList.add('border-[#d4af37]');
-            this.selectedRoleRegister = e.target.dataset.role;
-          });
-        });
-
-        // Botão Principal de Auth
-        document.getElementById('btn-auth-action').addEventListener('click', async () => {
-          const email = document.getElementById('auth-email').value.trim();
-          const pass = document.getElementById('auth-password').value.trim();
-          const errUI = document.getElementById('lobby-error');
-          const statusUI = document.getElementById('lobby-status');
-          
-          if(!email || !pass) return errUI.innerText = "Preencha e-mail e senha.";
-          errUI.classList.add('hidden');
-          statusUI.classList.remove('hidden');
-
-          try {
-            if (this.isLoginMode) {
-              await signInWithEmailAndPassword(auth, email, pass);
-            } else {
-              const name = document.getElementById('auth-name').value.trim();
-              if(!name || !this.selectedRoleRegister) {
-                statusUI.classList.add('hidden');
-                errUI.classList.remove('hidden');
-                return errUI.innerText = "Escolha sua pessoa e nome.";
-              }
-              const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-              const uid = userCred.user.uid;
-              
-              // Baixa os dados atuais para não sobrescrever o parceiro, insere o novo e salva
-              const docRef = doc(db, "couples", ROOM_ID);
-              const snap = await getDoc(docRef);
-              if(snap.exists()) State.data = { ...State.data, ...snap.data() };
-              
-              if(!State.data.userRoles) State.data.userRoles = {};
-              State.data.userRoles[uid] = this.selectedRoleRegister;
-              State.data[this.selectedRoleRegister].name = name;
-              
-              await StorageManager.save();
-            }
-          } catch (e) {
-            statusUI.classList.add('hidden');
-            errUI.classList.remove('hidden');
-            errUI.innerText = "Erro: " + e.message;
-          }
-        });
-
-        // Navegação
-        document.getElementById('tab-p1').addEventListener('click', () => this.switchViewRole('p1'));
-        document.getElementById('tab-p2').addEventListener('click', () => this.switchViewRole('p2'));
-        document.getElementById('nav-home').addEventListener('click', () => this.switchMainTab('home'));
-        document.getElementById('nav-passport').addEventListener('click', () => this.switchMainTab('passaporte'));
-        document.getElementById('nav-map').addEventListener('click', () => this.switchMainTab('mapa'));
-
-        // Modal Checkbox
-        document.querySelectorAll('.task-check').forEach(cb => {
-          cb.addEventListener('change', () => {
-            const allChecked = Array.from(document.querySelectorAll('.task-check')).every(c => c.checked);
-            const btn = document.getElementById('btn-checkin');
-            if(allChecked) {
-              btn.disabled = false;
-              btn.className = "w-full bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 font-bold py-4 rounded-xl shadow-lg transform active:scale-95 transition flex items-center justify-center gap-2";
-              btn.innerHTML = "✨ Registrar Encontro (+100 XP)";
-            } else {
-              btn.disabled = true;
-              btn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2";
-              btn.innerHTML = "Complete as etapas...";
-            }
-          });
-        });
-
-        // Registrar Encontro
-        document.getElementById('btn-checkin').addEventListener('click', () => {
-          if(!this.currentModalRestaurant) return;
-          const restId = this.currentModalRestaurant.id;
-          
-          // Salva Checkin
-          if(State.myRole && !State.data[State.myRole].completed.includes(restId)) {
-            State.data[State.myRole].completed.push(restId);
-          }
-          
-          // Salva Notas
-          const notesStr = document.getElementById('modal-notes').value.trim();
-          if(!State.data.notes) State.data.notes = {};
-          State.data.notes[restId] = notesStr;
-
-          StorageManager.save();
-          window.closeModal();
-        });
-
-        // Salvar apenas anotação
-        document.getElementById('btn-save-notes').addEventListener('click', () => {
-          if(!this.currentModalRestaurant) return;
-          const restId = this.currentModalRestaurant.id;
-          const notesStr = document.getElementById('modal-notes').value.trim();
-          if(!State.data.notes) State.data.notes = {};
-          State.data.notes[restId] = notesStr;
-          
-          StorageManager.save();
-          
-          const feedback = document.getElementById('notes-saved-feedback');
-          feedback.classList.remove('hidden');
-          setTimeout(() => feedback.classList.add('hidden'), 2000);
-        });
-      },
-
-      toggleAuthMode(isLogin) {
-        this.isLoginMode = isLogin;
-        const btnLogin = document.getElementById('btn-tab-login');
-        const btnReg = document.getElementById('btn-tab-register');
-        const extraFields = document.getElementById('register-fields');
-        const actionBtn = document.getElementById('btn-auth-action');
-
-        if(isLogin) {
-          btnLogin.className = "flex-1 py-2 text-sm font-bold bg-slate-700 text-white rounded-md shadow transition";
-          btnReg.className = "flex-1 py-2 text-sm font-bold text-slate-400 rounded-md transition hover:text-white";
-          extraFields.classList.add('hidden');
-          actionBtn.innerText = "Acessar Jornada";
-        } else {
-          btnReg.className = "flex-1 py-2 text-sm font-bold bg-slate-700 text-white rounded-md shadow transition";
-          btnLogin.className = "flex-1 py-2 text-sm font-bold text-slate-400 rounded-md transition hover:text-white";
-          extraFields.classList.remove('hidden');
-          actionBtn.innerText = "Criar Conta";
-        }
-      },
-
-      showApp() {
-        document.getElementById('view-lobby').classList.add('hidden');
-        document.getElementById('view-app').classList.remove('hidden');
-        document.getElementById('view-app').classList.add('flex');
-        
-        // Se a pessoa deslogou e bugou o localstorage
-        if(!State.myRole) State.myRole = 'p1'; 
-
-        this.switchMainTab('home');
-        this.renderAll();
-      },
-
-      switchMainTab(tab) {
-        document.getElementById('aba-home').classList.add('hidden');
-        document.getElementById('aba-passaporte').classList.add('hidden');
-        document.getElementById('aba-mapa').classList.add('hidden');
-        document.getElementById('nav-home').classList.replace('text-[#d4af37]', 'text-slate-500');
-        document.getElementById('nav-passport').classList.replace('text-[#d4af37]', 'text-slate-500');
-        document.getElementById('nav-map').classList.replace('text-[#d4af37]', 'text-slate-500');
-
-        if(tab === 'home') {
-          document.getElementById('aba-home').classList.remove('hidden');
-          document.getElementById('nav-home').classList.replace('text-slate-500', 'text-[#d4af37]');
-          document.getElementById('header-tabs').classList.add('hidden');
-        } 
-        else if(tab === 'passaporte') {
-          document.getElementById('aba-passaporte').classList.remove('hidden');
-          document.getElementById('nav-passport').classList.replace('text-slate-500', 'text-[#d4af37]');
-          document.getElementById('header-tabs').classList.remove('hidden');
-          this.renderPassport();
-        } 
-        else if(tab === 'mapa') {
-          document.getElementById('aba-mapa').classList.remove('hidden');
-          document.getElementById('nav-map').classList.replace('text-slate-500', 'text-[#d4af37]');
-          document.getElementById('header-tabs').classList.add('hidden');
-          if(!this.mapInstance) this.mapInstance = new Map3D('three-canvas-container');
-        }
-      },
-
-      switchViewRole(role) {
-        State.viewingRole = role;
-        ['p1', 'p2'].forEach(r => {
-          const btn = document.getElementById(`tab-${r}`);
-          if(r === role) btn.className = "px-4 py-1 rounded-full text-xs font-bold bg-[#d4af37] text-slate-900 transition shadow";
-          else btn.className = "px-4 py-1 rounded-full text-xs font-bold text-slate-400 transition hover:text-white";
-        });
-        this.renderPassport();
-      },
-
-      renderAll() {
-        this.renderDashboard();
-        if(!document.getElementById('aba-passaporte').classList.contains('hidden')) {
-          this.renderPassport();
-        }
-      },
-
-      renderDashboard() {
-        const p1 = State.data.p1;
-        const p2 = State.data.p2;
-
-        document.getElementById('hub-name-p1').innerText = p1.name;
-        document.getElementById('hub-avatar-p1').innerText = p1.avatar || '🦊';
-        document.getElementById('hub-xp-p1').innerText = `${p1.completed.length * 100} XP`;
-
-        document.getElementById('hub-name-p2').innerText = p2.name;
-        document.getElementById('hub-avatar-p2').innerText = p2.avatar || '🌸';
-        document.getElementById('hub-xp-p2').innerText = `${p2.completed.length * 100} XP`;
-
-        const combinedVisits = new Set([...p1.completed, ...p2.completed]).size;
-        document.getElementById('hub-total-score').innerText = `${combinedVisits}/22`;
-        document.getElementById('hub-progress-bar').style.width = `${(combinedVisits / 22) * 100}%`;
-        
-        document.getElementById('tab-p1').innerText = p1.name.split(' ')[0] || "P1";
-        document.getElementById('tab-p2').innerText = p2.name.split(' ')[0] || "P2";
-      },
-
-      renderPassport() {
-        const userData = State.data[State.viewingRole];
-        const completed = userData.completed || [];
-        
-        document.getElementById('passport-owner-name').innerText = `Propriedade de: ${userData.name}`;
-        const totalXP = completed.length * 100;
-        document.getElementById('xp-text').innerText = `${totalXP} / 2200 XP`;
-        document.getElementById('xp-bar').style.width = `${(totalXP / 2200) * 100}%`;
-
-        const wrapper = document.getElementById('pages-wrapper');
-        wrapper.innerHTML = '';
-        const chunks = [ RESTAURANTS.slice(0, 6), RESTAURANTS.slice(6, 12), RESTAURANTS.slice(12, 18), RESTAURANTS.slice(18, 22) ];
-
-        chunks.forEach((chunk, index) => {
-          const div = document.createElement('div');
-          div.className = 'passport-page';
-          div.style.zIndex = chunks.length - index;
-          if(index < this.currentPage) div.classList.add('flipped');
-
-          let stampsHtml = chunk.map(rest => {
-            const isDone = completed.includes(rest.id);
-            return `<div class="stamp ${isDone ? 'completed' : ''}"><span class="text-2xl mb-1">${rest.icon}</span><span class="truncate w-full px-1">${rest.name}</span></div>`;
-          }).join('');
-
-          div.innerHTML = `
-            <div class="flex justify-between items-center mb-4 border-b border-slate-300 pb-2">
-              <span class="font-cinzel text-[#1e3a8a] font-bold">Visto ${index + 1}</span>
-              <span class="text-xs text-slate-400">Pág ${index + 1}</span>
-            </div>
-            <div class="stamp-grid">${stampsHtml}</div>`;
-          wrapper.appendChild(div);
-        });
-
-        if(!document.getElementById('page-cover').classList.contains('flipped')) {
-           document.getElementById('passport-controls').classList.add('hidden');
-        } else {
-           document.getElementById('passport-controls').classList.remove('hidden');
-        }
-      },
-
-      openCheckinModal(rest) {
-        this.currentModalRestaurant = rest;
-        document.getElementById('modal-icon').innerText = rest.icon;
-        document.getElementById('modal-category').innerText = rest.category;
-        document.getElementById('modal-title').innerText = rest.name;
-        
-        // Puxa as anotações existentes do casal
-        const notasExistentes = (State.data.notes && State.data.notes[rest.id]) ? State.data.notes[rest.id] : '';
-        document.getElementById('modal-notes').value = notasExistentes;
-
-        document.querySelectorAll('.task-check').forEach(cb => cb.checked = false);
-        const btn = document.getElementById('btn-checkin');
-        btn.disabled = true;
-        btn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2";
-        btn.innerHTML = "Complete as etapas...";
-
-        // Mostra estado do checkin atual (MEU passport)
-        const myCompleted = State.myRole ? State.data[State.myRole].completed : [];
-        if(myCompleted.includes(rest.id)) {
-           document.querySelectorAll('.task-check').forEach(cb => { cb.checked = true; cb.disabled = true; });
-           btn.className = "w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2";
-           btn.innerHTML = "✓ Encontro Já Realizado!";
-        } else {
-           document.querySelectorAll('.task-check').forEach(cb => { cb.disabled = false; });
-        }
-
-        document.getElementById('checkin-modal').classList.add('active');
-      }
-    };
-
-    window.AppUI = AppUI;
-    window.openPassport = () => {
-      document.getElementById('page-cover').classList.add('flipped');
-      document.getElementById('pages-wrapper').classList.remove('hidden');
-      document.getElementById('passport-controls').classList.remove('hidden');
-    };
-    window.nextPage = () => {
-      const pages = document.querySelectorAll('#pages-wrapper .passport-page');
-      if(AppUI.currentPage < pages.length - 1) {
-        pages[AppUI.currentPage].classList.add('flipped');
-        AppUI.currentPage++;
-      }
-    };
-    window.prevPage = () => {
-      if(AppUI.currentPage > 0) {
-        AppUI.currentPage--;
-        document.querySelectorAll('#pages-wrapper .passport-page')[AppUI.currentPage].classList.remove('flipped');
-      } else {
-        document.getElementById('page-cover').classList.remove('flipped');
-        setTimeout(() => {
-          document.getElementById('pages-wrapper').classList.add('hidden');
-          document.getElementById('passport-controls').classList.add('hidden');
-        }, 300);
-      }
-    };
-    window.closeModal = () => document.getElementById('checkin-modal').classList.remove('active');
-    AppUI.openPlayerPassport = (role) => {
-      AppUI.switchViewRole(role);
-      AppUI.switchMainTab('passaporte');
-    };
-
-    AppUI.init();
-  </script>
-</body>
-</html>
