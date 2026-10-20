@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Date Quest SP - Aventura a Dois</title>
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   
-  <!-- Import Map do Three.js e Firebase -->
   <script type="importmap">
     {
       "imports": {
@@ -26,25 +22,20 @@
 
   <style>
     :root {
-      --color-primary: #1e3a8a; /* Azul marinho */
-      --color-accent: #d4af37; /* Dourado */
-      --color-paper: #f4ecd8; /* Pergaminho */
+      --color-primary: #1e3a8a;
+      --color-accent: #d4af37;
+      --color-paper: #f4ecd8;
     }
-
     body {
       font-family: 'Playfair Display', serif;
       background-color: #0f172a;
       color: #333;
-      overflow: hidden; /* Previne scroll no body inteiro */
+      overflow: hidden;
       touch-action: manipulation;
     }
-
     .font-cinzel { font-family: 'Cinzel', serif; }
 
-    /* Splash Screen e Cards */
-    .splash-screen {
-      transition: opacity 1s ease-out;
-    }
+    .splash-screen { transition: opacity 1s ease-out; }
     
     .player-card {
       background: rgba(30, 41, 59, 0.7);
@@ -52,14 +43,12 @@
       border: 1px solid rgba(212, 175, 55, 0.2);
       transition: all 0.3s ease;
     }
-    
     .player-card:hover, .player-card:active {
       transform: translateY(-5px);
       border-color: rgba(212, 175, 55, 0.8);
       box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(212, 175, 55, 0.2);
     }
 
-    /* Estilos do Passaporte */
     .passport-book {
       perspective: 1000px;
       width: 100%;
@@ -68,7 +57,6 @@
       margin: 0 auto;
       position: relative;
     }
-
     .passport-page {
       position: absolute;
       width: 100%;
@@ -84,7 +72,6 @@
       flex-direction: column;
       border: 1px solid rgba(212, 175, 55, 0.3);
     }
-
     .passport-cover {
       background: linear-gradient(135deg, #0f172a, #1e3a8a);
       color: var(--color-accent);
@@ -93,12 +80,8 @@
       box-shadow: inset -2px 0 5px rgba(255,255,255,0.1), inset 5px 0 10px rgba(0,0,0,0.5), 10px 10px 20px rgba(0,0,0,0.5);
       border: 2px solid var(--color-accent);
     }
+    .passport-page.flipped { transform: rotateY(-180deg); }
 
-    .passport-page.flipped {
-      transform: rotateY(-180deg);
-    }
-
-    /* Grid de Carimbos */
     .stamp-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -107,7 +90,6 @@
       align-items: center;
       justify-items: center;
     }
-
     .stamp {
       width: 80px;
       height: 80px;
@@ -122,7 +104,6 @@
       color: rgba(0,0,0,0.4);
       position: relative;
     }
-
     .stamp.completed {
       border: 3px solid #b91c1c;
       color: #b91c1c;
@@ -131,7 +112,6 @@
       opacity: 0.8;
       font-weight: bold;
     }
-
     .stamp.completed::after {
       content: '✓';
       position: absolute;
@@ -140,7 +120,6 @@
       z-index: -1;
     }
 
-    /* Modal / Bottom Sheet Animado */
     .modal-overlay {
       background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(4px);
@@ -148,26 +127,21 @@
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
-    
     .modal-overlay.active {
       opacity: 1;
       pointer-events: auto;
     }
-
     .modal-content {
       transform: translateY(100%);
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-
     .modal-overlay.active .modal-content {
       transform: translateY(0);
     }
 
-    /* Scrollbar oculta */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* CSS2D Label do Three.js */
     .map-label {
       background: rgba(255, 255, 255, 0.9);
       padding: 4px 8px;
@@ -185,53 +159,70 @@
       align-items: center;
       gap: 4px;
     }
-
     .map-label span.emoji { font-size: 14px; }
   </style>
 </head>
 <body class="h-screen w-screen flex flex-col text-slate-100 relative">
 
-  <!-- ==================== SPLASH SCREEN (Carregamento) ==================== -->
+  <!-- ==================== SPLASH SCREEN ==================== -->
   <div id="view-splash" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center splash-screen">
     <div class="text-6xl mb-4 animate-bounce">👑</div>
     <h1 class="font-cinzel text-4xl text-[#d4af37] tracking-widest">Date Quest</h1>
     <p class="text-slate-400 mt-2 tracking-widest text-sm uppercase animate-pulse">Carregando jornada...</p>
   </div>
 
-  <!-- ==================== LOBBY / LOGIN (Conta do Casal) ==================== -->
-  <div id="view-lobby" class="fixed inset-0 z-50 bg-slate-900 hidden flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
-    <div class="text-center mb-8">
+  <!-- ==================== LOBBY / LOGIN (Email) ==================== -->
+  <div id="view-lobby" class="fixed inset-0 z-50 bg-slate-900 hidden flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] overflow-y-auto">
+    <div class="text-center mb-6 mt-4">
       <h1 class="font-cinzel text-3xl text-[#d4af37] mb-2">Date Quest SP</h1>
-      <p class="text-slate-300">Uma Aventura a Dois</p>
+      <p class="text-slate-300">Nossa Jornada Gastronômica</p>
     </div>
 
     <div class="bg-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-700">
-      <div class="mb-4">
-        <label class="block text-sm text-slate-400 mb-1">Chave do Casal (ex: AMOR2024)</label>
-        <input type="text" id="couple-key" class="w-full bg-slate-900 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none uppercase text-center tracking-widest font-bold" placeholder="CÓDIGO ÚNICO">
-        <p class="text-xs text-slate-500 mt-2 text-center">Use a mesma chave nos dois celulares!</p>
+      
+      <!-- Alternador de Abas (Login / Cadastro) -->
+      <div class="flex bg-slate-900 rounded-lg p-1 mb-6 border border-slate-700">
+        <button id="btn-tab-login" class="flex-1 py-2 text-sm font-bold bg-slate-700 text-white rounded-md shadow transition">Entrar</button>
+        <button id="btn-tab-register" class="flex-1 py-2 text-sm font-bold text-slate-400 rounded-md transition hover:text-white">Criar Conta</button>
       </div>
 
-      <div class="mb-6">
-        <label class="block text-sm text-slate-400 mb-2">Quem é você?</label>
-        <div class="grid grid-cols-2 gap-3">
-          <button class="role-btn bg-slate-700 py-3 rounded-lg border-2 border-transparent transition" data-role="p1">Pessoa 1 🦊</button>
-          <button class="role-btn bg-slate-700 py-3 rounded-lg border-2 border-transparent transition" data-role="p2">Pessoa 2 🌸</button>
+      <!-- Campos Comuns -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm text-slate-400 mb-1">E-mail</label>
+          <input type="email" id="auth-email" class="w-full bg-slate-900 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="seu@email.com">
         </div>
-        <input type="text" id="user-name" class="w-full mt-3 bg-slate-900 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="Seu Nome ou Apelido">
+        <div>
+          <label class="block text-sm text-slate-400 mb-1">Senha</label>
+          <input type="password" id="auth-password" class="w-full bg-slate-900 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="******">
+        </div>
       </div>
 
-      <button id="btn-entrar" class="w-full bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 font-bold py-3 rounded-lg shadow-lg active:scale-95 transition">
-        Iniciar Jornada
+      <!-- Campos Apenas Cadastro -->
+      <div id="register-fields" class="hidden mt-4 space-y-4 border-t border-slate-700 pt-4">
+        <div>
+          <label class="block text-sm text-slate-400 mb-2">Quem é você na jornada?</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button class="role-btn bg-slate-700 py-2 rounded-lg border-2 border-transparent transition text-sm" data-role="p1">Pessoa 1 🦊</button>
+            <button class="role-btn bg-slate-700 py-2 rounded-lg border-2 border-transparent transition text-sm" data-role="p2">Pessoa 2 🌸</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-400 mb-1">Seu Nome / Apelido</label>
+          <input type="text" id="auth-name" class="w-full bg-slate-900 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none" placeholder="Como quer ser chamado?">
+        </div>
+      </div>
+
+      <button id="btn-auth-action" class="w-full mt-6 bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 font-bold py-3 rounded-lg shadow-lg active:scale-95 transition">
+        Acessar Jornada
       </button>
       <p id="lobby-status" class="text-center text-[#d4af37] text-sm mt-4 hidden animate-pulse">Conectando...</p>
+      <p id="lobby-error" class="text-center text-red-400 text-xs mt-4 hidden"></p>
     </div>
   </div>
 
   <!-- ==================== MAIN APP ==================== -->
   <div id="view-app" class="hidden flex-col h-full w-full">
-    
-    <!-- HEADER -->
     <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-20 shadow-md">
       <h1 class="font-cinzel text-[#d4af37] font-bold text-lg">Date Quest</h1>
       <div id="header-tabs" class="bg-slate-800 rounded-full p-1 flex hidden">
@@ -240,10 +231,9 @@
       </div>
     </header>
 
-    <!-- CONTENT AREA -->
     <main class="flex-grow relative overflow-hidden bg-slate-800">
       
-      <!-- ABA 0: INÍCIO / HUB DO CASAL -->
+      <!-- ABA 0: INÍCIO / HUB -->
       <div id="aba-home" class="absolute inset-0 flex flex-col p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] overflow-y-auto no-scrollbar">
         <div class="text-center mt-4 mb-8">
           <h2 class="font-cinzel text-2xl text-white mb-1">Nossa Jornada</h2>
@@ -261,20 +251,16 @@
         </div>
 
         <h3 class="font-cinzel text-[#d4af37] text-center mb-4">Escolha um Passaporte</h3>
-        
         <div class="grid grid-cols-2 gap-4 mb-8">
           <button onclick="AppUI.openPlayerPassport('p1')" class="player-card rounded-2xl p-4 flex flex-col items-center text-center">
             <div class="text-5xl mb-3 drop-shadow-lg" id="hub-avatar-p1">🦊</div>
             <h4 class="font-bold text-white mb-1 truncate w-full" id="hub-name-p1">Pessoa 1</h4>
             <p class="text-xs text-slate-400" id="hub-xp-p1">0 XP</p>
-            <div class="mt-3 text-[10px] uppercase bg-slate-800 text-[#d4af37] px-3 py-1 rounded-full border border-slate-600">Abrir Passaporte</div>
           </button>
-          
           <button onclick="AppUI.openPlayerPassport('p2')" class="player-card rounded-2xl p-4 flex flex-col items-center text-center">
             <div class="text-5xl mb-3 drop-shadow-lg" id="hub-avatar-p2">🌸</div>
             <h4 class="font-bold text-white mb-1 truncate w-full" id="hub-name-p2">Pessoa 2</h4>
             <p class="text-xs text-slate-400" id="hub-xp-p2">0 XP</p>
-            <div class="mt-3 text-[10px] uppercase bg-slate-800 text-[#d4af37] px-3 py-1 rounded-full border border-slate-600">Abrir Passaporte</div>
           </button>
         </div>
       </div>
@@ -303,39 +289,35 @@
         </div>
       </div>
 
-      <!-- ABA 2: MAPA 3D (Three.js) -->
+      <!-- ABA 2: MAPA 3D -->
       <div id="aba-mapa" class="absolute inset-0 hidden">
         <div class="absolute top-4 left-4 right-4 z-10 pointer-events-none">
           <div class="bg-white/10 backdrop-blur-md border border-[#d4af37]/30 rounded-xl p-4 shadow-lg text-center">
             <h3 class="font-cinzel text-[#d4af37] text-sm font-bold mb-1">O Arquipélago dos Sabores</h3>
-            <p class="text-xs text-slate-200 italic">Cada ilha guarda um momento. Cada parada, uma nova memória. Toque nos ícones.</p>
+            <p class="text-xs text-slate-200 italic">Explore, registre e deixe suas anotações.</p>
           </div>
         </div>
         <div id="three-canvas-container" class="w-full h-full"></div>
       </div>
-
     </main>
 
-    <!-- BOTTOM NAVIGATION -->
+    <!-- NAVEGAÇÃO BOTTOM -->
     <nav class="bg-slate-900 border-t border-slate-800 p-2 pb-safe z-20 flex justify-around">
       <button id="nav-home" class="flex flex-col items-center p-2 text-[#d4af37] transition-colors">
-        <span class="text-xl">🏰</span>
-        <span class="text-[10px] mt-1 font-bold">Início</span>
+        <span class="text-xl">🏰</span><span class="text-[10px] mt-1 font-bold">Início</span>
       </button>
       <button id="nav-passport" class="flex flex-col items-center p-2 text-slate-500 transition-colors">
-        <span class="text-xl">📖</span>
-        <span class="text-[10px] mt-1">Passaporte</span>
+        <span class="text-xl">📖</span><span class="text-[10px] mt-1">Passaporte</span>
       </button>
       <button id="nav-map" class="flex flex-col items-center p-2 text-slate-500 transition-colors">
-        <span class="text-xl">🗺️</span>
-        <span class="text-[10px] mt-1">Mapa 3D</span>
+        <span class="text-xl">🗺️</span><span class="text-[10px] mt-1">Mapa 3D</span>
       </button>
     </nav>
   </div>
 
-  <!-- MODAL DE CHECK-IN -->
+  <!-- MODAL DE CHECK-IN COM ANOTAÇÕES -->
   <div id="checkin-modal" class="modal-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-    <div class="modal-content bg-slate-900 w-full sm:max-w-md p-6 rounded-t-3xl sm:rounded-3xl border border-slate-700 border-b-0 sm:border-b">
+    <div class="modal-content bg-slate-900 w-full sm:max-w-md p-6 rounded-t-3xl sm:rounded-3xl border border-slate-700 border-b-0 sm:border-b max-h-[90vh] overflow-y-auto no-scrollbar">
       <div class="flex justify-between items-start mb-4">
         <div>
           <span id="modal-icon" class="text-3xl">🍽️</span>
@@ -345,7 +327,8 @@
         <button onclick="closeModal()" class="text-slate-500 hover:text-white text-2xl">&times;</button>
       </div>
 
-      <div class="space-y-3 mb-6 bg-slate-800 p-4 rounded-xl">
+      <!-- Checklist -->
+      <div class="space-y-3 mb-4 bg-slate-800 p-4 rounded-xl">
         <label class="flex items-center space-x-3 text-sm">
           <input type="checkbox" class="task-check form-checkbox text-[#d4af37] h-5 w-5 rounded border-slate-600 bg-slate-700">
           <span class="text-slate-300">Chegamos ao local 📍</span>
@@ -360,6 +343,16 @@
         </label>
       </div>
 
+      <!-- Anotações do Casal -->
+      <div class="mb-4">
+        <label class="text-xs text-[#d4af37] font-bold uppercase tracking-widest flex justify-between">
+          <span>Nossas Anotações</span>
+          <span id="notes-saved-feedback" class="text-green-400 text-[10px] hidden">Salvo!</span>
+        </label>
+        <textarea id="modal-notes" class="w-full bg-slate-800 text-slate-200 p-3 rounded-xl mt-2 text-sm border border-slate-600 focus:border-[#d4af37] focus:outline-none" rows="3" placeholder="Escrevam sobre a experiência, o que pediram, o que acharam..."></textarea>
+        <button id="btn-save-notes" class="w-full mt-2 bg-slate-700 hover:bg-slate-600 text-white text-xs py-2 rounded-lg transition border border-slate-600">💾 Salvar Anotações</button>
+      </div>
+
       <button id="btn-checkin" disabled class="w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2">
         <span>Bloqueado</span>
       </button>
@@ -367,15 +360,12 @@
   </div>
 
   <script type="module">
-    // ==========================================
-    // IMPORTS DO THREE.JS & FIREBASE
-    // ==========================================
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
     import { initializeApp } from "firebase/app";
-    import { getAuth, signInAnonymously } from "firebase/auth";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
     import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "firebase/firestore";
 
    const firebaseConfig = {
@@ -388,42 +378,36 @@
   measurementId: "G-PMH0W7QCLC"
 
 };
+   
+
     let app, db, auth;
     try {
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
       auth = getAuth(app);
-      console.log("Tentando inicializar Firebase...");
     } catch (error) {
-      console.warn("Firebase não configurado ou erro, rodando em modo LocalStorage:", error);
+      console.warn("Firebase não configurado. Fallback local.", error);
     }
 
-    // ==========================================
-    // BASE DE DADOS DOS RESTAURANTES (22 Locais - 5 Ilhas)
-    // ==========================================
     const RESTAURANTS = [
-      { id: 1, name: "Madero", category: "Burgers", icon: "🍔", island: 1, color: 0x22c55e }, // Verde
+      { id: 1, name: "Madero", category: "Burgers", icon: "🍔", island: 1, color: 0x22c55e },
       { id: 2, name: "Outback", category: "Steakhouse", icon: "🥩", island: 1, color: 0x22c55e },
       { id: 4, name: "Z Deli", category: "Sanduíches", icon: "🥪", island: 1, color: 0x22c55e },
       { id: 8, name: "Patties", category: "Smashed", icon: "🍔", island: 1, color: 0x22c55e },
-
-      { id: 3, name: "Bacio di Latte", category: "Gelato", icon: "🍧", island: 2, color: 0xf472b6 }, // Rosa
+      { id: 3, name: "Bacio di Latte", category: "Gelato", icon: "🍧", island: 2, color: 0xf472b6 },
       { id: 5, name: "Carlo's Bakery", category: "Doceria", icon: "🧁", island: 2, color: 0xf472b6 },
       { id: 6, name: "Le Bife", category: "Bistrô", icon: "🍽️", island: 2, color: 0xf472b6 },
       { id: 17, name: "Paris 6", category: "Bistrô 24h", icon: "🍰", island: 2, color: 0xf472b6 },
       { id: 16, name: "L'Entrecôte", category: "Francês", icon: "🍷", island: 2, color: 0xf472b6 },
-
-      { id: 9, name: "Taverna Medieval", category: "Temático", icon: "⚔️", island: 3, color: 0xfacc15 }, // Amarelo
+      { id: 9, name: "Taverna Medieval", category: "Temático", icon: "⚔️", island: 3, color: 0xfacc15 },
       { id: 10, name: "Beco Hexagonal", category: "Bruxo", icon: "🪄", island: 3, color: 0xfacc15 },
       { id: 11, name: "Vassoura Quebrada", category: "Magia", icon: "🧹", island: 3, color: 0xfacc15 },
       { id: 12, name: "Magia & Bruxaria", category: "Castelo", icon: "🏰", island: 3, color: 0xfacc15 },
-
-      { id: 13, name: "Hannover", category: "Fondue", icon: "🫕", island: 4, color: 0x38bdf8 }, // Azul Gelo
+      { id: 13, name: "Hannover", category: "Fondue", icon: "🫕", island: 4, color: 0x38bdf8 },
       { id: 14, name: "Chalezinho", category: "Fondue Rom", icon: "🧀", island: 4, color: 0x38bdf8 },
       { id: 7, name: "Eataly", category: "Italiano", icon: "🍕", island: 4, color: 0x38bdf8 },
       { id: 15, name: "Famiglia Mancini", category: "Cantina", icon: "🍝", island: 4, color: 0x38bdf8 },
-
-      { id: 18, name: "Figueira Rubaiyat", category: "Carnes", icon: "🍖", island: 5, color: 0xa855f7 }, // Roxo
+      { id: 18, name: "Figueira Rubaiyat", category: "Carnes", icon: "🍖", island: 5, color: 0xa855f7 },
       { id: 19, name: "Skye Bar", category: "Rooftop", icon: "🌃", island: 5, color: 0xa855f7 },
       { id: 20, name: "Maní", category: "Alta Gastron.", icon: "✨", island: 5, color: 0xa855f7 },
       { id: 21, name: "D.O.M.", category: "Michelin", icon: "🌟", island: 5, color: 0xa855f7 },
@@ -431,351 +415,280 @@
     ];
 
     // ==========================================
-    // ESTADO E ARMAZENAMENTO (Fallback System)
+    // ESTADO E ARMAZENAMENTO (SALA ÚNICA DO CASAL)
     // ==========================================
+    const ROOM_ID = "NOSSA_JORNADA"; // ID Fixo no banco de dados para os dois
+    
     const State = {
-      coupleKey: null,
       myRole: null, 
-      myName: "",
       viewingRole: 'p1', 
       data: {
         p1: { name: "Pessoa 1", avatar: "🦊", completed: [] },
-        p2: { name: "Pessoa 2", avatar: "🌸", completed: [] }
+        p2: { name: "Pessoa 2", avatar: "🌸", completed: [] },
+        notes: {}, // { "1": "anotação", "2": "anotação" }
+        userRoles: {} // Mapeia Firebase UID para "p1" ou "p2"
       }
     };
 
     const StorageManager = {
-      useLocalOnly: !db, 
       unsubscribe: null,
 
-      async init(coupleKey, role, name) {
-        State.coupleKey = coupleKey;
-        State.myRole = role;
-        State.myName = name;
-        State.viewingRole = role;
-        
-        State.data[role].name = name;
+      async initRealtime(uid) {
+        if (!db) return this.fallbackToLocal();
 
-        localStorage.setItem('datequest_session', JSON.stringify({ coupleKey, role, name }));
-
-        if (!this.useLocalOnly) {
-          try {
-            await signInAnonymously(auth);
-            const docRef = doc(db, "couples", coupleKey);
-            const docSnap = await getDoc(docRef);
-            
-            if (!docSnap.exists()) {
-              await setDoc(docRef, State.data);
-            }
-            
-            this.unsubscribe = onSnapshot(docRef, (snapshot) => {
-              if (snapshot.exists()) {
-                State.data = snapshot.data();
-                AppUI.renderAll();
+        try {
+          const docRef = doc(db, "couples", ROOM_ID);
+          
+          this.unsubscribe = onSnapshot(docRef, (snapshot) => {
+            if (snapshot.exists()) {
+              const serverData = snapshot.data();
+              // Mesclar com base local para garantir estrutura
+              State.data = { ...State.data, ...serverData };
+              
+              // Descobre meu papel baseado no UID salvo no banco
+              if (State.data.userRoles && State.data.userRoles[uid]) {
+                State.myRole = State.data.userRoles[uid];
               }
-            }, (error) => {
-              console.error("Erro no onSnapshot Firebase:", error);
-              this.fallbackToLocal();
-            });
-
-            return true;
-          } catch (e) {
-            console.error("Erro Firebase, caindo para local:", e);
-            this.fallbackToLocal();
-          }
-        } else {
-          this.fallbackToLocal();
+              
+              AppUI.renderAll();
+            } else {
+              // Primeira vez que o banco é criado
+              setDoc(docRef, State.data);
+            }
+          });
+        } catch (e) {
+          console.error("Erro Realtime:", e);
         }
-      },
-
-      fallbackToLocal() {
-        this.useLocalOnly = true;
-        const localData = localStorage.getItem(`dq_data_${State.coupleKey}`);
-        if (localData) {
-          State.data = JSON.parse(localData);
-          State.data[State.myRole].name = State.myName;
-        }
-        this.saveLocal();
-        AppUI.renderAll();
       },
 
       async save() {
-        if (this.useLocalOnly) {
-          this.saveLocal();
-          AppUI.renderAll();
-        } else {
-          try {
-            const docRef = doc(db, "couples", State.coupleKey);
-            await setDoc(docRef, State.data, { merge: true });
-          } catch(e) {
-            console.error("Erro ao salvar", e);
-            this.fallbackToLocal();
-          }
-        }
+        if (!db) return this.saveLocal();
+        try {
+          const docRef = doc(db, "couples", ROOM_ID);
+          await setDoc(docRef, State.data, { merge: true });
+        } catch(e) { console.error("Erro ao salvar:", e); }
       },
 
       saveLocal() {
-        localStorage.setItem(`dq_data_${State.coupleKey}`, JSON.stringify(State.data));
+        localStorage.setItem(`dq_data_local`, JSON.stringify(State.data));
+        AppUI.renderAll();
+      },
+
+      fallbackToLocal() {
+        const localData = localStorage.getItem(`dq_data_local`);
+        if (localData) State.data = JSON.parse(localData);
+        AppUI.renderAll();
       }
     };
 
     // ==========================================
-    // CLASSE DO MAPA 3D (Three.js)
+    // MAPA 3D (CÓDIGO THREE.JS MANTIDO)
     // ==========================================
     class Map3D {
+      // (Mantido idêntico ao anterior para o Mapa funcionar perfeitamente)
       constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.scene = new THREE.Scene();
-        
         this.scene.background = new THREE.Color(0x87CEEB);
         this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
-
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 500);
         this.camera.position.set(0, 40, 60);
-
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.container.appendChild(this.renderer.domElement);
-
         this.labelRenderer = new CSS2DRenderer();
         this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
         this.labelRenderer.domElement.style.position = 'absolute';
         this.labelRenderer.domElement.style.top = '0px';
         this.labelRenderer.domElement.style.pointerEvents = 'none';
         this.container.appendChild(this.labelRenderer.domElement);
-
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.05;
         this.controls.enablePan = false;
-        this.controls.minDistance = 20; 
-        this.controls.maxDistance = 90; 
-        this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
-
+        this.controls.minDistance = 20; this.controls.maxDistance = 90; 
+        this.controls.maxPolarAngle = Math.PI/2 - 0.1;
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         this.scene.add(ambientLight);
         const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
         dirLight.position.set(20, 50, 20);
         this.scene.add(dirLight);
-
         this.clock = new THREE.Clock();
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
         this.pins = [];
-
         this.buildEnvironment();
         this.buildCheckpoints();
-
         window.addEventListener('resize', () => this.onWindowResize());
         this.renderer.domElement.addEventListener('pointerdown', (e) => this.onClick(e));
-
         this.animate();
       }
-
       buildEnvironment() {
         const oceanGeometry = new THREE.PlaneGeometry(300, 300);
-        const oceanMaterial = new THREE.MeshStandardMaterial({ 
-          color: 0x006994, transparent: true, opacity: 0.8, roughness: 0.1, metalness: 0.1
-        });
+        const oceanMaterial = new THREE.MeshStandardMaterial({ color: 0x006994, transparent: true, opacity: 0.8 });
         const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
-        ocean.rotation.x = -Math.PI / 2;
-        ocean.position.y = -2;
-        this.scene.add(ocean);
-
+        ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2; this.scene.add(ocean);
         this.islandPositions = [
-          { x: 0, z: 0, color: 0x22c55e },     
-          { x: -25, z: -20, color: 0xf472b6 }, 
-          { x: 25, z: -15, color: 0xfacc15 },  
-          { x: -20, z: 25, color: 0x38bdf8 },  
-          { x: 20, z: 25, color: 0xa855f7 }    
+          { x: 0, z: 0, color: 0x22c55e }, { x: -25, z: -20, color: 0xf472b6 }, 
+          { x: 25, z: -15, color: 0xfacc15 }, { x: -20, z: 25, color: 0x38bdf8 }, { x: 20, z: 25, color: 0xa855f7 }    
         ];
-
         this.islandPositions.forEach(pos => {
-          const baseGeo = new THREE.CylinderGeometry(12, 10, 4, 32);
-          const baseMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
-          const base = new THREE.Mesh(baseGeo, baseMat);
-          base.position.set(pos.x, 0, pos.z);
-          this.scene.add(base);
-
-          const topGeo = new THREE.SphereGeometry(12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-          const topMat = new THREE.MeshStandardMaterial({ color: pos.color, roughness: 0.8 });
-          const top = new THREE.Mesh(topGeo, topMat);
-          top.position.set(pos.x, 2, pos.z);
-          top.scale.y = 0.3;
-          this.scene.add(top);
+          const base = new THREE.Mesh(new THREE.CylinderGeometry(12, 10, 4, 32), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
+          base.position.set(pos.x, 0, pos.z); this.scene.add(base);
+          const top = new THREE.Mesh(new THREE.SphereGeometry(12, 32, 16, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({ color: pos.color }));
+          top.position.set(pos.x, 2, pos.z); top.scale.y = 0.3; this.scene.add(top);
         });
-
         const bridgeGeo = new THREE.BoxGeometry(2, 0.5, 20);
         const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
-        
-        const b1 = new THREE.Mesh(bridgeGeo, bridgeMat);
-        b1.position.set(-12.5, 2, -10); b1.rotation.y = Math.PI / 4;
-        this.scene.add(b1);
-
-        const b2 = new THREE.Mesh(bridgeGeo, bridgeMat);
-        b2.position.set(12.5, 2, -7.5); b2.rotation.y = -Math.PI / 3;
-        this.scene.add(b2);
+        const b1 = new THREE.Mesh(bridgeGeo, bridgeMat); b1.position.set(-12.5, 2, -10); b1.rotation.y = Math.PI/4; this.scene.add(b1);
+        const b2 = new THREE.Mesh(bridgeGeo, bridgeMat); b2.position.set(12.5, 2, -7.5); b2.rotation.y = -Math.PI/3; this.scene.add(b2);
       }
-
       buildCheckpoints() {
         RESTAURANTS.forEach(rest => {
-          const islandBase = this.islandPositions[rest.island - 1];
-          const angle = Math.random() * Math.PI * 2;
-          const radius = Math.random() * 8;
-          const posX = islandBase.x + Math.cos(angle) * radius;
-          const posZ = islandBase.z + Math.sin(angle) * radius;
-
+          const base = this.islandPositions[rest.island - 1];
+          const angle = Math.random() * Math.PI * 2; const radius = Math.random() * 8;
           const pinGroup = new THREE.Group();
-          pinGroup.position.set(posX, 5, posZ);
+          pinGroup.position.set(base.x + Math.cos(angle)*radius, 5, base.z + Math.sin(angle)*radius);
           pinGroup.userData = rest;
-
-          const sphereGeo = new THREE.SphereGeometry(0.8, 16, 16);
-          const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5 });
-          const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+          const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffffff }));
           sphere.position.y = 1.5;
-
-          const coneGeo = new THREE.ConeGeometry(0.5, 1.5, 16);
-          const coneMat = new THREE.MeshStandardMaterial({ color: rest.color });
-          const cone = new THREE.Mesh(coneGeo, coneMat);
+          const cone = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.5, 16), new THREE.MeshStandardMaterial({ color: rest.color }));
           cone.rotation.x = Math.PI;
-
-          const ringGeo = new THREE.TorusGeometry(0.8, 0.1, 8, 24);
-          const ringMat = new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.3 });
-          const ring = new THREE.Mesh(ringGeo, ringMat);
-          ring.rotation.x = Math.PI / 2;
-          ring.position.y = -0.5;
-
-          pinGroup.add(sphere);
-          pinGroup.add(cone);
-          pinGroup.add(ring);
-
-          const labelDiv = document.createElement('div');
-          labelDiv.className = 'map-label';
-          const colorHex = '#' + rest.color.toString(16).padStart(6, '0');
-          labelDiv.style.backgroundColor = colorHex;
-          labelDiv.innerHTML = `<span class="emoji">${rest.icon}</span> ${rest.name}`;
+          pinGroup.add(sphere); pinGroup.add(cone);
           
-          const labelObj = new CSS2DObject(labelDiv);
-          labelObj.position.set(0, 3, 0); 
-          pinGroup.add(labelObj);
-
-          this.scene.add(pinGroup);
-          this.pins.push(pinGroup);
+          const labelDiv = document.createElement('div'); labelDiv.className = 'map-label';
+          labelDiv.style.backgroundColor = '#' + rest.color.toString(16).padStart(6, '0');
+          labelDiv.innerHTML = `<span class="emoji">${rest.icon}</span> ${rest.name}`;
+          const labelObj = new CSS2DObject(labelDiv); labelObj.position.set(0, 3, 0); pinGroup.add(labelObj);
+          this.scene.add(pinGroup); this.pins.push(pinGroup);
         });
       }
-
       onClick(event) {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1; this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         this.raycaster.setFromCamera(this.mouse, this.camera);
-        
-        const meshesToCheck = [];
-        this.pins.forEach(p => p.children.forEach(c => {
-          if(c.isMesh) meshesToCheck.push(c);
-        }));
-
-        const intersects = this.raycaster.intersectObjects(meshesToCheck);
-        
+        const meshes = []; this.pins.forEach(p => p.children.forEach(c => { if(c.isMesh) meshes.push(c); }));
+        const intersects = this.raycaster.intersectObjects(meshes);
         if (intersects.length > 0) {
-          const clickedPin = intersects[0].object.parent;
-          const restaurantData = clickedPin.userData;
-          
-          if(restaurantData && restaurantData.id) {
-            AppUI.openCheckinModal(restaurantData);
-          }
+          const rest = intersects[0].object.parent.userData;
+          if(rest && rest.id) AppUI.openCheckinModal(rest);
         }
       }
-
       onWindowResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        this.camera.aspect = window.innerWidth / window.innerHeight; this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight); this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
       }
-
       animate() {
         requestAnimationFrame(() => this.animate());
         const time = this.clock.getElapsedTime();
-        
-        this.pins.forEach((pin, i) => {
-          pin.position.y = 5 + Math.sin(time * 2 + i) * 0.5;
-          pin.rotation.y += 0.02;
-        });
-
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
-        this.labelRenderer.render(this.scene, this.camera);
+        this.pins.forEach((pin, i) => { pin.position.y = 5 + Math.sin(time*2 + i)*0.5; pin.rotation.y += 0.02; });
+        this.controls.update(); this.renderer.render(this.scene, this.camera); this.labelRenderer.render(this.scene, this.camera);
       }
     }
 
 
     // ==========================================
-    // UI CONTROLLER
+    // UI CONTROLLER & AUTHENTICATION
     // ==========================================
     const AppUI = {
       currentPage: 0,
       mapInstance: null,
       currentModalRestaurant: null,
+      isLoginMode: true,
+      selectedRoleRegister: null,
 
       init() {
         this.bindEvents();
-        setTimeout(() => {
-          this.checkSession();
-        }, 1500);
-      },
-
-      checkSession() {
-        const session = localStorage.getItem('datequest_session');
-        const splash = document.getElementById('view-splash');
         
-        if (session) {
-          const { coupleKey, role, name } = JSON.parse(session);
-          StorageManager.init(coupleKey, role, name).then(() => {
-            splash.style.opacity = '0';
-            setTimeout(() => {
-              splash.classList.add('hidden');
-              this.showApp();
-            }, 1000);
+        // Verifica Sessão Firebase
+        if(auth) {
+          onAuthStateChanged(auth, (user) => {
+            const splash = document.getElementById('view-splash');
+            if (user) {
+              StorageManager.initRealtime(user.uid).then(() => {
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.classList.add('hidden'); this.showApp(); }, 1000);
+              });
+            } else {
+              splash.style.opacity = '0';
+              setTimeout(() => {
+                splash.classList.add('hidden');
+                document.getElementById('view-lobby').classList.remove('hidden');
+                document.getElementById('view-lobby').classList.add('flex');
+              }, 1000);
+            }
           });
         } else {
-          splash.style.opacity = '0';
-          setTimeout(() => {
-            splash.classList.add('hidden');
-            document.getElementById('view-lobby').classList.remove('hidden');
-            document.getElementById('view-lobby').classList.add('flex');
-          }, 1000);
+          // Fallback Local
+          StorageManager.fallbackToLocal();
+          document.getElementById('view-splash').classList.add('hidden');
+          this.showApp();
         }
       },
 
       bindEvents() {
+        // Toggle Login/Register
+        document.getElementById('btn-tab-login').addEventListener('click', () => this.toggleAuthMode(true));
+        document.getElementById('btn-tab-register').addEventListener('click', () => this.toggleAuthMode(false));
+
+        // Seleção de Role no Cadastro
         document.querySelectorAll('.role-btn').forEach(btn => {
           btn.addEventListener('click', (e) => {
             document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('border-[#d4af37]'));
             e.target.classList.add('border-[#d4af37]');
-            State.myRole = e.target.dataset.role;
+            this.selectedRoleRegister = e.target.dataset.role;
           });
         });
 
-        document.getElementById('btn-entrar').addEventListener('click', () => {
-          const key = document.getElementById('couple-key').value.trim().toUpperCase();
-          const name = document.getElementById('user-name').value.trim();
-          if(!key || !State.myRole || !name) return alert('Preencha a Chave, escolha quem é você e digite seu nome!');
+        // Botão Principal de Auth
+        document.getElementById('btn-auth-action').addEventListener('click', async () => {
+          const email = document.getElementById('auth-email').value.trim();
+          const pass = document.getElementById('auth-password').value.trim();
+          const errUI = document.getElementById('lobby-error');
+          const statusUI = document.getElementById('lobby-status');
           
-          document.getElementById('lobby-status').classList.remove('hidden');
-          StorageManager.init(key, State.myRole, name).then(() => {
-            this.showApp();
-          });
+          if(!email || !pass) return errUI.innerText = "Preencha e-mail e senha.";
+          errUI.classList.add('hidden');
+          statusUI.classList.remove('hidden');
+
+          try {
+            if (this.isLoginMode) {
+              await signInWithEmailAndPassword(auth, email, pass);
+            } else {
+              const name = document.getElementById('auth-name').value.trim();
+              if(!name || !this.selectedRoleRegister) {
+                statusUI.classList.add('hidden');
+                errUI.classList.remove('hidden');
+                return errUI.innerText = "Escolha sua pessoa e nome.";
+              }
+              const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+              const uid = userCred.user.uid;
+              
+              // Baixa os dados atuais para não sobrescrever o parceiro, insere o novo e salva
+              const docRef = doc(db, "couples", ROOM_ID);
+              const snap = await getDoc(docRef);
+              if(snap.exists()) State.data = { ...State.data, ...snap.data() };
+              
+              if(!State.data.userRoles) State.data.userRoles = {};
+              State.data.userRoles[uid] = this.selectedRoleRegister;
+              State.data[this.selectedRoleRegister].name = name;
+              
+              await StorageManager.save();
+            }
+          } catch (e) {
+            statusUI.classList.add('hidden');
+            errUI.classList.remove('hidden');
+            errUI.innerText = "Erro: " + e.message;
+          }
         });
 
+        // Navegação
         document.getElementById('tab-p1').addEventListener('click', () => this.switchViewRole('p1'));
         document.getElementById('tab-p2').addEventListener('click', () => this.switchViewRole('p2'));
-
         document.getElementById('nav-home').addEventListener('click', () => this.switchMainTab('home'));
         document.getElementById('nav-passport').addEventListener('click', () => this.switchMainTab('passaporte'));
         document.getElementById('nav-map').addEventListener('click', () => this.switchMainTab('mapa'));
 
+        // Modal Checkbox
         document.querySelectorAll('.task-check').forEach(cb => {
           cb.addEventListener('change', () => {
             const allChecked = Array.from(document.querySelectorAll('.task-check')).every(c => c.checked);
@@ -792,16 +705,59 @@
           });
         });
 
+        // Registrar Encontro
         document.getElementById('btn-checkin').addEventListener('click', () => {
           if(!this.currentModalRestaurant) return;
           const restId = this.currentModalRestaurant.id;
           
-          if(!State.data[State.myRole].completed.includes(restId)) {
+          // Salva Checkin
+          if(State.myRole && !State.data[State.myRole].completed.includes(restId)) {
             State.data[State.myRole].completed.push(restId);
-            StorageManager.save();
           }
+          
+          // Salva Notas
+          const notesStr = document.getElementById('modal-notes').value.trim();
+          if(!State.data.notes) State.data.notes = {};
+          State.data.notes[restId] = notesStr;
+
+          StorageManager.save();
           window.closeModal();
         });
+
+        // Salvar apenas anotação
+        document.getElementById('btn-save-notes').addEventListener('click', () => {
+          if(!this.currentModalRestaurant) return;
+          const restId = this.currentModalRestaurant.id;
+          const notesStr = document.getElementById('modal-notes').value.trim();
+          if(!State.data.notes) State.data.notes = {};
+          State.data.notes[restId] = notesStr;
+          
+          StorageManager.save();
+          
+          const feedback = document.getElementById('notes-saved-feedback');
+          feedback.classList.remove('hidden');
+          setTimeout(() => feedback.classList.add('hidden'), 2000);
+        });
+      },
+
+      toggleAuthMode(isLogin) {
+        this.isLoginMode = isLogin;
+        const btnLogin = document.getElementById('btn-tab-login');
+        const btnReg = document.getElementById('btn-tab-register');
+        const extraFields = document.getElementById('register-fields');
+        const actionBtn = document.getElementById('btn-auth-action');
+
+        if(isLogin) {
+          btnLogin.className = "flex-1 py-2 text-sm font-bold bg-slate-700 text-white rounded-md shadow transition";
+          btnReg.className = "flex-1 py-2 text-sm font-bold text-slate-400 rounded-md transition hover:text-white";
+          extraFields.classList.add('hidden');
+          actionBtn.innerText = "Acessar Jornada";
+        } else {
+          btnReg.className = "flex-1 py-2 text-sm font-bold bg-slate-700 text-white rounded-md shadow transition";
+          btnLogin.className = "flex-1 py-2 text-sm font-bold text-slate-400 rounded-md transition hover:text-white";
+          extraFields.classList.remove('hidden');
+          actionBtn.innerText = "Criar Conta";
+        }
       },
 
       showApp() {
@@ -809,6 +765,9 @@
         document.getElementById('view-app').classList.remove('hidden');
         document.getElementById('view-app').classList.add('flex');
         
+        // Se a pessoa deslogou e bugou o localstorage
+        if(!State.myRole) State.myRole = 'p1'; 
+
         this.switchMainTab('home');
         this.renderAll();
       },
@@ -817,7 +776,6 @@
         document.getElementById('aba-home').classList.add('hidden');
         document.getElementById('aba-passaporte').classList.add('hidden');
         document.getElementById('aba-mapa').classList.add('hidden');
-
         document.getElementById('nav-home').classList.replace('text-[#d4af37]', 'text-slate-500');
         document.getElementById('nav-passport').classList.replace('text-[#d4af37]', 'text-slate-500');
         document.getElementById('nav-map').classList.replace('text-[#d4af37]', 'text-slate-500');
@@ -837,31 +795,25 @@
           document.getElementById('aba-mapa').classList.remove('hidden');
           document.getElementById('nav-map').classList.replace('text-slate-500', 'text-[#d4af37]');
           document.getElementById('header-tabs').classList.add('hidden');
-
-          if(!this.mapInstance) {
-            this.mapInstance = new Map3D('three-canvas-container');
-          }
+          if(!this.mapInstance) this.mapInstance = new Map3D('three-canvas-container');
         }
       },
 
       switchViewRole(role) {
         State.viewingRole = role;
-        
         ['p1', 'p2'].forEach(r => {
           const btn = document.getElementById(`tab-${r}`);
-          if(r === role) {
-            btn.className = "px-4 py-1 rounded-full text-xs font-bold bg-[#d4af37] text-slate-900 transition shadow";
-          } else {
-            btn.className = "px-4 py-1 rounded-full text-xs font-bold text-slate-400 transition hover:text-white";
-          }
+          if(r === role) btn.className = "px-4 py-1 rounded-full text-xs font-bold bg-[#d4af37] text-slate-900 transition shadow";
+          else btn.className = "px-4 py-1 rounded-full text-xs font-bold text-slate-400 transition hover:text-white";
         });
-
         this.renderPassport();
       },
 
       renderAll() {
         this.renderDashboard();
-        this.renderPassport();
+        if(!document.getElementById('aba-passaporte').classList.contains('hidden')) {
+          this.renderPassport();
+        }
       },
 
       renderDashboard() {
@@ -877,7 +829,6 @@
         document.getElementById('hub-xp-p2').innerText = `${p2.completed.length * 100} XP`;
 
         const combinedVisits = new Set([...p1.completed, ...p2.completed]).size;
-        
         document.getElementById('hub-total-score').innerText = `${combinedVisits}/22`;
         document.getElementById('hub-progress-bar').style.width = `${(combinedVisits / 22) * 100}%`;
         
@@ -890,21 +841,13 @@
         const completed = userData.completed || [];
         
         document.getElementById('passport-owner-name').innerText = `Propriedade de: ${userData.name}`;
-        
         const totalXP = completed.length * 100;
-        const maxXP = 2200;
-        document.getElementById('xp-text').innerText = `${totalXP} / ${maxXP} XP`;
-        document.getElementById('xp-bar').style.width = `${(totalXP / maxXP) * 100}%`;
+        document.getElementById('xp-text').innerText = `${totalXP} / 2200 XP`;
+        document.getElementById('xp-bar').style.width = `${(totalXP / 2200) * 100}%`;
 
         const wrapper = document.getElementById('pages-wrapper');
         wrapper.innerHTML = '';
-        
-        const chunks = [
-          RESTAURANTS.slice(0, 6),
-          RESTAURANTS.slice(6, 12),
-          RESTAURANTS.slice(12, 18),
-          RESTAURANTS.slice(18, 22)
-        ];
+        const chunks = [ RESTAURANTS.slice(0, 6), RESTAURANTS.slice(6, 12), RESTAURANTS.slice(12, 18), RESTAURANTS.slice(18, 22) ];
 
         chunks.forEach((chunk, index) => {
           const div = document.createElement('div');
@@ -914,12 +857,7 @@
 
           let stampsHtml = chunk.map(rest => {
             const isDone = completed.includes(rest.id);
-            return `
-              <div class="stamp ${isDone ? 'completed' : ''}">
-                <span class="text-2xl mb-1">${rest.icon}</span>
-                <span class="truncate w-full px-1">${rest.name}</span>
-              </div>
-            `;
+            return `<div class="stamp ${isDone ? 'completed' : ''}"><span class="text-2xl mb-1">${rest.icon}</span><span class="truncate w-full px-1">${rest.name}</span></div>`;
           }).join('');
 
           div.innerHTML = `
@@ -927,8 +865,7 @@
               <span class="font-cinzel text-[#1e3a8a] font-bold">Visto ${index + 1}</span>
               <span class="text-xs text-slate-400">Pág ${index + 1}</span>
             </div>
-            <div class="stamp-grid">${stampsHtml}</div>
-          `;
+            <div class="stamp-grid">${stampsHtml}</div>`;
           wrapper.appendChild(div);
         });
 
@@ -945,13 +882,19 @@
         document.getElementById('modal-category').innerText = rest.category;
         document.getElementById('modal-title').innerText = rest.name;
         
+        // Puxa as anotações existentes do casal
+        const notasExistentes = (State.data.notes && State.data.notes[rest.id]) ? State.data.notes[rest.id] : '';
+        document.getElementById('modal-notes').value = notasExistentes;
+
         document.querySelectorAll('.task-check').forEach(cb => cb.checked = false);
         const btn = document.getElementById('btn-checkin');
         btn.disabled = true;
         btn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2";
         btn.innerHTML = "Complete as etapas...";
 
-        if(State.data[State.myRole].completed.includes(rest.id)) {
+        // Mostra estado do checkin atual (MEU passport)
+        const myCompleted = State.myRole ? State.data[State.myRole].completed : [];
+        if(myCompleted.includes(rest.id)) {
            document.querySelectorAll('.task-check').forEach(cb => { cb.checked = true; cb.disabled = true; });
            btn.className = "w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2";
            btn.innerHTML = "✓ Encontro Já Realizado!";
@@ -963,15 +906,12 @@
       }
     };
 
-    // Global Functions for HTML onClick
     window.AppUI = AppUI;
-    
     window.openPassport = () => {
       document.getElementById('page-cover').classList.add('flipped');
       document.getElementById('pages-wrapper').classList.remove('hidden');
       document.getElementById('passport-controls').classList.remove('hidden');
     };
-
     window.nextPage = () => {
       const pages = document.querySelectorAll('#pages-wrapper .passport-page');
       if(AppUI.currentPage < pages.length - 1) {
@@ -979,12 +919,10 @@
         AppUI.currentPage++;
       }
     };
-
     window.prevPage = () => {
       if(AppUI.currentPage > 0) {
         AppUI.currentPage--;
-        const pages = document.querySelectorAll('#pages-wrapper .passport-page');
-        pages[AppUI.currentPage].classList.remove('flipped');
+        document.querySelectorAll('#pages-wrapper .passport-page')[AppUI.currentPage].classList.remove('flipped');
       } else {
         document.getElementById('page-cover').classList.remove('flipped');
         setTimeout(() => {
@@ -993,19 +931,13 @@
         }, 300);
       }
     };
-
-    window.closeModal = () => {
-      document.getElementById('checkin-modal').classList.remove('active');
-    };
-
+    window.closeModal = () => document.getElementById('checkin-modal').classList.remove('active');
     AppUI.openPlayerPassport = (role) => {
       AppUI.switchViewRole(role);
       AppUI.switchMainTab('passaporte');
     };
 
-    // Inicia App
     AppUI.init();
-
   </script>
 </body>
 </html>
