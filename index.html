@@ -3,192 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Date Quest - Grande SP</title>
+    <title>Date Quest SP - Aventura a Dois</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,700&family=Poppins:wght@400;600;800&display=swap');
 
         :root {
-            --bg-cream: #F5F0E6;
-            --primary-blue: #0A146E;
-            --primary-purple: #4A148C;
-            --accent-gold: #D4AF37;
-            --text-dark: #1A1A1A;
-            --ilha-rosa: #FF9CEE;
-            --ilha-laranja: #FFB347;
-            --ilha-azul: #AEC6CF;
-            --ilha-roxa: #B39DDB;
-            --ilha-verde: #77DD77;
+            --bg-dark: #0f0c20;
+            --primary-blue: #1a237e;
+            --primary-purple: #4a148c;
+            --accent-gold: #ffd700;
+            --bg-cream: #fbf8f3;
+            --text-dark: #1f1f1f;
+            
+            /* Cores dos Polos/Regiões da Ilha */
+            --polo-1: #4caf50; /* Baixada Gastronômica - Verde */
+            --polo-2: #ff9800; /* Vale dos Sabores - Laranja */
+            --polo-3: #e91e63; /* Ilha Temática - Rosa Magia */
+            --polo-4: #9c27b0; /* Reino dos Fondues - Roxo */
+            --polo-5: #00bcd4; /* Cume Alta Gastronomia - Azul Céu */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--primary-blue); color: var(--text-dark); overflow-x: hidden; }
+        body { background-color: var(--bg-dark); color: var(--text-dark); overflow-x: hidden; }
 
-        /* LOBBY (Vínculo de Casal) */
+        /* LOBBY & SELEÇÃO DE PERSONAGEM */
         #lobby {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
-            color: white; text-align: center; padding: 20px; z-index: 100; position: fixed; width: 100%;
+            min-height: 100vh; background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+            color: white; text-align: center; padding: 20px; z-index: 1000; position: fixed; width: 100%; top: 0; left: 0;
+            overflow-y: auto;
         }
-        .lobby-box { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); max-width: 400px; width: 100%; }
-        .lobby-box h1 { font-family: 'Playfair Display', serif; margin-bottom: 20px; color: var(--accent-gold); }
-        .lobby-box input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; text-align: center; text-transform: uppercase; }
-        .lobby-box button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .btn-gerar { background: var(--accent-gold); color: var(--primary-blue); }
-        .btn-conectar { background: white; color: var(--primary-blue); }
-        .btn-gerar:disabled, .btn-conectar:disabled { opacity: 0.7; cursor: not-allowed; }
-        #display-codigo { font-size: 32px; font-weight: 800; letter-spacing: 5px; margin: 20px 0; color: var(--accent-gold); }
+        .lobby-box { background: rgba(255,255,255,0.08); padding: 30px; border-radius: 24px; backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.18); max-width: 450px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        .lobby-box h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--accent-gold); margin-bottom: 8px; }
+        .lobby-box p { font-size: 0.9rem; opacity: 0.85; margin-bottom: 20px; }
+        
+        .lobby-box input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 16px; text-align: center; text-transform: uppercase; font-weight: bold; background: rgba(255,255,255,0.9); }
+        .lobby-box button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.3s transform, 0.3s background; }
+        .btn-gerar { background: linear-gradient(90deg, #ffd700, #ffa000); color: #000; }
+        .btn-conectar { background: #3f51b5; color: white; }
+        .btn-gerar:hover, .btn-conectar:hover { transform: translateY(-2px); }
+        .btn-gerar:disabled, .btn-conectar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        #display-codigo { font-size: 28px; font-weight: 800; letter-spacing: 6px; margin: 15px 0; color: var(--accent-gold); background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; border: 1px dashed var(--accent-gold); }
+
+        /* SELEÇÃO DE PERFIL */
+        .step-perfil { display: none; text-align: center; }
+        .avatar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 15px 0; }
+        .avatar-card { background: rgba(255,255,255,0.1); border-radius: 16px; padding: 10px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .avatar-card.selected { border-color: var(--accent-gold); background: rgba(255, 215, 0, 0.2); transform: scale(1.05); }
+        .avatar-card span { font-size: 38px; display: block; }
+        .avatar-card p { font-size: 11px; margin-top: 4px; color: white; }
 
         /* APP PRINCIPAL */
-        #app { display: none; padding-bottom: 80px; }
-        .screen { display: none; padding: 20px; max-width: 800px; margin: 0 auto; }
+        #app { display: none; padding-bottom: 90px; }
+        .screen { display: none; padding: 15px; max-width: 900px; margin: 0 auto; }
         .screen.active { display: block; }
 
-        /* PASSAPORTE */
-        #passaporte { background-color: var(--bg-cream); min-height: 100vh; }
-        .pass-header { text-align: center; padding: 40px 0; border-bottom: 2px dashed rgba(10, 20, 110, 0.3); }
-        .pass-header h1 { font-family: 'Playfair Display', serif; color: var(--primary-blue); font-size: 2.5rem; letter-spacing: 2px; }
-        .globo-icon { font-size: 40px; color: var(--accent-gold); margin-bottom: 10px; }
-        .nomes-casal { display: flex; justify-content: center; gap: 15px; margin-top: 20px; font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--primary-blue); }
-        .nomes-casal input { background: transparent; border: none; border-bottom: 1px solid var(--primary-blue); color: var(--primary-blue); font-family: 'Playfair Display', serif; font-size: 1.5rem; text-align: center; width: 120px; }
-        .nomes-casal input:focus { outline: none; border-bottom: 2px solid var(--accent-gold); }
+        /* PASSAPORTES (PAINEL DUPLO) */
+        #passaporte { background-color: var(--bg-dark); min-height: 100vh; padding-top: 20px; }
+        .pass-title { text-align: center; color: white; margin-bottom: 20px; font-family: 'Playfair Display', serif; }
+        .pass-title h2 { color: var(--accent-gold); font-size: 2rem; }
+
+        .passaportes-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         
-        .xp-bar-container { background: white; padding: 20px; border-radius: 15px; margin: 30px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .xp-info { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; color: var(--primary-blue); }
-        .xp-track { width: 100%; height: 12px; background: #E0E0E0; border-radius: 6px; overflow: hidden; }
-        .xp-fill { height: 100%; background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple)); width: 0%; transition: width 0.5s ease; }
+        .passaporte-card {
+            background: var(--bg-cream); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border: 3px solid var(--accent-gold); position: relative; overflow: hidden;
+        }
+        .passaporte-card::before {
+            content: 'PASSAPORTE OFICIAL'; position: absolute; top: 12px; right: -30px; transform: rotate(45deg);
+            background: var(--accent-gold); color: #000; font-size: 8px; font-weight: bold; padding: 4px 30px;
+        }
 
-        .carimbos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; margin-top: 30px; }
-        .carimbo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; text-align: center; padding: 10px; opacity: 0.3; transition: 0.3s; }
-        .carimbo.concluido { opacity: 1; border-color: var(--primary-blue); color: var(--primary-blue); transform: rotate(-10deg); border-style: double; border-width: 6px; }
-        .carimbo h4 { font-size: 10px; text-transform: uppercase; margin-bottom: 5px; }
-        .carimbo p { font-size: 8px; font-weight: bold; }
+        .pass-header { text-align: center; border-bottom: 2px dashed rgba(26, 35, 126, 0.2); padding-bottom: 15px; margin-bottom: 15px; }
+        .pass-avatar { font-size: 50px; background: white; width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid var(--primary-blue); }
+        .pass-nome { font-family: 'Playfair Display', serif; color: var(--primary-blue); font-size: 1.4rem; font-weight: 700; }
+        .pass-cargo { font-size: 11px; color: #666; letter-spacing: 1px; text-transform: uppercase; }
 
-        /* MAPA DA ILHA */
-        #mapa { background: #87CEEB; min-height: 100vh; position: relative; padding: 40px 20px 100px; }
-        .ilha-container { display: flex; flex-direction: column-reverse; gap: 60px; align-items: center; position: relative; }
-        
-        .checkpoint-wrap { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        
-        /* Cards flutuantes */
-        .card-restaurante { background: white; padding: 10px 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; margin-bottom: 15px; border-top: 4px solid var(--accent-gold); min-width: 150px; position: relative; }
-        .card-restaurante::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); border-width: 10px 10px 0; border-style: solid; border-color: white transparent transparent transparent; }
-        .card-restaurante h3 { font-size: 14px; color: var(--primary-blue); }
-        .card-restaurante span { font-size: 10px; color: #666; text-transform: uppercase; }
+        .xp-box { background: white; padding: 12px; border-radius: 12px; margin-bottom: 15px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); }
+        .xp-text { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: var(--primary-blue); margin-bottom: 6px; }
+        .xp-bar { height: 10px; background: #e0e0e0; border-radius: 5px; overflow: hidden; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, #1a237e, #7b1fa2); width: 0%; transition: width 0.5s ease; }
 
-        /* Botões do mapa estilo anel duplo */
-        .ponto-mapa { width: 40px; height: 40px; border-radius: 50%; background: white; border: 6px solid var(--accent-gold); box-shadow: 0 0 0 4px white, 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; font-weight: bold; color: transparent; }
-        .ponto-mapa.concluido { background: var(--accent-gold); color: white; border-color: white; box-shadow: 0 0 0 4px var(--accent-gold); }
-        .ponto-mapa.concluido::after { content: '✓'; }
+        .carimbos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .carimbo {
+            aspect-ratio: 1; border-radius: 50%; border: 2px dashed #bbb; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center; padding: 5px; opacity: 0.35; transition: 0.3s; background: white;
+        }
+        .carimbo.concluido {
+            opacity: 1; border: 3px double var(--primary-blue); color: var(--primary-blue); transform: rotate(-8deg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: #f0f3ff;
+        }
+        .carimbo-icon { font-size: 18px; }
+        .carimbo-nome { font-size: 8px; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
 
-        /* Cores das ilhas/regiões */
-        .regiao-0 .ponto-mapa { border-color: var(--ilha-verde); } .regiao-0 .ponto-mapa.concluido { background: var(--ilha-verde); box-shadow: 0 0 0 4px var(--ilha-verde); } .regiao-0 .card-restaurante { border-top-color: var(--ilha-verde); }
-        .regiao-1 .ponto-mapa { border-color: var(--ilha-laranja); } .regiao-1 .ponto-mapa.concluido { background: var(--ilha-laranja); box-shadow: 0 0 0 4px var(--ilha-laranja); } .regiao-1 .card-restaurante { border-top-color: var(--ilha-laranja); }
-        .regiao-2 .ponto-mapa { border-color: var(--ilha-rosa); } .regiao-2 .ponto-mapa.concluido { background: var(--ilha-rosa); box-shadow: 0 0 0 4px var(--ilha-rosa); } .regiao-2 .card-restaurante { border-top-color: var(--ilha-rosa); }
-        .regiao-3 .ponto-mapa { border-color: var(--ilha-roxa); } .regiao-3 .ponto-mapa.concluido { background: var(--ilha-roxa); box-shadow: 0 0 0 4px var(--ilha-roxa); } .regiao-3 .card-restaurante { border-top-color: var(--ilha-roxa); }
-        .regiao-4 .ponto-mapa { border-color: var(--ilha-azul); } .regiao-4 .ponto-mapa.concluido { background: var(--ilha-azul); box-shadow: 0 0 0 4px var(--ilha-azul); } .regiao-4 .card-restaurante { border-top-color: var(--ilha-azul); }
+        /* MAPA DA ILHA REFORMULADO */
+        #mapa { background: #111936; min-height: 100vh; position: relative; padding: 20px 10px 120px; }
+        .mapa-header { text-align: center; color: white; margin-bottom: 25px; }
+        .mapa-header h2 { font-family: 'Playfair Display', serif; color: var(--accent-gold); font-size: 1.8rem; }
 
-        /* Modal Check-in (Estilo Licitação) */
-        #modal-checkin { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-cream); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); z-index: 1000; }
-        .modal-header { background: var(--primary-blue); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .ilha-wrapper {
+            position: relative; max-width: 600px; margin: 0 auto; padding: 40px 10px;
+            background: radial-gradient(circle, #1e295d 0%, #0d1329 100%); border-radius: 30px;
+            border: 2px solid rgba(255,215,0,0.2); box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+        }
+
+        /* SVG Fundo de Ilhas */
+        .ilha-svg-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.25; }
+
+        .caminho-container { position: relative; z-index: 2; display: flex; flex-direction: column-reverse; gap: 45px; }
+
+        .nodo-restaurante {
+            display: flex; align-items: center; justify-content: center; position: relative; width: 100%;
+        }
+
+        /* Variações de alinhamento no mapa */
+        .nodo-restaurante:nth-child(odd) { justify-content: flex-start; padding-left: 10%; }
+        .nodo-restaurante:nth-child(even) { justify-content: flex-end; padding-right: 10%; }
+        .nodo-restaurante:nth-child(5n) { justify-content: center; padding: 0; }
+
+        .card-ponto {
+            background: rgba(255,255,255,0.95); padding: 10px 14px; border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); text-align: center; width: 170px;
+            position: relative; border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s transform;
+        }
+        .card-ponto:hover { transform: scale(1.04); }
+        .card-ponto h4 { font-size: 13px; color: #111; font-weight: 700; margin-bottom: 2px; }
+        .card-ponto p { font-size: 10px; color: #666; font-weight: 600; text-transform: uppercase; }
+
+        .ponto-btn {
+            width: 44px; height: 44px; border-radius: 50%; background: white;
+            border: 5px solid #fff; box-shadow: 0 0 0 4px #aaa, 0 8px 15px rgba(0,0,0,0.4);
+            cursor: pointer; position: absolute; margin-top: -5px; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;
+        }
+        .nodo-restaurante:nth-child(odd) .ponto-btn { right: 15%; }
+        .nodo-restaurante:nth-child(even) .ponto-btn { left: 15%; }
+        .nodo-restaurante:nth-child(5n) .ponto-btn { position: relative; margin-top: 10px; }
+
+        /* Estilos e Cores dos Polos */
+        .polo-0 .card-ponto { border-left-color: var(--polo-1); }
+        .polo-0 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-1), 0 8px 15px rgba(0,0,0,0.4); }
+        .polo-0 .ponto-btn.concluido { background: var(--polo-1); color: white; }
+
+        .polo-1 .card-ponto { border-left-color: var(--polo-2); }
+        .polo-1 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-2), 0 8px 15px rgba(0,0,0,0.4); }
+        .polo-1 .ponto-btn.concluido { background: var(--polo-2); color: white; }
+
+        .polo-2 .card-ponto { border-left-color: var(--polo-3); }
+        .polo-2 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-3), 0 8px 15px rgba(0,0,0,0.4); }
+        .polo-2 .ponto-btn.concluido { background: var(--polo-3); color: white; }
+
+        .polo-3 .card-ponto { border-left-color: var(--polo-4); }
+        .polo-3 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-4), 0 8px 15px rgba(0,0,0,0.4); }
+        .polo-3 .ponto-btn.concluido { background: var(--polo-4); color: white; }
+
+        .polo-4 .card-ponto { border-left-color: var(--polo-5); }
+        .polo-4 .ponto-btn { box-shadow: 0 0 0 4px var(--polo-5), 0 8px 15px rgba(0,0,0,0.4); }
+        .polo-4 .ponto-btn.concluido { background: var(--polo-5); color: white; }
+
+        .ponto-btn.concluido::after { content: '✓'; }
+
+        /* MODAL CHECK-IN */
+        #modal-checkin {
+            display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-cream);
+            border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 25px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5); z-index: 2000; max-width: 600px; left: 50%; transform: translateX(-50%);
+        }
+        .modal-header { background: var(--primary-blue); color: white; padding: 16px; border-radius: 16px; text-align: center; margin-bottom: 20px; }
         .checklist { list-style: none; margin-bottom: 20px; }
-        .checklist li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ccc; color: var(--primary-blue); font-weight: 600; }
-        #btn-confirmar { width: 100%; padding: 15px; background: var(--accent-gold); color: var(--primary-blue); border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .checklist li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #ccc; font-weight: 600; color: #333; }
+        #btn-confirmar { width: 100%; padding: 16px; background: linear-gradient(90deg, #ffd700, #ffa000); color: #000; border: none; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; }
         #btn-confirmar:disabled { opacity: 0.5; cursor: not-allowed; }
-        .close-modal { text-align: right; margin-bottom: 10px; cursor: pointer; color: #666; font-weight: bold; }
 
-        /* NAVEGAÇÃO */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 50; }
-        .nav-item { background: none; border: none; font-size: 16px; font-weight: 600; color: #999; cursor: pointer; }
-        .nav-item.active { color: var(--primary-blue); border-bottom: 2px solid var(--accent-gold); }
-
+        /* NAV INFERIOR */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px;
+            background: rgba(15, 12, 32, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around;
+            padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100;
+        }
+        .nav-item { background: none; border: none; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); padding-bottom: 2px; }
     </style>
 </head>
 <body>
 
-    <!-- LOBBY -->
+    <!-- LOBBY & REGISTRO -->
     <div id="lobby">
         <div class="lobby-box">
-            <h1>Date Quest</h1>
-            <p>Conecte seus passaportes para jogarem juntos!</p>
-            
-            <div style="margin-top: 30px;">
-                <button id="btn-gerar" class="btn-gerar">Gerar Código do Casal</button>
+            <h1>Date Quest SP</h1>
+            <p>O mapa de encontros do casal!</p>
+
+            <!-- ETAPA 1: Código -->
+            <div id="step-codigo">
+                <button id="btn-gerar" class="btn-gerar">Gerar Novo Código de Casal</button>
                 <div id="display-codigo"></div>
-            </div>
-            
-            <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
-            
-            <div>
-                <p style="font-size: 14px; margin-bottom: 10px;">Ou entre com um código existente:</p>
+                <hr style="border-color: rgba(255,255,255,0.15); margin: 15px 0;">
+                <p style="font-size: 12px; margin-bottom: 8px;">Ou digite o código da sua parceira:</p>
                 <input type="text" id="input-codigo" placeholder="EX: A4X9" maxlength="4">
-                <button id="btn-conectar" class="btn-conectar">Conectar</button>
+                <button id="btn-conectar" class="btn-conectar">Entrar com Código</button>
+            </div>
+
+            <!-- ETAPA 2: Seleção de Personagem -->
+            <div id="step-perfil" class="step-perfil">
+                <h3 style="color: var(--accent-gold); margin-bottom: 8px;">Quem é você?</h3>
+                <p style="font-size: 12px;">Escolha quem você representa na dupla:</p>
+                
+                <div style="display: flex; gap: 10px; margin: 15px 0;">
+                    <button id="btn-p1" class="btn-conectar" style="margin:0;" onclick="selecionarSlot('p1')">Pessoa 1</button>
+                    <button id="btn-p2" class="btn-conectar" style="margin:0; background:#5c6bc0;" onclick="selecionarSlot('p2')">Pessoa 2</button>
+                </div>
+
+                <input type="text" id="input-nome" placeholder="Seu Nome ou Apelido" style="margin-bottom: 15px;">
+
+                <p style="font-size: 12px;">Escolha seu Avatar:</p>
+                <div class="avatar-grid" id="avatar-grid">
+                    <div class="avatar-card selected" onclick="escolherAvatar('👑', this)"><span>👑</span><p>Rainha</p></div>
+                    <div class="avatar-card" onclick="escolherAvatar('🐱', this)"><span>🐱</span><p>Gatinha</p></div>
+                    <div class="avatar-card" onclick="escolherAvatar('🦊', this)"><span>🦊</span><p>Raposa</p></div>
+                    <div class="avatar-card" onclick="escolherAvatar('🌸', this)"><span>🌸</span><p>Flor</p></div>
+                    <div class="avatar-card" onclick="escolherAvatar('🍷', this)"><span>🍷</span><p>Gourmet</p></div>
+                    <div class="avatar-card" onclick="escolherAvatar('✨', this)"><span>✨</span><p>Brilho</p></div>
+                </div>
+
+                <button id="btn-finalizar-perfil" class="btn-gerar" onclick="salvarPerfilCompleto()">Entrar na Jornada!</button>
             </div>
         </div>
     </div>
 
     <!-- APP PRINCIPAL -->
     <div id="app">
-        <!-- TELA PASSAPORTE -->
+        <!-- TELA PASSAPORTES (DUPLO) -->
         <div id="passaporte" class="screen active">
-            <div class="pass-header">
-                <div class="globo-icon">🌐</div>
-                <h1>PASSAPORTE</h1>
-                <p style="letter-spacing: 3px; font-size: 12px; color: #666;">GIRO GASTRONÔMICO SP</p>
-                
-                <div class="nomes-casal">
-                    <input type="text" id="nome-amor1" value="Amor 1">
-                    <span>&</span>
-                    <input type="text" id="nome-amor2" value="Amor 2">
-                </div>
+            <div class="pass-title">
+                <h2>Passaportes do Casal</h2>
+                <p style="font-size: 12px; color: #ccc;">Acompanhe a evolução individual de cada uma</p>
             </div>
 
-            <div class="xp-bar-container">
-                <div class="xp-info">
-                    <span id="nivel-casal">Nível 1: Ficantes</span>
-                    <span id="xp-texto">0 / 300 XP</span>
+            <div class="passaportes-container">
+                <!-- Passaporte Pessoa 1 -->
+                <div class="passaporte-card" id="card-p1">
+                    <div class="pass-header">
+                        <div class="pass-avatar" id="p1-avatar">👑</div>
+                        <div class="pass-nome" id="p1-nome">Pessoa 1</div>
+                        <div class="pass-cargo">Exploradora de SP</div>
+                    </div>
+                    <div class="xp-box">
+                        <div class="xp-text">
+                            <span id="p1-nivel">Nível 1</span>
+                            <span id="p1-xp">0 XP</span>
+                        </div>
+                        <div class="xp-bar"><div class="xp-fill" id="p1-fill"></div></div>
+                    </div>
+                    <h5 style="color: var(--primary-blue); font-size: 11px; text-transform: uppercase;">Carimbos:</h5>
+                    <div class="carimbos-grid" id="p1-carimbos"></div>
                 </div>
-                <div class="xp-track">
-                    <div class="xp-fill" id="xp-fill"></div>
-                </div>
-            </div>
 
-            <h3 style="color: var(--primary-blue); margin-bottom: 15px; font-family: 'Playfair Display', serif;">Carimbos Oficiais</h3>
-            <div class="carimbos-grid" id="carimbos-container">
-                <!-- Preenchido via JS -->
+                <!-- Passaporte Pessoa 2 -->
+                <div class="passaporte-card" id="card-p2">
+                    <div class="pass-header">
+                        <div class="pass-avatar" id="p2-avatar">🐱</div>
+                        <div class="pass-nome" id="p2-nome">Pessoa 2</div>
+                        <div class="pass-cargo">Exploradora de SP</div>
+                    </div>
+                    <div class="xp-box">
+                        <div class="xp-text">
+                            <span id="p2-nivel">Nível 1</span>
+                            <span id="p2-xp">0 XP</span>
+                        </div>
+                        <div class="xp-bar"><div class="xp-fill" id="p2-fill"></div></div>
+                    </div>
+                    <h5 style="color: var(--primary-blue); font-size: 11px; text-transform: uppercase;">Carimbos:</h5>
+                    <div class="carimbos-grid" id="p2-carimbos"></div>
+                </div>
             </div>
         </div>
 
         <!-- TELA MAPA -->
         <div id="mapa" class="screen">
-            <h2 style="text-align: center; color: var(--primary-blue); font-family: 'Playfair Display', serif; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 10px; margin-bottom: 20px;">Mapa da Jornada</h2>
-            <div class="ilha-container" id="ilha-container">
-                <!-- Preenchido via JS -->
+            <div class="mapa-header">
+                <h2>Ilha Gastronômica SP</h2>
+                <p style="font-size: 12px; color: #aaa;">Subam a montanha restaurante por restaurante!</p>
+            </div>
+
+            <div class="ilha-wrapper">
+                <!-- Desenho Vetorial de Relevo da Ilha -->
+                <svg class="ilha-svg-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M10,90 Q30,95 50,85 T90,90 Q95,50 85,20 T50,5 Q10,10 5,50 Z" fill="#4caf50" />
+                    <path d="M20,80 Q40,85 50,75 T80,80 Q85,45 75,25 T50,15 Q20,20 15,45 Z" fill="#ff9800" />
+                    <path d="M30,70 Q45,72 50,65 T70,70 Q75,40 65,30 T50,22 Q30,25 25,40 Z" fill="#e91e63" />
+                </svg>
+
+                <div class="caminho-container" id="caminho-container">
+                    <!-- Gerado via JavaScript -->
+                </div>
             </div>
         </div>
 
-        <!-- MODAL DE CHECK-IN -->
+        <!-- MODAL CHECKIN -->
         <div id="modal-checkin">
-            <div class="close-modal" onclick="fecharModal()">✕ Fechar</div>
+            <div style="text-align: right; cursor: pointer; font-weight: bold;" onclick="fecharModal()">✕</div>
             <div class="modal-header">
-                <h3 id="modal-nome">Nome do Restaurante</h3>
+                <h3 id="modal-nome">Restaurante</h3>
                 <p id="modal-cat" style="font-size: 12px; opacity: 0.8;">Categoria</p>
             </div>
             <ul class="checklist">
-                <li>Chegaram no local <span class="check-item">⏳</span></li>
-                <li>Fizeram o pedido <span class="check-item">⏳</span></li>
-                <li>Aproveitaram juntos <span class="check-item">⏳</span></li>
+                <li>Encontro Marcado <span class="chk">⏳</span></li>
+                <li>Mesa Reservada & Pedido <span class="chk">⏳</span></li>
+                <li>Experiência Incrível A Dois <span class="chk">⏳</span></li>
             </ul>
-            <button id="btn-confirmar">Registrar Presença (+100 XP)</button>
+            <button id="btn-confirmar">Fazer Check-in (+100 XP)</button>
         </div>
 
-        <!-- NAVEGAÇÃO INFERIOR -->
+        <!-- NAV -->
         <div class="bottom-nav">
-            <button class="nav-item active" onclick="mudarTela('passaporte')">Passaporte</button>
-            <button class="nav-item" onclick="mudarTela('mapa')">Mapa da Ilha</button>
+            <button class="nav-item active" onclick="mudarTela('passaporte', this)">Passaportes</button>
+            <button class="nav-item" onclick="mudarTela('mapa', this)">Mapa da Ilha</button>
         </div>
     </div>
 
-    <!-- FIREBASE SDK -->
+    <!-- FIREBASE & LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -204,215 +337,207 @@
   measurementId: "G-PMH0W7QCLC"
 
 };
+    
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // DADOS DOS RESTAURANTES (22 Opções)
         const restaurantes = [
-            { id: "r1", nome: "Madero", cat: "Burgers & Carnes", regiao: 0 },
-            { id: "r2", nome: "Outback", cat: "Steakhouse", regiao: 0 },
-            { id: "r3", nome: "Bacio di Latte", cat: "Gelateria", regiao: 0 },
-            { id: "r4", nome: "Z Deli", cat: "Sanduíches", regiao: 0 },
-            { id: "r5", nome: "Carlo's Bakery", cat: "Doceria", regiao: 1 },
-            { id: "r6", nome: "Le Bife", cat: "Bistrô", regiao: 1 },
-            { id: "r7", nome: "Eataly", cat: "Italiano", regiao: 1 },
-            { id: "r8", nome: "Patties", cat: "Ultra Smashed", regiao: 1 },
-            { id: "r9", nome: "Taverna Medieval", cat: "Temático", regiao: 2 },
-            { id: "r10", nome: "Beco Hexagonal", cat: "Temático Bruxo", regiao: 2 },
-            { id: "r11", nome: "Vassoura Quebrada", cat: "Hamburgueria Magia", regiao: 2 },
-            { id: "r12", nome: "Magia & Bruxaria", cat: "Castelo Temático", regiao: 2 },
-            { id: "r13", nome: "Hannover", cat: "Fondue", regiao: 3 },
-            { id: "r14", nome: "Era uma vez um Chalezinho", cat: "Fondue Romântico", regiao: 3 },
-            { id: "r15", nome: "Famiglia Mancini", cat: "Cantina Tradicional", regiao: 3 },
-            { id: "r16", nome: "L'Entrecôte de Paris", cat: "Francês", regiao: 3 },
-            { id: "r17", nome: "Paris 6", cat: "Bistrô Famoso", regiao: 4 },
-            { id: "r18", nome: "A Figueira Rubaiyat", cat: "Carnes Premium", regiao: 4 },
-            { id: "r19", nome: "Skye Bar", cat: "Rooftop & Drinks", regiao: 4 },
-            { id: "r20", nome: "Mani", cat: "Alta Gastronomia", regiao: 4 },
-            { id: "r21", nome: "D.O.M.", cat: "Estrela Michelin", regiao: 4 },
-            { id: "r22", nome: "Terraço Itália", cat: "Jantar nas Alturas", regiao: 4 }
+            { id: "r1", nome: "Madero", cat: "Burgers", polo: 0 },
+            { id: "r2", nome: "Outback", cat: "Steakhouse", polo: 0 },
+            { id: "r3", nome: "Bacio di Latte", cat: "Gelato", polo: 0 },
+            { id: "r4", nome: "Z Deli", cat: "Sanduíches", polo: 0 },
+            { id: "r5", nome: "Carlo's Bakery", cat: "Doceria", polo: 1 },
+            { id: "r6", nome: "Le Bife", cat: "Bistrô", polo: 1 },
+            { id: "r7", nome: "Eataly", cat: "Italiano", polo: 1 },
+            { id: "r8", nome: "Patties", cat: "Smashed", polo: 1 },
+            { id: "r9", nome: "Taverna Medieval", cat: "Temático", polo: 2 },
+            { id: "r10", nome: "Beco Hexagonal", cat: "Bruxo Temático", polo: 2 },
+            { id: "r11", nome: "Vassoura Quebrada", cat: "Hamburgueria Magia", polo: 2 },
+            { id: "r12", nome: "Magia & Bruxaria", cat: "Castelo", polo: 2 },
+            { id: "r13", nome: "Hannover", cat: "Fondue", polo: 3 },
+            { id: "r14", nome: "Chalezinho", cat: "Fondue Romântico", polo: 3 },
+            { id: "r15", nome: "Famiglia Mancini", cat: "Cantina", polo: 3 },
+            { id: "r16", nome: "L'Entrecôte de Paris", cat: "Francês", polo: 3 },
+            { id: "r17", nome: "Paris 6", cat: "Bistrô 24h", polo: 4 },
+            { id: "r18", nome: "Figueira Rubaiyat", cat: "Carnes Nobres", polo: 4 },
+            { id: "r19", nome: "Skye Bar", cat: "Rooftop & Drinks", polo: 4 },
+            { id: "r20", nome: "Maní", cat: "Alta Gastronomia", polo: 4 },
+            { id: "r21", nome: "D.O.M.", cat: "Michelin Star", polo: 4 },
+            { id: "r22", nome: "Terraço Itália", cat: "Topo de SP", polo: 4 }
         ];
 
         let codigoAtual = null;
-        let dadosLocais = { xp: 0, nivel: 1, concluidos: [], passaporte: { amor1: "Amor 1", amor2: "Amor 2" } };
+        let slotSelecionado = 'p1';
+        let avatarEscolhido = '👑';
+        let dadosCasal = null;
 
-        // LÓGICA DE LOGIN E CÓDIGO DO CASAL
+        // Botoes do Lobby
         document.getElementById("btn-gerar").addEventListener("click", async () => {
-            const btnGerar = document.getElementById("btn-gerar");
-            const displayCodigo = document.getElementById("display-codigo");
-            
-            // ANIMAÇÃO DE CARREGAMENTO APLICADA AQUI
-            btnGerar.innerText = "Conectando à nuvem...";
-            btnGerar.disabled = true;
-
+            const btn = document.getElementById("btn-gerar");
+            btn.innerText = "Conectando..."; btn.disabled = true;
             try {
-                const codigoGerado = Math.random().toString(36).substring(2, 6).toUpperCase();
+                const codigo = Math.random().toString(36).substring(2, 6).toUpperCase();
                 await signInAnonymously(auth);
-                await setDoc(doc(db, "vinculos", codigoGerado), {
-                    xp: 0, nivel: 1, restaurantesConcluidos: [],
-                    passaporte: { amor1: "Amor 1", amor2: "Amor 2" }
+                await setDoc(doc(db, "vinculos", codigo), {
+                    p1: { nome: "Pessoa 1", avatar: "👑", xp: 0, concluidos: [] },
+                    p2: { nome: "Pessoa 2", avatar: "🐱", xp: 0, concluidos: [] }
                 });
-
-                displayCodigo.innerText = codigoGerado;
-                btnGerar.innerText = "Código Gerado!";
-                iniciarSincronizacao(codigoGerado);
-            } catch (error) {
-                console.error("Erro:", error);
-                alert("Erro de conexão. Trocou as chaves do Firebase?");
-                btnGerar.innerText = "Gerar Código do Casal";
-                btnGerar.disabled = false;
+                document.getElementById("display-codigo").innerText = codigo;
+                codigoAtual = codigo;
+                avancarParaPerfil();
+            } catch(e) {
+                alert("Erro ao conectar no Firebase. Verifique suas chaves.");
+                btn.innerText = "Gerar Novo Código"; btn.disabled = false;
             }
         });
 
         document.getElementById("btn-conectar").addEventListener("click", async () => {
             const codigo = document.getElementById("input-codigo").value.toUpperCase();
             if(codigo.length === 4) {
-                document.getElementById("btn-conectar").innerText = "Entrando...";
                 await signInAnonymously(auth);
                 const docSnap = await getDoc(doc(db, "vinculos", codigo));
                 if(docSnap.exists()) {
-                    iniciarSincronizacao(codigo);
+                    codigoAtual = codigo;
+                    avancarParaPerfil();
                 } else {
                     alert("Código não encontrado!");
-                    document.getElementById("btn-conectar").innerText = "Conectar";
                 }
             }
         });
 
-        function iniciarSincronizacao(codigo) {
-            codigoAtual = codigo;
+        function avancarParaPerfil() {
+            document.getElementById("step-codigo").style.display = "none";
+            document.getElementById("step-perfil").style.display = "block";
+        }
+
+        window.selecionarSlot = function(slot) {
+            slotSelecionado = slot;
+            document.getElementById("btn-p1").style.border = slot === 'p1' ? '2px solid #ffd700' : 'none';
+            document.getElementById("btn-p2").style.border = slot === 'p2' ? '2px solid #ffd700' : 'none';
+        }
+
+        window.escolherAvatar = function(emoji, el) {
+            avatarEscolhido = emoji;
+            document.querySelectorAll(".avatar-card").forEach(c => c.classList.remove("selected"));
+            el.classList.add("selected");
+        }
+
+        window.salvarPerfilCompleto = async function() {
+            const nome = document.getElementById("input-nome").value || (slotSelecionado === 'p1' ? 'Pessoa 1' : 'Pessoa 2');
+            const ref = doc(db, "vinculos", codigoAtual);
+            
+            await updateDoc(ref, {
+                [`${slotSelecionado}.nome`]: nome,
+                [`${slotSelecionado}.avatar`]: avatarEscolhido
+            });
+
+            iniciarApp();
+        }
+
+        function iniciarApp() {
             document.getElementById("lobby").style.display = "none";
             document.getElementById("app").style.display = "block";
-            
-            // Listener em tempo real
+
             onSnapshot(doc(db, "vinculos", codigoAtual), (docSnap) => {
-                if(docSnap.exists()){
-                    dadosLocais = docSnap.data();
-                    atualizarInterface();
+                if(docSnap.exists()) {
+                    dadosCasal = docSnap.data();
+                    renderizarPassaportes();
+                    renderizarMapa();
                 }
             });
-
-            // Listeners de input de nome
-            document.getElementById("nome-amor1").addEventListener("change", (e) => salvarNome("amor1", e.target.value));
-            document.getElementById("nome-amor2").addEventListener("change", (e) => salvarNome("amor2", e.target.value));
-            
-            renderizarMapa();
         }
 
-        async function salvarNome(campo, valor) {
-            if(!codigoAtual) return;
-            const ref = doc(db, "vinculos", codigoAtual);
-            await updateDoc(ref, { [`passaporte.${campo}`]: valor });
-        }
+        function renderizarPassaportes() {
+            ['p1', 'p2'].forEach(p => {
+                const data = dadosCasal[p] || { nome: p, avatar: '👑', xp: 0, concluidos: [] };
+                document.getElementById(`${p}-avatar`).innerText = data.avatar;
+                document.getElementById(`${p}-nome`).innerText = data.nome;
 
-        function atualizarInterface() {
-            // Nomes
-            document.getElementById("nome-amor1").value = dadosLocais.passaporte.amor1 || "Amor 1";
-            document.getElementById("nome-amor2").value = dadosLocais.passaporte.amor2 || "Amor 2";
+                let nivel = Math.floor(data.xp / 300) + 1;
+                let xpRestante = data.xp % 300;
+                document.getElementById(`${p}-nivel`).innerText = `Nível ${nivel}`;
+                document.getElementById(`${p}-xp`).innerText = `${xpRestante} / 300 XP`;
+                document.getElementById(`${p}-fill`).style.width = `${(xpRestante/300)*100}%`;
 
-            // XP e Nível
-            let titulos = ["Ficantes", "Casal Delivery", "Exploradores", "Realeza dos Encontros", "Lendas da Gastronomia"];
-            let nivelAtual = Math.floor(dadosLocais.xp / 300) + 1;
-            let xpNaBarra = dadosLocais.xp % 300;
-            
-            document.getElementById("nivel-casal").innerText = `Nível ${nivelAtual}: ${titulos[Math.min(nivelAtual-1, 4)]}`;
-            document.getElementById("xp-texto").innerText = `${xpNaBarra} / 300 XP`;
-            document.getElementById("xp-fill").style.width = `${(xpNaBarra / 300) * 100}%`;
-
-            // Carimbos
-            const container = document.getElementById("carimbos-container");
-            container.innerHTML = "";
-            restaurantes.forEach(r => {
-                const concluido = dadosLocais.restaurantesConcluidos.includes(r.id);
-                container.innerHTML += `
-                    <div class="carimbo ${concluido ? 'concluido' : ''}">
-                        <h4>${r.nome}</h4>
-                        <p>${concluido ? 'VISITADO' : 'PENDENTE'}</p>
-                    </div>
-                `;
+                const grid = document.getElementById(`${p}-carimbos`);
+                grid.innerHTML = "";
+                restaurantes.slice(0, 9).forEach(r => {
+                    const conc = (data.concluidos || []).includes(r.id);
+                    grid.innerHTML += `
+                        <div class="carimbo ${conc ? 'concluido' : ''}">
+                            <span class="carimbo-icon">${conc ? '📍' : '🔒'}</span>
+                            <span class="carimbo-nome">${r.nome}</span>
+                        </div>
+                    `;
+                });
             });
-
-            renderizarMapa();
         }
 
         function renderizarMapa() {
-            const container = document.getElementById("ilha-container");
+            const container = document.getElementById("caminho-container");
             container.innerHTML = "";
-            
-            restaurantes.forEach((r, index) => {
-                const concluido = dadosLocais.restaurantesConcluidos.includes(r.id);
-                // Alternar lados para fazer zig-zag
-                const alinhamento = index % 2 === 0 ? 'flex-start' : 'flex-end';
-                
+
+            const meusConcluidos = (dadosCasal[slotSelecionado]?.concluidos) || [];
+
+            restaurantes.forEach((r) => {
+                const conc = meusConcluidos.includes(r.id);
                 container.innerHTML += `
-                    <div class="checkpoint-wrap regiao-${r.regiao}" style="align-items: ${alinhamento}; width: 80%; margin: 0 auto;">
-                        <div class="card-restaurante">
-                            <h3>${r.nome}</h3>
-                            <span>${r.cat}</span>
+                    <div class="nodo-restaurante polo-${r.polo}">
+                        <div class="card-ponto" onclick="abrirModal('${r.id}', '${r.nome}', '${r.cat}')">
+                            <h4>${r.nome}</h4>
+                            <p>${r.cat}</p>
                         </div>
-                        <div class="ponto-mapa ${concluido ? 'concluido' : ''}" onclick="abrirCheckin('${r.id}', '${r.nome}', '${r.cat}')"></div>
+                        <div class="ponto-btn ${conc ? 'concluido' : ''}" onclick="abrirModal('${r.id}', '${r.nome}', '${r.cat}')"></div>
                     </div>
                 `;
             });
         }
 
-        // LÓGICA DO MODAL
-        let restauranteSelecionado = null;
-        window.abrirCheckin = function(id, nome, cat) {
-            if(dadosLocais.restaurantesConcluidos.includes(id)) {
-                alert("Vocês já visitaram este local!"); return;
-            }
-            restauranteSelecionado = id;
+        let idSelecionado = null;
+        window.abrirModal = function(id, nome, cat) {
+            idSelecionado = id;
             document.getElementById("modal-nome").innerText = nome;
             document.getElementById("modal-cat").innerText = cat;
+            document.querySelectorAll(".chk").forEach(c => c.innerText = "⏳");
             document.getElementById("btn-confirmar").disabled = false;
-            document.querySelectorAll(".check-item").forEach(el => el.innerText = "⏳");
             document.getElementById("modal-checkin").style.display = "block";
         }
 
         window.fecharModal = function() {
             document.getElementById("modal-checkin").style.display = "none";
-            restauranteSelecionado = null;
         }
 
         document.getElementById("btn-confirmar").addEventListener("click", async () => {
-            if(!restauranteSelecionado || !codigoAtual) return;
-            
+            if(!idSelecionado) return;
             const btn = document.getElementById("btn-confirmar");
             btn.disabled = true;
-            btn.innerText = "Carimbando...";
 
-            let checks = document.querySelectorAll(".check-item");
-            setTimeout(() => checks[0].innerText = "✅", 500);
-            setTimeout(() => checks[1].innerText = "✅", 1000);
+            let chks = document.querySelectorAll(".chk");
+            setTimeout(() => chks[0].innerText = "✅", 400);
+            setTimeout(() => chks[1].innerText = "✅", 800);
             setTimeout(async () => {
-                checks[2].innerText = "✅";
-                
-                // Salvar no Firebase
+                chks[2].innerText = "✅";
+
                 const ref = doc(db, "vinculos", codigoAtual);
+                const xpAtual = dadosCasal[slotSelecionado].xp || 0;
+
                 await updateDoc(ref, {
-                    xp: dadosLocais.xp + 100,
-                    restaurantesConcluidos: arrayUnion(restauranteSelecionado)
+                    [`${slotSelecionado}.xp`]: xpAtual + 100,
+                    [`${slotSelecionado}.concluidos`]: arrayUnion(idSelecionado)
                 });
 
-                setTimeout(() => {
-                    fecharModal();
-                    btn.innerText = "Registrar Presença (+100 XP)";
-                }, 500);
-
-            }, 1500);
+                setTimeout(() => { fecharModal(); }, 600);
+            }, 1200);
         });
 
-        // NAVEGAÇÃO DE TELAS
-        window.mudarTela = function(tela) {
-            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(tela).classList.add('active');
-            event.target.classList.add('active');
+        window.mudarTela = function(tela, btn) {
+            document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+            document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+            document.getElementById(tela).classList.add("active");
+            btn.classList.add("active");
         }
-
     </script>
 </body>
 </html>
