@@ -11,7 +11,7 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   
-  <!-- Import Map do Three.js (Correção de módulos) -->
+  <!-- Import Map do Three.js e Firebase -->
   <script type="importmap">
     {
       "imports": {
@@ -35,11 +35,29 @@
       font-family: 'Playfair Display', serif;
       background-color: #0f172a;
       color: #333;
-      overflow: hidden; /* Previne scroll no body inteiro (app mobile-like) */
+      overflow: hidden; /* Previne scroll no body inteiro */
       touch-action: manipulation;
     }
 
     .font-cinzel { font-family: 'Cinzel', serif; }
+
+    /* Splash Screen e Cards */
+    .splash-screen {
+      transition: opacity 1s ease-out;
+    }
+    
+    .player-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .player-card:hover, .player-card:active {
+      transform: translateY(-5px);
+      border-color: rgba(212, 175, 55, 0.8);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(212, 175, 55, 0.2);
+    }
 
     /* Estilos do Passaporte */
     .passport-book {
@@ -145,7 +163,7 @@
       transform: translateY(0);
     }
 
-    /* Esconder scrollbar mas permitir scroll onde necessário */
+    /* Scrollbar oculta */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -162,7 +180,7 @@
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
       pointer-events: none;
       white-space: nowrap;
-      margin-top: -20px; /* Posiciona acima do pino */
+      margin-top: -20px;
       display: flex;
       align-items: center;
       gap: 4px;
@@ -173,8 +191,15 @@
 </head>
 <body class="h-screen w-screen flex flex-col text-slate-100 relative">
 
+  <!-- ==================== SPLASH SCREEN (Carregamento) ==================== -->
+  <div id="view-splash" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center splash-screen">
+    <div class="text-6xl mb-4 animate-bounce">👑</div>
+    <h1 class="font-cinzel text-4xl text-[#d4af37] tracking-widest">Date Quest</h1>
+    <p class="text-slate-400 mt-2 tracking-widest text-sm uppercase animate-pulse">Carregando jornada...</p>
+  </div>
+
   <!-- ==================== LOBBY / LOGIN (Conta do Casal) ==================== -->
-  <div id="view-lobby" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
+  <div id="view-lobby" class="fixed inset-0 z-50 bg-slate-900 hidden flex-col items-center justify-center p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
     <div class="text-center mb-8">
       <h1 class="font-cinzel text-3xl text-[#d4af37] mb-2">Date Quest SP</h1>
       <p class="text-slate-300">Uma Aventura a Dois</p>
@@ -184,7 +209,7 @@
       <div class="mb-4">
         <label class="block text-sm text-slate-400 mb-1">Chave do Casal (ex: AMOR2024)</label>
         <input type="text" id="couple-key" class="w-full bg-slate-900 text-white px-4 py-3 rounded-lg border border-slate-600 focus:border-[#d4af37] focus:outline-none uppercase text-center tracking-widest font-bold" placeholder="CÓDIGO ÚNICO">
-        <p class="text-xs text-slate-500 mt-2 text-center">Use a mesma chave para sincronizar os dois celulares!</p>
+        <p class="text-xs text-slate-500 mt-2 text-center">Use a mesma chave nos dois celulares!</p>
       </div>
 
       <div class="mb-6">
@@ -207,9 +232,9 @@
   <div id="view-app" class="hidden flex-col h-full w-full">
     
     <!-- HEADER -->
-    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-20">
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-20 shadow-md">
       <h1 class="font-cinzel text-[#d4af37] font-bold text-lg">Date Quest</h1>
-      <div class="bg-slate-800 rounded-full p-1 flex">
+      <div id="header-tabs" class="bg-slate-800 rounded-full p-1 flex hidden">
         <button id="tab-p1" class="px-4 py-1 rounded-full text-xs font-bold bg-[#d4af37] text-slate-900 transition">P1</button>
         <button id="tab-p2" class="px-4 py-1 rounded-full text-xs font-bold text-slate-400 transition">P2</button>
       </div>
@@ -218,11 +243,45 @@
     <!-- CONTENT AREA -->
     <main class="flex-grow relative overflow-hidden bg-slate-800">
       
-      <!-- ABA 1: PASSAPORTE -->
-      <div id="aba-passaporte" class="absolute inset-0 flex flex-col items-center justify-center p-4 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
+      <!-- ABA 0: INÍCIO / HUB DO CASAL -->
+      <div id="aba-home" class="absolute inset-0 flex flex-col p-6 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] overflow-y-auto no-scrollbar">
+        <div class="text-center mt-4 mb-8">
+          <h2 class="font-cinzel text-2xl text-white mb-1">Nossa Jornada</h2>
+          <p class="text-slate-400 text-sm">Progresso do Casal</p>
+          
+          <div class="mt-6 bg-slate-900 rounded-2xl p-4 border border-slate-700 shadow-lg">
+            <div class="flex justify-between items-end mb-2">
+              <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Restaurantes Visitados</span>
+              <span id="hub-total-score" class="text-xl font-cinzel font-bold text-[#d4af37]">0/22</span>
+            </div>
+            <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-600">
+              <div id="hub-progress-bar" class="bg-gradient-to-r from-[#d4af37] to-[#b8860b] h-full" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-cinzel text-[#d4af37] text-center mb-4">Escolha um Passaporte</h3>
         
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <button onclick="AppUI.openPlayerPassport('p1')" class="player-card rounded-2xl p-4 flex flex-col items-center text-center">
+            <div class="text-5xl mb-3 drop-shadow-lg" id="hub-avatar-p1">🦊</div>
+            <h4 class="font-bold text-white mb-1 truncate w-full" id="hub-name-p1">Pessoa 1</h4>
+            <p class="text-xs text-slate-400" id="hub-xp-p1">0 XP</p>
+            <div class="mt-3 text-[10px] uppercase bg-slate-800 text-[#d4af37] px-3 py-1 rounded-full border border-slate-600">Abrir Passaporte</div>
+          </button>
+          
+          <button onclick="AppUI.openPlayerPassport('p2')" class="player-card rounded-2xl p-4 flex flex-col items-center text-center">
+            <div class="text-5xl mb-3 drop-shadow-lg" id="hub-avatar-p2">🌸</div>
+            <h4 class="font-bold text-white mb-1 truncate w-full" id="hub-name-p2">Pessoa 2</h4>
+            <p class="text-xs text-slate-400" id="hub-xp-p2">0 XP</p>
+            <div class="mt-3 text-[10px] uppercase bg-slate-800 text-[#d4af37] px-3 py-1 rounded-full border border-slate-600">Abrir Passaporte</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ABA 1: PASSAPORTE -->
+      <div id="aba-passaporte" class="absolute inset-0 hidden flex-col items-center justify-center p-4 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
         <div class="passport-book" id="passport-container">
-          <!-- Capa -->
           <div class="passport-page passport-cover flex items-center justify-center text-center cursor-pointer" id="page-cover" onclick="openPassport()">
             <div>
               <div class="text-4xl mb-4">👑</div>
@@ -235,8 +294,6 @@
               <p class="text-[10px] mt-6 text-slate-400 animate-pulse">Toque para abrir</p>
             </div>
           </div>
-
-          <!-- Páginas Internas geradas via JS -->
           <div id="pages-wrapper" class="absolute inset-0 hidden"></div>
         </div>
 
@@ -248,14 +305,12 @@
 
       <!-- ABA 2: MAPA 3D (Three.js) -->
       <div id="aba-mapa" class="absolute inset-0 hidden">
-        <!-- HUD Romântico -->
         <div class="absolute top-4 left-4 right-4 z-10 pointer-events-none">
           <div class="bg-white/10 backdrop-blur-md border border-[#d4af37]/30 rounded-xl p-4 shadow-lg text-center">
             <h3 class="font-cinzel text-[#d4af37] text-sm font-bold mb-1">O Arquipélago dos Sabores</h3>
-            <p class="text-xs text-slate-200 italic">Cada ilha guarda um momento. Cada parada, uma nova memória a dois. Toque nos ícones para registrar seu encontro.</p>
+            <p class="text-xs text-slate-200 italic">Cada ilha guarda um momento. Cada parada, uma nova memória. Toque nos ícones.</p>
           </div>
         </div>
-        <!-- Container do Canvas 3D -->
         <div id="three-canvas-container" class="w-full h-full"></div>
       </div>
 
@@ -263,16 +318,19 @@
 
     <!-- BOTTOM NAVIGATION -->
     <nav class="bg-slate-900 border-t border-slate-800 p-2 pb-safe z-20 flex justify-around">
-      <button id="nav-passport" class="flex flex-col items-center p-2 text-[#d4af37]">
-        <span class="text-xl">📖</span>
-        <span class="text-[10px] mt-1 font-bold">Passaporte</span>
+      <button id="nav-home" class="flex flex-col items-center p-2 text-[#d4af37] transition-colors">
+        <span class="text-xl">🏰</span>
+        <span class="text-[10px] mt-1 font-bold">Início</span>
       </button>
-      <button id="nav-map" class="flex flex-col items-center p-2 text-slate-500">
+      <button id="nav-passport" class="flex flex-col items-center p-2 text-slate-500 transition-colors">
+        <span class="text-xl">📖</span>
+        <span class="text-[10px] mt-1">Passaporte</span>
+      </button>
+      <button id="nav-map" class="flex flex-col items-center p-2 text-slate-500 transition-colors">
         <span class="text-xl">🗺️</span>
         <span class="text-[10px] mt-1">Mapa 3D</span>
       </button>
     </nav>
-
   </div>
 
   <!-- MODAL DE CHECK-IN -->
@@ -320,8 +378,7 @@
     import { getAuth, signInAnonymously } from "firebase/auth";
     import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "firebase/firestore";
 
-   
-const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyBKeGPY0nBPpV_uo6N-vGuK-zNbmLP14wE",
   authDomain: "date-quest-sp.firebaseapp.com",
   projectId: "date-quest-sp",
@@ -331,7 +388,6 @@ const firebaseConfig = {
   measurementId: "G-PMH0W7QCLC"
 
 };
-
     let app, db, auth;
     try {
       app = initializeApp(firebaseConfig);
@@ -357,21 +413,21 @@ const firebaseConfig = {
       { id: 17, name: "Paris 6", category: "Bistrô 24h", icon: "🍰", island: 2, color: 0xf472b6 },
       { id: 16, name: "L'Entrecôte", category: "Francês", icon: "🍷", island: 2, color: 0xf472b6 },
 
-      { id: 9, name: "Taverna Medieval", category: "Temático", icon: "⚔️", island: 3, color: 0xfacc15 }, // Amarelo/Ouro
+      { id: 9, name: "Taverna Medieval", category: "Temático", icon: "⚔️", island: 3, color: 0xfacc15 }, // Amarelo
       { id: 10, name: "Beco Hexagonal", category: "Bruxo", icon: "🪄", island: 3, color: 0xfacc15 },
       { id: 11, name: "Vassoura Quebrada", category: "Magia", icon: "🧹", island: 3, color: 0xfacc15 },
       { id: 12, name: "Magia & Bruxaria", category: "Castelo", icon: "🏰", island: 3, color: 0xfacc15 },
 
       { id: 13, name: "Hannover", category: "Fondue", icon: "🫕", island: 4, color: 0x38bdf8 }, // Azul Gelo
-      { id: 14, name: "Chalezinho", category: "Fondue Romântico", icon: "🧀", island: 4, color: 0x38bdf8 },
+      { id: 14, name: "Chalezinho", category: "Fondue Rom", icon: "🧀", island: 4, color: 0x38bdf8 },
       { id: 7, name: "Eataly", category: "Italiano", icon: "🍕", island: 4, color: 0x38bdf8 },
       { id: 15, name: "Famiglia Mancini", category: "Cantina", icon: "🍝", island: 4, color: 0x38bdf8 },
 
       { id: 18, name: "Figueira Rubaiyat", category: "Carnes", icon: "🍖", island: 5, color: 0xa855f7 }, // Roxo
       { id: 19, name: "Skye Bar", category: "Rooftop", icon: "🌃", island: 5, color: 0xa855f7 },
-      { id: 20, name: "Maní", category: "Alta Gastronomia", icon: "✨", island: 5, color: 0xa855f7 },
+      { id: 20, name: "Maní", category: "Alta Gastron.", icon: "✨", island: 5, color: 0xa855f7 },
       { id: 21, name: "D.O.M.", category: "Michelin", icon: "🌟", island: 5, color: 0xa855f7 },
-      { id: 22, name: "Terraço Itália", category: "Topo de SP", icon: "🥂", island: 5, color: 0xa855f7 }
+      { id: 22, name: "Terraço Itália", category: "Topo SP", icon: "🥂", island: 5, color: 0xa855f7 }
     ];
 
     // ==========================================
@@ -379,9 +435,9 @@ const firebaseConfig = {
     // ==========================================
     const State = {
       coupleKey: null,
-      myRole: null, // 'p1' ou 'p2'
+      myRole: null, 
       myName: "",
-      viewingRole: 'p1', // Qual aba está aberta no momento
+      viewingRole: 'p1', 
       data: {
         p1: { name: "Pessoa 1", avatar: "🦊", completed: [] },
         p2: { name: "Pessoa 2", avatar: "🌸", completed: [] }
@@ -389,18 +445,17 @@ const firebaseConfig = {
     };
 
     const StorageManager = {
-      useLocalOnly: !db, // Se não tem db instanciado, vai direto pro local
+      useLocalOnly: !db, 
       unsubscribe: null,
 
       async init(coupleKey, role, name) {
         State.coupleKey = coupleKey;
         State.myRole = role;
         State.myName = name;
-        State.viewingRole = role; // Inicia vendo o próprio passaporte
+        State.viewingRole = role;
         
         State.data[role].name = name;
 
-        // Salvar login local persistente
         localStorage.setItem('datequest_session', JSON.stringify({ coupleKey, role, name }));
 
         if (!this.useLocalOnly) {
@@ -410,24 +465,22 @@ const firebaseConfig = {
             const docSnap = await getDoc(docRef);
             
             if (!docSnap.exists()) {
-              // Cria nova chave
               await setDoc(docRef, State.data);
             }
             
-            // Listen em tempo real
             this.unsubscribe = onSnapshot(docRef, (snapshot) => {
               if (snapshot.exists()) {
                 State.data = snapshot.data();
                 AppUI.renderAll();
               }
             }, (error) => {
-              console.error("Erro no onSnapshot Firebase (Permissões?):", error);
+              console.error("Erro no onSnapshot Firebase:", error);
               this.fallbackToLocal();
             });
 
             return true;
           } catch (e) {
-            console.error("Erro na comunicação com Firebase, caindo para local:", e);
+            console.error("Erro Firebase, caindo para local:", e);
             this.fallbackToLocal();
           }
         } else {
@@ -440,7 +493,7 @@ const firebaseConfig = {
         const localData = localStorage.getItem(`dq_data_${State.coupleKey}`);
         if (localData) {
           State.data = JSON.parse(localData);
-          State.data[State.myRole].name = State.myName; // Força atualização do nome atual
+          State.data[State.myRole].name = State.myName;
         }
         this.saveLocal();
         AppUI.renderAll();
@@ -455,7 +508,7 @@ const firebaseConfig = {
             const docRef = doc(db, "couples", State.coupleKey);
             await setDoc(docRef, State.data, { merge: true });
           } catch(e) {
-            console.error("Erro ao salvar no firebase", e);
+            console.error("Erro ao salvar", e);
             this.fallbackToLocal();
           }
         }
@@ -474,45 +527,38 @@ const firebaseConfig = {
         this.container = document.getElementById(containerId);
         this.scene = new THREE.Scene();
         
-        // Fundo e Neblina
         this.scene.background = new THREE.Color(0x87CEEB);
         this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
 
-        // Câmera
         this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
         this.camera.position.set(0, 40, 60);
 
-        // WebGL Renderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.container.appendChild(this.renderer.domElement);
 
-        // CSS2D Renderer (Para as labels HTML flutuantes)
         this.labelRenderer = new CSS2DRenderer();
         this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
         this.labelRenderer.domElement.style.position = 'absolute';
         this.labelRenderer.domElement.style.top = '0px';
-        this.labelRenderer.domElement.style.pointerEvents = 'none'; // Não roubar o clique da tela
+        this.labelRenderer.domElement.style.pointerEvents = 'none';
         this.container.appendChild(this.labelRenderer.domElement);
 
-        // Controles Mobile-Friendly
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
-        this.controls.enablePan = false; // Impede que arraste o mapa pra longe
-        this.controls.minDistance = 20;  // Zoom máximo
-        this.controls.maxDistance = 90;  // Zoom mínimo
-        this.controls.maxPolarAngle = Math.PI / 2 - 0.1; // Não deixa ver por baixo da terra
+        this.controls.enablePan = false;
+        this.controls.minDistance = 20; 
+        this.controls.maxDistance = 90; 
+        this.controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-        // Iluminação
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         this.scene.add(ambientLight);
         const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
         dirLight.position.set(20, 50, 20);
         this.scene.add(dirLight);
 
-        // Variáveis de Animação e Interação
         this.clock = new THREE.Clock();
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
@@ -521,7 +567,6 @@ const firebaseConfig = {
         this.buildEnvironment();
         this.buildCheckpoints();
 
-        // Eventos
         window.addEventListener('resize', () => this.onWindowResize());
         this.renderer.domElement.addEventListener('pointerdown', (e) => this.onClick(e));
 
@@ -529,7 +574,6 @@ const firebaseConfig = {
       }
 
       buildEnvironment() {
-        // Oceano
         const oceanGeometry = new THREE.PlaneGeometry(300, 300);
         const oceanMaterial = new THREE.MeshStandardMaterial({ 
           color: 0x006994, transparent: true, opacity: 0.8, roughness: 0.1, metalness: 0.1
@@ -539,33 +583,29 @@ const firebaseConfig = {
         ocean.position.y = -2;
         this.scene.add(ocean);
 
-        // Posições das 5 Ilhas
         this.islandPositions = [
-          { x: 0, z: 0, color: 0x22c55e },     // Ilha 1 Centro
-          { x: -25, z: -20, color: 0xf472b6 }, // Ilha 2 Esq Cima
-          { x: 25, z: -15, color: 0xfacc15 },  // Ilha 3 Dir Cima
-          { x: -20, z: 25, color: 0x38bdf8 },  // Ilha 4 Esq Baixo
-          { x: 20, z: 25, color: 0xa855f7 }    // Ilha 5 Dir Baixo
+          { x: 0, z: 0, color: 0x22c55e },     
+          { x: -25, z: -20, color: 0xf472b6 }, 
+          { x: 25, z: -15, color: 0xfacc15 },  
+          { x: -20, z: 25, color: 0x38bdf8 },  
+          { x: 20, z: 25, color: 0xa855f7 }    
         ];
 
         this.islandPositions.forEach(pos => {
-          // Base Cilindrica
           const baseGeo = new THREE.CylinderGeometry(12, 10, 4, 32);
           const baseMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
           const base = new THREE.Mesh(baseGeo, baseMat);
           base.position.set(pos.x, 0, pos.z);
           this.scene.add(base);
 
-          // Topo/Colina
           const topGeo = new THREE.SphereGeometry(12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
           const topMat = new THREE.MeshStandardMaterial({ color: pos.color, roughness: 0.8 });
           const top = new THREE.Mesh(topGeo, topMat);
           top.position.set(pos.x, 2, pos.z);
-          top.scale.y = 0.3; // Achatada
+          top.scale.y = 0.3;
           this.scene.add(top);
         });
 
-        // Pontes
         const bridgeGeo = new THREE.BoxGeometry(2, 0.5, 20);
         const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
         
@@ -581,7 +621,6 @@ const firebaseConfig = {
       buildCheckpoints() {
         RESTAURANTS.forEach(rest => {
           const islandBase = this.islandPositions[rest.island - 1];
-          // Posição aleatória na ilha (raio pequeno para não cair na água)
           const angle = Math.random() * Math.PI * 2;
           const radius = Math.random() * 8;
           const posX = islandBase.x + Math.cos(angle) * radius;
@@ -589,9 +628,8 @@ const firebaseConfig = {
 
           const pinGroup = new THREE.Group();
           pinGroup.position.set(posX, 5, posZ);
-          pinGroup.userData = rest; // Salva os dados para o clique
+          pinGroup.userData = rest;
 
-          // Pino visual
           const sphereGeo = new THREE.SphereGeometry(0.8, 16, 16);
           const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5 });
           const sphere = new THREE.Mesh(sphereGeo, sphereMat);
@@ -600,7 +638,7 @@ const firebaseConfig = {
           const coneGeo = new THREE.ConeGeometry(0.5, 1.5, 16);
           const coneMat = new THREE.MeshStandardMaterial({ color: rest.color });
           const cone = new THREE.Mesh(coneGeo, coneMat);
-          cone.rotation.x = Math.PI; // Vira de cabeça pra baixo
+          cone.rotation.x = Math.PI;
 
           const ringGeo = new THREE.TorusGeometry(0.8, 0.1, 8, 24);
           const ringMat = new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.3 });
@@ -612,16 +650,14 @@ const firebaseConfig = {
           pinGroup.add(cone);
           pinGroup.add(ring);
 
-          // Rótulo HTML flutuante
           const labelDiv = document.createElement('div');
           labelDiv.className = 'map-label';
-          // Transforma cor hexa 0xRRGGBB para rgba
           const colorHex = '#' + rest.color.toString(16).padStart(6, '0');
           labelDiv.style.backgroundColor = colorHex;
           labelDiv.innerHTML = `<span class="emoji">${rest.icon}</span> ${rest.name}`;
           
           const labelObj = new CSS2DObject(labelDiv);
-          labelObj.position.set(0, 3, 0); // Acima do pino
+          labelObj.position.set(0, 3, 0); 
           pinGroup.add(labelObj);
 
           this.scene.add(pinGroup);
@@ -630,13 +666,11 @@ const firebaseConfig = {
       }
 
       onClick(event) {
-        // Normaliza posição do mouse (-1 a +1)
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         this.raycaster.setFromCamera(this.mouse, this.camera);
         
-        // Pega todos os meshes dentro dos pinGroups
         const meshesToCheck = [];
         this.pins.forEach(p => p.children.forEach(c => {
           if(c.isMesh) meshesToCheck.push(c);
@@ -645,7 +679,6 @@ const firebaseConfig = {
         const intersects = this.raycaster.intersectObjects(meshesToCheck);
         
         if (intersects.length > 0) {
-          // O object é o mesh (cone/esfera), o parent é o Group que tem o userData
           const clickedPin = intersects[0].object.parent;
           const restaurantData = clickedPin.userData;
           
@@ -664,10 +697,8 @@ const firebaseConfig = {
 
       animate() {
         requestAnimationFrame(() => this.animate());
-        
         const time = this.clock.getElapsedTime();
         
-        // Animação dos pinos: Flutuar (Y) e Girar
         this.pins.forEach((pin, i) => {
           pin.position.y = 5 + Math.sin(time * 2 + i) * 0.5;
           pin.rotation.y += 0.02;
@@ -690,22 +721,35 @@ const firebaseConfig = {
 
       init() {
         this.bindEvents();
-        this.checkSession();
+        setTimeout(() => {
+          this.checkSession();
+        }, 1500);
       },
 
       checkSession() {
         const session = localStorage.getItem('datequest_session');
+        const splash = document.getElementById('view-splash');
+        
         if (session) {
           const { coupleKey, role, name } = JSON.parse(session);
-          document.getElementById('lobby-status').classList.remove('hidden');
           StorageManager.init(coupleKey, role, name).then(() => {
-            this.showApp();
+            splash.style.opacity = '0';
+            setTimeout(() => {
+              splash.classList.add('hidden');
+              this.showApp();
+            }, 1000);
           });
+        } else {
+          splash.style.opacity = '0';
+          setTimeout(() => {
+            splash.classList.add('hidden');
+            document.getElementById('view-lobby').classList.remove('hidden');
+            document.getElementById('view-lobby').classList.add('flex');
+          }, 1000);
         }
       },
 
       bindEvents() {
-        // Lobby Roles
         document.querySelectorAll('.role-btn').forEach(btn => {
           btn.addEventListener('click', (e) => {
             document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('border-[#d4af37]'));
@@ -714,7 +758,6 @@ const firebaseConfig = {
           });
         });
 
-        // Entrar
         document.getElementById('btn-entrar').addEventListener('click', () => {
           const key = document.getElementById('couple-key').value.trim().toUpperCase();
           const name = document.getElementById('user-name').value.trim();
@@ -726,15 +769,13 @@ const firebaseConfig = {
           });
         });
 
-        // Header Tabs
         document.getElementById('tab-p1').addEventListener('click', () => this.switchViewRole('p1'));
         document.getElementById('tab-p2').addEventListener('click', () => this.switchViewRole('p2'));
 
-        // Bottom Nav Tabs
+        document.getElementById('nav-home').addEventListener('click', () => this.switchMainTab('home'));
         document.getElementById('nav-passport').addEventListener('click', () => this.switchMainTab('passaporte'));
         document.getElementById('nav-map').addEventListener('click', () => this.switchMainTab('mapa'));
 
-        // Checkbox do Modal
         document.querySelectorAll('.task-check').forEach(cb => {
           cb.addEventListener('change', () => {
             const allChecked = Array.from(document.querySelectorAll('.task-check')).every(c => c.checked);
@@ -751,7 +792,6 @@ const firebaseConfig = {
           });
         });
 
-        // Confirmar Checkin
         document.getElementById('btn-checkin').addEventListener('click', () => {
           if(!this.currentModalRestaurant) return;
           const restId = this.currentModalRestaurant.id;
@@ -769,29 +809,35 @@ const firebaseConfig = {
         document.getElementById('view-app').classList.remove('hidden');
         document.getElementById('view-app').classList.add('flex');
         
-        // Atualiza UI baseada no meu role real (Para nomes nos botões do header)
-        document.getElementById('tab-p1').innerText = State.data.p1.name.split(' ')[0] || "P1";
-        document.getElementById('tab-p2').innerText = State.data.p2.name.split(' ')[0] || "P2";
-
-        this.switchViewRole(State.myRole);
-        this.switchMainTab('passaporte'); // Passaporte inicia por padrão
+        this.switchMainTab('home');
+        this.renderAll();
       },
 
       switchMainTab(tab) {
-        if(tab === 'passaporte') {
-          document.getElementById('aba-passaporte').classList.remove('hidden');
-          document.getElementById('aba-mapa').classList.add('hidden');
-          
-          document.getElementById('nav-passport').classList.replace('text-slate-500', 'text-[#d4af37]');
-          document.getElementById('nav-map').classList.replace('text-[#d4af37]', 'text-slate-500');
-        } else {
-          document.getElementById('aba-passaporte').classList.add('hidden');
-          document.getElementById('aba-mapa').classList.remove('hidden');
-          
-          document.getElementById('nav-map').classList.replace('text-slate-500', 'text-[#d4af37]');
-          document.getElementById('nav-passport').classList.replace('text-[#d4af37]', 'text-slate-500');
+        document.getElementById('aba-home').classList.add('hidden');
+        document.getElementById('aba-passaporte').classList.add('hidden');
+        document.getElementById('aba-mapa').classList.add('hidden');
 
-          // Instancia o mapa 3D apenas na primeira vez que abre a aba
+        document.getElementById('nav-home').classList.replace('text-[#d4af37]', 'text-slate-500');
+        document.getElementById('nav-passport').classList.replace('text-[#d4af37]', 'text-slate-500');
+        document.getElementById('nav-map').classList.replace('text-[#d4af37]', 'text-slate-500');
+
+        if(tab === 'home') {
+          document.getElementById('aba-home').classList.remove('hidden');
+          document.getElementById('nav-home').classList.replace('text-slate-500', 'text-[#d4af37]');
+          document.getElementById('header-tabs').classList.add('hidden');
+        } 
+        else if(tab === 'passaporte') {
+          document.getElementById('aba-passaporte').classList.remove('hidden');
+          document.getElementById('nav-passport').classList.replace('text-slate-500', 'text-[#d4af37]');
+          document.getElementById('header-tabs').classList.remove('hidden');
+          this.renderPassport();
+        } 
+        else if(tab === 'mapa') {
+          document.getElementById('aba-mapa').classList.remove('hidden');
+          document.getElementById('nav-map').classList.replace('text-slate-500', 'text-[#d4af37]');
+          document.getElementById('header-tabs').classList.add('hidden');
+
           if(!this.mapInstance) {
             this.mapInstance = new Map3D('three-canvas-container');
           }
@@ -801,7 +847,6 @@ const firebaseConfig = {
       switchViewRole(role) {
         State.viewingRole = role;
         
-        // Atualiza Header visualmente
         ['p1', 'p2'].forEach(r => {
           const btn = document.getElementById(`tab-${r}`);
           if(r === role) {
@@ -815,27 +860,45 @@ const firebaseConfig = {
       },
 
       renderAll() {
+        this.renderDashboard();
         this.renderPassport();
+      },
+
+      renderDashboard() {
+        const p1 = State.data.p1;
+        const p2 = State.data.p2;
+
+        document.getElementById('hub-name-p1').innerText = p1.name;
+        document.getElementById('hub-avatar-p1').innerText = p1.avatar || '🦊';
+        document.getElementById('hub-xp-p1').innerText = `${p1.completed.length * 100} XP`;
+
+        document.getElementById('hub-name-p2').innerText = p2.name;
+        document.getElementById('hub-avatar-p2').innerText = p2.avatar || '🌸';
+        document.getElementById('hub-xp-p2').innerText = `${p2.completed.length * 100} XP`;
+
+        const combinedVisits = new Set([...p1.completed, ...p2.completed]).size;
+        
+        document.getElementById('hub-total-score').innerText = `${combinedVisits}/22`;
+        document.getElementById('hub-progress-bar').style.width = `${(combinedVisits / 22) * 100}%`;
+        
+        document.getElementById('tab-p1').innerText = p1.name.split(' ')[0] || "P1";
+        document.getElementById('tab-p2').innerText = p2.name.split(' ')[0] || "P2";
       },
 
       renderPassport() {
         const userData = State.data[State.viewingRole];
         const completed = userData.completed || [];
         
-        // Atualiza Capa
         document.getElementById('passport-owner-name').innerText = `Propriedade de: ${userData.name}`;
         
-        // XP System
         const totalXP = completed.length * 100;
         const maxXP = 2200;
         document.getElementById('xp-text').innerText = `${totalXP} / ${maxXP} XP`;
         document.getElementById('xp-bar').style.width = `${(totalXP / maxXP) * 100}%`;
 
-        // Gera Páginas
         const wrapper = document.getElementById('pages-wrapper');
         wrapper.innerHTML = '';
         
-        // Paginação: 6 por pág (pág 1 a 3), 4 por pág (pág 4) = 22 total
         const chunks = [
           RESTAURANTS.slice(0, 6),
           RESTAURANTS.slice(6, 12),
@@ -869,7 +932,6 @@ const firebaseConfig = {
           wrapper.appendChild(div);
         });
 
-        // Mostra controles se estiver aberto
         if(!document.getElementById('page-cover').classList.contains('flipped')) {
            document.getElementById('passport-controls').classList.add('hidden');
         } else {
@@ -883,14 +945,12 @@ const firebaseConfig = {
         document.getElementById('modal-category').innerText = rest.category;
         document.getElementById('modal-title').innerText = rest.name;
         
-        // Reseta checkboxes
         document.querySelectorAll('.task-check').forEach(cb => cb.checked = false);
         const btn = document.getElementById('btn-checkin');
         btn.disabled = true;
         btn.className = "w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2";
         btn.innerHTML = "Complete as etapas...";
 
-        // Se eu já fiz, mostra concluído
         if(State.data[State.myRole].completed.includes(rest.id)) {
            document.querySelectorAll('.task-check').forEach(cb => { cb.checked = true; cb.disabled = true; });
            btn.className = "w-full bg-green-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2";
@@ -904,6 +964,8 @@ const firebaseConfig = {
     };
 
     // Global Functions for HTML onClick
+    window.AppUI = AppUI;
+    
     window.openPassport = () => {
       document.getElementById('page-cover').classList.add('flipped');
       document.getElementById('pages-wrapper').classList.remove('hidden');
@@ -924,7 +986,6 @@ const firebaseConfig = {
         const pages = document.querySelectorAll('#pages-wrapper .passport-page');
         pages[AppUI.currentPage].classList.remove('flipped');
       } else {
-        // Fecha o livro
         document.getElementById('page-cover').classList.remove('flipped');
         setTimeout(() => {
           document.getElementById('pages-wrapper').classList.add('hidden');
@@ -935,6 +996,11 @@ const firebaseConfig = {
 
     window.closeModal = () => {
       document.getElementById('checkin-modal').classList.remove('active');
+    };
+
+    AppUI.openPlayerPassport = (role) => {
+      AppUI.switchViewRole(role);
+      AppUI.switchMainTab('passaporte');
     };
 
     // Inicia App
