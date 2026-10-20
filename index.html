@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Passaporte do Casal - Date Quest</title>
+    <title>Date Quest SP - Aventura a Dois</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Playfair+Display:ital,wght@0,600;1,700&family=Poppins:wght@400;600;800&display=swap');
 
@@ -13,12 +13,19 @@
             --accent-gold: #f3c649;
             --paper-cream: #fbf8f3;
             --paper-border: #d4c5b0;
+            
+            /* Cores das Ilhas */
+            --color-ilha-verde: #e83e8c;
+            --color-ilha-laranja: #fd7e14;
+            --color-ilha-amarela: #ffc107;
+            --color-ilha-azul: #17a2b8;
+            --color-ilha-roxa: #6f42c1;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
         body { background-color: var(--bg-ocean); color: #fff; overflow-x: hidden; min-height: 100vh; }
 
-        /* LOBBY DE ENTRADA */
+        /* LOBBY */
         #lobby {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 100vh; background: radial-gradient(circle at center, #1a2a4a 0%, #080d1a 100%);
@@ -37,7 +44,9 @@
         .avatar-card.selected { border-color: var(--accent-gold); background: rgba(243, 198, 73, 0.25); }
 
         /* APP PRINCIPAL */
-        #app { display: none; padding: 20px 10px 80px; max-width: 600px; margin: 0 auto; }
+        #app { display: none; padding: 15px 10px 90px; max-width: 900px; margin: 0 auto; }
+        .screen { display: none; }
+        .screen.active { display: block; }
 
         /* ALTERNADOR DE USUÁRIO */
         .user-switcher {
@@ -51,16 +60,13 @@
         }
         .user-badge.active { opacity: 1; background: var(--accent-gold); color: #000; box-shadow: 0 4px 12px rgba(243,198,73,0.4); }
 
-        /* LIVRO PASSAPORTE (SEM ESPELHAMENTO) */
+        /* PASSAPORTE LIVRO */
         .passport-container { display: flex; justify-content: center; position: relative; margin-top: 10px; }
-        
         .book-wrapper {
             width: 340px; height: 500px; position: relative;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6); border-radius: 16px; overflow: hidden;
             background: var(--paper-cream); border: 2px solid var(--paper-border);
         }
-
-        /* Capa do Passaporte (Abre Deslizando para a Esquerda) */
         .book-cover {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
             background: linear-gradient(135deg, #0f1b38, #050a17); border-right: 2px solid var(--accent-gold);
@@ -70,29 +76,23 @@
             box-shadow: 5px 0 25px rgba(0,0,0,0.5); cursor: pointer;
         }
         .book-cover.opened { transform: translateX(-105%); opacity: 0; pointer-events: none; }
-
         .cover-emblem { font-size: 60px; color: var(--accent-gold); }
         .cover-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--accent-gold); letter-spacing: 4px; font-weight: 800; text-align: center; }
         .cover-name { font-family: 'Playfair Display', serif; font-size: 22px; color: #fff; border-bottom: 2px solid var(--accent-gold); padding-bottom: 6px; width: 85%; text-align: center; }
         .cover-hint { font-size: 11px; color: var(--accent-gold); letter-spacing: 2px; font-weight: bold; }
 
-        /* Página Interna do Livro */
         .book-page {
             width: 100%; height: 100%; padding: 20px; color: #222;
-            display: flex; flex-direction: column; justify-content: space-between;
-            background: var(--paper-cream);
+            display: flex; flex-direction: column; justify-content: space-between; background: var(--paper-cream);
         }
-
         .page-header { text-align: center; border-bottom: 2px dashed #b5a48b; padding-bottom: 12px; }
         .page-avatar { font-size: 40px; background: #fff; width: 65px; height: 65px; line-height: 65px; border-radius: 50%; margin: 0 auto 6px; border: 2px solid var(--accent-gold); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .page-owner { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: bold; color: var(--primary-blue); }
-        
         .page-stats { background: #e8ded0; padding: 10px; border-radius: 10px; font-size: 11px; margin: 10px 0; }
         .stats-row { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; color: var(--primary-blue); }
         .bar-bg { height: 8px; background: #ccc; border-radius: 4px; overflow: hidden; }
         .bar-fill { height: 100%; background: var(--primary-blue); width: 0%; transition: width 0.4s; }
 
-        /* Grade de Carimbos (Sem Inversão de Texto) */
         .stamps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex-grow: 1; align-content: start; margin-top: 8px; }
         .stamp-box {
             aspect-ratio: 1; border-radius: 50%; border: 2px dashed #a0907a; display: flex; flex-direction: column;
@@ -103,14 +103,85 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.15);
         }
         .stamp-box h6 { font-size: 8px; font-weight: 800; text-transform: uppercase; margin-top: 2px; }
-
-        /* Controles de Página de Livro */
         .page-navigation { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #d4c5b0; padding-top: 10px; }
         .btn-nav-page { background: var(--primary-blue); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        .btn-nav-page:disabled { opacity: 0.3; cursor: not-allowed; }
-        .page-indicator { font-size: 11px; font-weight: bold; color: #666; }
+        .btn-fechar-capa { background: transparent; border: 1px solid #b5a48b; color: #555; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; }
 
-        .btn-fechar-capa { background: transparent; border: 1px solid #b5a48b; color: #555; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 10px; margin-bottom: 5px; }
+        /* ABA MAPA DA ILHA COM ANIMAÇÃO DOS CHECKPOINTS */
+        #mapa { background: #137bb5; padding: 15px 10px 100px; border-radius: 20px; overflow-x: auto; }
+        .mapa-header-box { text-align: left; background: rgba(255,255,255,0.95); padding: 12px 20px; border-radius: 14px; color: #000; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .mapa-header-box h3 { font-family: 'Poppins', sans-serif; font-size: 18px; color: #0a146e; font-weight: 800; }
+        
+        .archipelago-map {
+            width: 860px; height: 520px; margin: 0 auto; position: relative;
+            background: #1bb2e8; border-radius: 24px; border: 5px solid #fff;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4); overflow: hidden;
+        }
+
+        /* Formatos das Ilhas Flutuantes */
+        .island-shape { position: absolute; border-radius: 40% 60% 50% 50%; box-shadow: inset 0 -8px 0 rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.2); }
+        .ilha-1 { top: 30px; left: 30px; width: 280px; height: 210px; background: #68b030; border: 6px solid #509020; }
+        .ilha-2 { bottom: 30px; left: 80px; width: 260px; height: 190px; background: #88c030; border: 6px solid #68a020; }
+        .ilha-3 { top: 120px; left: 320px; width: 260px; height: 260px; background: #c2ab72; border: 6px solid #a28b52; }
+        .ilha-4 { top: 30px; right: 230px; width: 230px; height: 180px; background: #82d0e0; border: 6px solid #62b0c0; }
+        .ilha-5 { bottom: 30px; right: 30px; width: 260px; height: 220px; background: #b082d0; border: 6px solid #9062b0; }
+
+        .bridge { position: absolute; background: #8b5a2b; border: 2px solid #5c3a1a; height: 12px; z-index: 2; border-radius: 4px; }
+        .b1 { top: 220px; left: 240px; width: 60px; transform: rotate(45deg); }
+        .b2 { top: 260px; left: 300px; width: 50px; transform: rotate(-10deg); }
+        .b3 { top: 110px; left: 520px; width: 60px; transform: rotate(-30px); }
+
+        /* ÍCONES ANIMADOS DOS RESTAURANTES NOS CHECKPOINTS */
+        .map-checkpoint {
+            position: absolute; z-index: 10; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s;
+        }
+        .map-checkpoint:hover { transform: scale(1.15) translateY(-4px); }
+
+        .icon-badge {
+            font-size: 18px; background: #fff; width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 3px solid currentColor; animation: pulseGlow 2s infinite alternate;
+        }
+
+        .check-ring {
+            width: 28px; height: 28px; border-radius: 50%; background: #fff; margin-top: -8px;
+            border: 3px solid currentColor; box-shadow: 0 0 0 3px #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: bold; color: transparent;
+        }
+        .map-checkpoint.checked .check-ring { background: currentColor; color: #fff; }
+        .map-checkpoint.checked .check-ring::after { content: '✓'; }
+
+        /* Animação Flutuante nos Ícones */
+        @keyframes pulseGlow {
+            0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+            100% { transform: translateY(-5px); box-shadow: 0 8px 18px rgba(0,0,0,0.5); }
+        }
+
+        .c-verde { color: var(--color-ilha-verde); }
+        .c-laranja { color: var(--color-ilha-laranja); }
+        .c-amarela { color: var(--color-ilha-amarela); }
+        .c-azul { color: var(--color-ilha-azul); }
+        .c-roxa { color: var(--color-ilha-roxa); }
+
+        /* MODAL DE CHECK-IN */
+        #modal-checkin {
+            display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
+            background: var(--paper-cream); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 25px;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.6); z-index: 3000; color: #222;
+        }
+        .modal-head { background: var(--primary-blue); color: #fff; padding: 15px; border-radius: 14px; text-align: center; margin-bottom: 15px; }
+        .check-steps { list-style: none; margin-bottom: 20px; }
+        .check-steps li { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #bbb; font-weight: 600; }
+        #btn-confirmar { width: 100%; padding: 16px; background: linear-gradient(90deg, #f3c649, #e0a926); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; }
+
+        /* BARRA DE NAVEGAÇÃO ABAIXO */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px;
+            background: rgba(9, 19, 34, 0.96); backdrop-filter: blur(12px); display: flex; justify-content: space-around;
+            padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000;
+        }
+        .nav-btn { background: none; border: none; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; }
+        .nav-btn.active { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); padding-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -156,9 +227,9 @@
         </div>
     </div>
 
-    <!-- APP PRINCIPAL (ABA DO PASSAPORTE) -->
+    <!-- APP PRINCIPAL -->
     <div id="app">
-        <!-- Alternador de Usuários no Topo -->
+        <!-- ALTERNADOR DE PERFIL -->
         <div class="user-switcher">
             <div class="user-badge active" id="badge-p1" onclick="mudarPerfilExibido('p1')">
                 <span id="switcher-avatar-p1">👑</span> <span id="switcher-nome-p1">Pessoa 1</span>
@@ -168,56 +239,125 @@
             </div>
         </div>
 
-        <!-- Estrutura do Passaporte em Livro -->
-        <div class="passport-container">
-            <div class="book-wrapper">
-                
-                <!-- Capa Frontal -->
-                <div class="book-cover" id="book-cover" onclick="abrirCapa()">
-                    <div class="cover-emblem">🌐</div>
-                    <div class="cover-title">PASSAPORTE</div>
-                    <div class="cover-name" id="cover-active-name">Pessoa 1</div>
-                    <div class="cover-hint">CLIQUE PARA ABRIR ➔</div>
-                </div>
-
-                <!-- Interior / Páginas -->
-                <div class="book-page">
-                    <div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <button class="btn-fechar-capa" onclick="fecharCapa()">⬅ Capa</button>
-                            <span style="font-size: 10px; color: #888; font-weight: bold;">DOCUMENTO OFICIAL</span>
+        <!-- ABA PASSAPORTE -->
+        <div id="passaporte" class="screen active">
+            <div class="passport-container">
+                <div class="book-wrapper">
+                    <div class="book-cover" id="book-cover" onclick="abrirCapa()">
+                        <div class="cover-emblem">🌐</div>
+                        <div class="cover-title">PASSAPORTE</div>
+                        <div class="cover-name" id="cover-active-name">Pessoa 1</div>
+                        <div class="cover-hint">CLIQUE PARA ABRIR ➔</div>
+                    </div>
+                    <div class="book-page">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <button class="btn-fechar-capa" onclick="fecharCapa()">⬅ Capa</button>
+                                <span style="font-size: 10px; color: #888; font-weight: bold;">DOCUMENTO OFICIAL</span>
+                            </div>
+                            <div class="page-header">
+                                <div class="page-avatar" id="page-active-avatar">👑</div>
+                                <div class="page-owner" id="page-active-name">Pessoa 1</div>
+                            </div>
+                            <div class="page-stats">
+                                <div class="stats-row"><span id="active-nivel">Nível 1</span><span id="active-xp">0 XP</span></div>
+                                <div class="bar-bg"><div class="bar-fill" id="active-fill"></div></div>
+                            </div>
                         </div>
-
-                        <div class="page-header">
-                            <div class="page-avatar" id="page-active-avatar">👑</div>
-                            <div class="page-owner" id="page-active-name">Pessoa 1</div>
-                        </div>
-
-                        <div class="page-stats">
-                            <div class="stats-row"><span id="active-nivel">Nível 1</span><span id="active-xp">0 XP</span></div>
-                            <div class="bar-bg"><div class="bar-fill" id="active-fill"></div></div>
+                        <div class="stamps-grid" id="stamps-container"></div>
+                        <div class="page-navigation">
+                            <button class="btn-nav-page" id="btn-prev-page" onclick="paginaAnterior()">◀ Anterior</button>
+                            <span class="page-indicator" style="font-size:11px; font-weight:bold; color:#666;">PÁG. <span id="pag-num">1</span> DE 4</span>
+                            <button class="btn-nav-page" id="btn-next-page" onclick="proximaPagina()">Próxima ▶</button>
                         </div>
                     </div>
-
-                    <!-- Grade dos 22 Restaurantes (6 Por Folha) -->
-                    <div class="stamps-grid" id="stamps-container"></div>
-
-                    <!-- Navegação de Páginas -->
-                    <div class="page-navigation">
-                        <button class="btn-nav-page" id="btn-prev-page" onclick="paginaAnterior()">◀ Anterior</button>
-                        <span class="page-indicator">PÁG. <span id="pag-num">1</span> DE 4</span>
-                        <button class="btn-nav-page" id="btn-next-page" onclick="proximaPagina()">Próxima ▶</button>
-                    </div>
                 </div>
-
             </div>
+        </div>
+
+        <!-- ABA MAPA DA ILHA COM ANIMAÇÃO -->
+        <div id="mapa" class="screen">
+            <div class="mapa-header-box">
+                <div>
+                    <h3>MAPA DA JORNADA</h3>
+                    <p id="mapa-sub">Clique no ícone para realizar o check-in do casal.</p>
+                </div>
+            </div>
+
+            <div class="archipelago-map">
+                <!-- Ilhas -->
+                <div class="island-shape ilha-1"></div>
+                <div class="island-shape ilha-2"></div>
+                <div class="island-shape ilha-3"></div>
+                <div class="island-shape ilha-4"></div>
+                <div class="island-shape ilha-5"></div>
+
+                <!-- Pontes -->
+                <div class="bridge b1"></div>
+                <div class="bridge b2"></div>
+                <div class="bridge b3"></div>
+
+                <!-- 22 Checkpoints Animados com Ícones -->
+                <!-- Ilha 1 (Verde/Rosa) -->
+                <div class="map-checkpoint c-verde" id="cp-r1" style="top: 80px; left: 50px;" onclick="abrirModal('r1')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-verde" id="cp-r2" style="top: 45px; left: 130px;" onclick="abrirModal('r2')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-verde" id="cp-r3" style="top: 120px; left: 200px;" onclick="abrirModal('r3')"><div class="icon-badge">🍧</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-verde" id="cp-r4" style="top: 155px; left: 120px;" onclick="abrirModal('r4')"><div class="icon-badge">🥪</div><div class="check-ring"></div></div>
+
+                <!-- Ilha 2 (Laranja) -->
+                <div class="map-checkpoint c-laranja" id="cp-r5" style="bottom: 120px; left: 170px;" onclick="abrirModal('r5')"><div class="icon-badge">🧁</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-laranja" id="cp-r6" style="bottom: 60px; left: 220px;" onclick="abrirModal('r6')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-laranja" id="cp-r7" style="bottom: 140px; left: 260px;" onclick="abrirModal('r7')"><div class="icon-badge">🍝</div><div class="check-ring"></div></div>
+
+                <!-- Ilha 3 (Amarela Centro) -->
+                <div class="map-checkpoint c-amarela" id="cp-r8" style="top: 230px; left: 340px;" onclick="abrirModal('r8')"><div class="icon-badge">🍔</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-amarela" id="cp-r9" style="top: 300px; left: 390px;" onclick="abrirModal('r9')"><div class="icon-badge">⚔️</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-amarela" id="cp-r10" style="top: 250px; left: 460px;" onclick="abrirModal('r10')"><div class="icon-badge">🪄</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-amarela" id="cp-r11" style="top: 170px; left: 410px;" onclick="abrirModal('r11')"><div class="icon-badge">🧹</div><div class="check-ring"></div></div>
+
+                <!-- Ilha 4 (Azul Gelada Topo) -->
+                <div class="map-checkpoint c-azul" id="cp-r12" style="top: 60px; right: 380px;" onclick="abrirModal('r12')"><div class="icon-badge">🏰</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-azul" id="cp-r13" style="top: 40px; right: 300px;" onclick="abrirModal('r13')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-azul" id="cp-r14" style="top: 110px; right: 340px;" onclick="abrirModal('r14')"><div class="icon-badge">🫕</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-azul" id="cp-r15" style="top: 130px; right: 250px;" onclick="abrirModal('r15')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
+
+                <!-- Ilha 5 (Roxa Direita) -->
+                <div class="map-checkpoint c-roxa" id="cp-r16" style="bottom: 130px; right: 190px;" onclick="abrirModal('r16')"><div class="icon-badge">🥐</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-roxa" id="cp-r17" style="bottom: 165px; right: 130px;" onclick="abrirModal('r17')"><div class="icon-badge">🍷</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-roxa" id="cp-r18" style="bottom: 100px; right: 70px;" onclick="abrirModal('r18')"><div class="icon-badge">🥩</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-roxa" id="cp-r19" style="bottom: 40px; right: 130px;" onclick="abrirModal('r19')"><div class="icon-badge">🌃</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-roxa" id="cp-r20" style="bottom: 175px; right: 230px;" onclick="abrirModal('r20')"><div class="icon-badge">🍽️</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-roxa" id="cp-r21" style="bottom: 75px; right: 210px;" onclick="abrirModal('r21')"><div class="icon-badge">🌟</div><div class="check-ring"></div></div>
+                <div class="map-checkpoint c-roxa" id="cp-r22" style="bottom: 115px; right: 120px;" onclick="abrirModal('r22')"><div class="icon-badge">🏙️</div><div class="check-ring"></div></div>
+            </div>
+        </div>
+
+        <!-- MODAL DE CHECK-IN -->
+        <div id="modal-checkin">
+            <div style="text-align: right; cursor: pointer; font-weight: bold;" onclick="fecharModal()">✕</div>
+            <div class="modal-head">
+                <h3 id="modal-nome">Restaurante</h3>
+                <p id="modal-cat" style="font-size: 11px; opacity: 0.8;">Categoria</p>
+            </div>
+            <ul class="check-steps">
+                <li>Chegada ao local <span class="chk">⏳</span></li>
+                <li>Experiência Vivenciada <span class="chk">⏳</span></li>
+                <li>Carimbo Gravado <span class="chk">⏳</span></li>
+            </ul>
+            <button id="btn-confirmar">Confirmar Presença (+100 XP)</button>
+        </div>
+
+        <!-- NAV BARRA -->
+        <div class="bottom-nav">
+            <button class="nav-btn active" onclick="alternarAba('passaporte', this)">Passaporte</button>
+            <button class="nav-btn" onclick="alternarAba('mapa', this)">Mapa da Ilha</button>
         </div>
     </div>
 
     <!-- FIREBASE SDK & LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
       const firebaseConfig = {
@@ -230,21 +370,23 @@
   measurementId: "G-PMH0W7QCLC"
 
 };
-   
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Lista Exata dos 22 Restaurantes
         const restaurantes = [
-            { id: "r1", nome: "Madero" }, { id: "r2", nome: "Outback" }, { id: "r3", nome: "Bacio di Latte" },
-            { id: "r4", nome: "Z Deli" }, { id: "r5", nome: "Carlo's Bakery" }, { id: "r6", nome: "Le Bife" },
-            { id: "r7", nome: "Eataly" }, { id: "r8", nome: "Patties" }, { id: "r9", nome: "Taverna Medieval" },
-            { id: "r10", nome: "Beco Hexagonal" }, { id: "r11", nome: "Vassoura Quebrada" }, { id: "r12", nome: "Magia & Bruxaria" },
-            { id: "r13", nome: "Hannover" }, { id: "r14", nome: "Chalezinho" }, { id: "r15", nome: "Famiglia Mancini" },
-            { id: "r16", nome: "L'Entrecôte" }, { id: "r17", nome: "Paris 6" }, { id: "r18", nome: "Figueira Rubaiyat" },
-            { id: "r19", nome: "Skye Bar" }, { id: "r20", nome: "Maní" }, { id: "r21", nome: "D.O.M." }, { id: "r22", nome: "Terraço Itália" }
+            { id: "r1", nome: "Madero", cat: "Burgers" }, { id: "r2", nome: "Outback", cat: "Steakhouse" },
+            { id: "r3", nome: "Bacio di Latte", cat: "Gelato" }, { id: "r4", nome: "Z Deli", cat: "Sanduíches" },
+            { id: "r5", nome: "Carlo's Bakery", cat: "Doceria" }, { id: "r6", nome: "Le Bife", cat: "Bistrô" },
+            { id: "r7", nome: "Eataly", cat: "Italiano" }, { id: "r8", nome: "Patties", cat: "Smashed" },
+            { id: "r9", nome: "Taverna Medieval", cat: "Temático" }, { id: "r10", nome: "Beco Hexagonal", cat: "Bruxo" },
+            { id: "r11", nome: "Vassoura Quebrada", cat: "Magia" }, { id: "r12", nome: "Magia & Bruxaria", cat: "Castelo" },
+            { id: "r13", nome: "Hannover", cat: "Fondue" }, { id: "r14", nome: "Chalezinho", cat: "Fondue" },
+            { id: "r15", nome: "Famiglia Mancini", cat: "Cantina" }, { id: "r16", nome: "L'Entrecôte", cat: "Francês" },
+            { id: "r17", nome: "Paris 6", cat: "Bistrô 24h" }, { id: "r18", nome: "Figueira Rubaiyat", cat: "Carnes" },
+            { id: "r19", nome: "Skye Bar", cat: "Rooftop" }, { id: "r20", nome: "Maní", cat: "Alta Gastronomia" },
+            { id: "r21", nome: "D.O.M.", cat: "Michelin" }, { id: "r22", nome: "Terraço Itália", cat: "Topo de SP" }
         ];
 
         let codigoAtual = null;
@@ -294,8 +436,7 @@
         }
 
         window.selecionarSlot = function(slot) {
-            slotMeu = slot;
-            perfilExibido = slot;
+            slotMeu = slot; perfilExibido = slot;
             document.getElementById("btn-p1").style.border = slot === 'p1' ? '2px solid #f3c649' : 'none';
             document.getElementById("btn-p2").style.border = slot === 'p2' ? '2px solid #f3c649' : 'none';
         }
@@ -330,14 +471,9 @@
             });
         }
 
-        // CONTROLES DE CAPA E PÁGINA
-        window.abrirCapa = function() {
-            document.getElementById("book-cover").classList.add("opened");
-        }
-
-        window.fecharCapa = function() {
-            document.getElementById("book-cover").classList.remove("opened");
-        }
+        // CONTROLES DE CAPA E PÁGINAS
+        window.abrirCapa = function() { document.getElementById("book-cover").classList.add("opened"); }
+        window.fecharCapa = function() { document.getElementById("book-cover").classList.remove("opened"); }
 
         window.mudarPerfilExibido = function(slot) {
             perfilExibido = slot;
@@ -345,21 +481,11 @@
             document.getElementById(`badge-${slot}`).classList.add("active");
             paginaAtual = 1;
             renderizarPassaporte();
+            renderizarMapa();
         }
 
-        window.proximaPagina = function() {
-            if(paginaAtual < 4) {
-                paginaAtual++;
-                renderizarPassaporte();
-            }
-        }
-
-        window.paginaAnterior = function() {
-            if(paginaAtual > 1) {
-                paginaAtual--;
-                renderizarPassaporte();
-            }
-        }
+        window.proximaPagina = function() { if(paginaAtual < 4) { paginaAtual++; renderizarPassaporte(); } }
+        window.paginaAnterior = function() { if(paginaAtual > 1) { paginaAtual--; renderizarPassaporte(); } }
 
         function renderizarInterface() {
             document.getElementById("switcher-avatar-p1").innerText = dadosCasal.p1.avatar;
@@ -368,6 +494,7 @@
             document.getElementById("switcher-nome-p2").innerText = dadosCasal.p2.nome;
 
             renderizarPassaporte();
+            renderizarMapa();
         }
 
         function renderizarPassaporte() {
@@ -383,7 +510,6 @@
             document.getElementById("active-xp").innerText = `${xpRestante} / 300 XP`;
             document.getElementById("active-fill").style.width = `${(xpRestante/300)*100}%`;
 
-            // Páginas (6 Restaurantes por Folha)
             document.getElementById("pag-num").innerText = paginaAtual;
             document.getElementById("btn-prev-page").disabled = (paginaAtual === 1);
             document.getElementById("btn-next-page").disabled = (paginaAtual === 4);
@@ -403,6 +529,68 @@
                     </div>
                 `;
             });
+        }
+
+        function renderizarMapa() {
+            const concluidos = (dadosCasal[perfilExibido]?.concluidos) || [];
+            
+            restaurantes.forEach((r) => {
+                const el = document.getElementById(`cp-${r.id}`);
+                if(el) {
+                    if(concluidos.includes(r.id)) {
+                        el.classList.add("checked");
+                    } else {
+                        el.classList.remove("checked");
+                    }
+                }
+            });
+
+            document.getElementById("mapa-sub").innerText = `${concluidos.length} de 22 locais carimbados por ${dadosCasal[perfilExibido]?.nome}.`;
+        }
+
+        let idSelecionado = null;
+        window.abrirModal = function(id) {
+            const rest = restaurantes.find(r => r.id === id);
+            idSelecionado = id;
+            document.getElementById("modal-nome").innerText = rest.nome;
+            document.getElementById("modal-cat").innerText = rest.cat;
+            document.querySelectorAll(".chk").forEach(c => c.innerText = "⏳");
+            document.getElementById("btn-confirmar").disabled = false;
+            document.getElementById("modal-checkin").style.display = "block";
+        }
+
+        window.fecharModal = function() {
+            document.getElementById("modal-checkin").style.display = "none";
+        }
+
+        document.getElementById("btn-confirmar").addEventListener("click", async () => {
+            if(!idSelecionado) return;
+            const btn = document.getElementById("btn-confirmar");
+            btn.disabled = true;
+
+            let chks = document.querySelectorAll(".chk");
+            setTimeout(() => chks[0].innerText = "✅", 400);
+            setTimeout(() => chks[1].innerText = "✅", 800);
+            setTimeout(async () => {
+                chks[2].innerText = "✅";
+
+                const ref = doc(db, "vinculos", codigoAtual);
+                const xpAtual = dadosCasal[slotMeu].xp || 0;
+
+                await updateDoc(ref, {
+                    [`${slotMeu}.xp`]: xpAtual + 100,
+                    [`${slotMeu}.concluidos`]: arrayUnion(idSelecionado)
+                });
+
+                setTimeout(() => { fecharModal(); }, 600);
+            }, 1200);
+        });
+
+        window.alternarAba = function(aba, btn) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(aba).classList.add('active');
+            btn.classList.add('active');
         }
     </script>
 </body>
