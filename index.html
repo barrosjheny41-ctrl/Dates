@@ -194,11 +194,7 @@
         import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // =========================================================
-        // ATENÇÃO: COLOQUE SUAS CHAVES DO FIREBASE AQUI
-        // =========================================================
-
-const firebaseConfig = {
+      const firebaseConfig = {
   apiKey: "AIzaSyBKeGPY0nBPpV_uo6N-vGuK-zNbmLP14wE",
   authDomain: "date-quest-sp.firebaseapp.com",
   projectId: "date-quest-sp",
@@ -208,7 +204,215 @@ const firebaseConfig = {
   measurementId: "G-PMH0W7QCLC"
 
 };
-    
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        // DADOS DOS RESTAURANTES (22 Opções)
+        const restaurantes = [
+            { id: "r1", nome: "Madero", cat: "Burgers & Carnes", regiao: 0 },
+            { id: "r2", nome: "Outback", cat: "Steakhouse", regiao: 0 },
+            { id: "r3", nome: "Bacio di Latte", cat: "Gelateria", regiao: 0 },
+            { id: "r4", nome: "Z Deli", cat: "Sanduíches", regiao: 0 },
+            { id: "r5", nome: "Carlo's Bakery", cat: "Doceria", regiao: 1 },
+            { id: "r6", nome: "Le Bife", cat: "Bistrô", regiao: 1 },
+            { id: "r7", nome: "Eataly", cat: "Italiano", regiao: 1 },
+            { id: "r8", nome: "Patties", cat: "Ultra Smashed", regiao: 1 },
+            { id: "r9", nome: "Taverna Medieval", cat: "Temático", regiao: 2 },
+            { id: "r10", nome: "Beco Hexagonal", cat: "Temático Bruxo", regiao: 2 },
+            { id: "r11", nome: "Vassoura Quebrada", cat: "Hamburgueria Magia", regiao: 2 },
+            { id: "r12", nome: "Magia & Bruxaria", cat: "Castelo Temático", regiao: 2 },
+            { id: "r13", nome: "Hannover", cat: "Fondue", regiao: 3 },
+            { id: "r14", nome: "Era uma vez um Chalezinho", cat: "Fondue Romântico", regiao: 3 },
+            { id: "r15", nome: "Famiglia Mancini", cat: "Cantina Tradicional", regiao: 3 },
+            { id: "r16", nome: "L'Entrecôte de Paris", cat: "Francês", regiao: 3 },
+            { id: "r17", nome: "Paris 6", cat: "Bistrô Famoso", regiao: 4 },
+            { id: "r18", nome: "A Figueira Rubaiyat", cat: "Carnes Premium", regiao: 4 },
+            { id: "r19", nome: "Skye Bar", cat: "Rooftop & Drinks", regiao: 4 },
+            { id: "r20", nome: "Mani", cat: "Alta Gastronomia", regiao: 4 },
+            { id: "r21", nome: "D.O.M.", cat: "Estrela Michelin", regiao: 4 },
+            { id: "r22", nome: "Terraço Itália", cat: "Jantar nas Alturas", regiao: 4 }
+        ];
+
+        let codigoAtual = null;
+        let dadosLocais = { xp: 0, nivel: 1, concluidos: [], passaporte: { amor1: "Amor 1", amor2: "Amor 2" } };
+
+        // LÓGICA DE LOGIN E CÓDIGO DO CASAL
+        document.getElementById("btn-gerar").addEventListener("click", async () => {
+            const btnGerar = document.getElementById("btn-gerar");
+            const displayCodigo = document.getElementById("display-codigo");
+            
+            // ANIMAÇÃO DE CARREGAMENTO APLICADA AQUI
+            btnGerar.innerText = "Conectando à nuvem...";
+            btnGerar.disabled = true;
+
+            try {
+                const codigoGerado = Math.random().toString(36).substring(2, 6).toUpperCase();
+                await signInAnonymously(auth);
+                await setDoc(doc(db, "vinculos", codigoGerado), {
+                    xp: 0, nivel: 1, restaurantesConcluidos: [],
+                    passaporte: { amor1: "Amor 1", amor2: "Amor 2" }
+                });
+
+                displayCodigo.innerText = codigoGerado;
+                btnGerar.innerText = "Código Gerado!";
+                iniciarSincronizacao(codigoGerado);
+            } catch (error) {
+                console.error("Erro:", error);
+                alert("Erro de conexão. Trocou as chaves do Firebase?");
+                btnGerar.innerText = "Gerar Código do Casal";
+                btnGerar.disabled = false;
+            }
+        });
+
+        document.getElementById("btn-conectar").addEventListener("click", async () => {
+            const codigo = document.getElementById("input-codigo").value.toUpperCase();
+            if(codigo.length === 4) {
+                document.getElementById("btn-conectar").innerText = "Entrando...";
+                await signInAnonymously(auth);
+                const docSnap = await getDoc(doc(db, "vinculos", codigo));
+                if(docSnap.exists()) {
+                    iniciarSincronizacao(codigo);
+                } else {
+                    alert("Código não encontrado!");
+                    document.getElementById("btn-conectar").innerText = "Conectar";
+                }
+            }
+        });
+
+        function iniciarSincronizacao(codigo) {
+            codigoAtual = codigo;
+            document.getElementById("lobby").style.display = "none";
+            document.getElementById("app").style.display = "block";
+            
+            // Listener em tempo real
+            onSnapshot(doc(db, "vinculos", codigoAtual), (docSnap) => {
+                if(docSnap.exists()){
+                    dadosLocais = docSnap.data();
+                    atualizarInterface();
+                }
+            });
+
+            // Listeners de input de nome
+            document.getElementById("nome-amor1").addEventListener("change", (e) => salvarNome("amor1", e.target.value));
+            document.getElementById("nome-amor2").addEventListener("change", (e) => salvarNome("amor2", e.target.value));
+            
+            renderizarMapa();
+        }
+
+        async function salvarNome(campo, valor) {
+            if(!codigoAtual) return;
+            const ref = doc(db, "vinculos", codigoAtual);
+            await updateDoc(ref, { [`passaporte.${campo}`]: valor });
+        }
+
+        function atualizarInterface() {
+            // Nomes
+            document.getElementById("nome-amor1").value = dadosLocais.passaporte.amor1 || "Amor 1";
+            document.getElementById("nome-amor2").value = dadosLocais.passaporte.amor2 || "Amor 2";
+
+            // XP e Nível
+            let titulos = ["Ficantes", "Casal Delivery", "Exploradores", "Realeza dos Encontros", "Lendas da Gastronomia"];
+            let nivelAtual = Math.floor(dadosLocais.xp / 300) + 1;
+            let xpNaBarra = dadosLocais.xp % 300;
+            
+            document.getElementById("nivel-casal").innerText = `Nível ${nivelAtual}: ${titulos[Math.min(nivelAtual-1, 4)]}`;
+            document.getElementById("xp-texto").innerText = `${xpNaBarra} / 300 XP`;
+            document.getElementById("xp-fill").style.width = `${(xpNaBarra / 300) * 100}%`;
+
+            // Carimbos
+            const container = document.getElementById("carimbos-container");
+            container.innerHTML = "";
+            restaurantes.forEach(r => {
+                const concluido = dadosLocais.restaurantesConcluidos.includes(r.id);
+                container.innerHTML += `
+                    <div class="carimbo ${concluido ? 'concluido' : ''}">
+                        <h4>${r.nome}</h4>
+                        <p>${concluido ? 'VISITADO' : 'PENDENTE'}</p>
+                    </div>
+                `;
+            });
+
+            renderizarMapa();
+        }
+
+        function renderizarMapa() {
+            const container = document.getElementById("ilha-container");
+            container.innerHTML = "";
+            
+            restaurantes.forEach((r, index) => {
+                const concluido = dadosLocais.restaurantesConcluidos.includes(r.id);
+                // Alternar lados para fazer zig-zag
+                const alinhamento = index % 2 === 0 ? 'flex-start' : 'flex-end';
+                
+                container.innerHTML += `
+                    <div class="checkpoint-wrap regiao-${r.regiao}" style="align-items: ${alinhamento}; width: 80%; margin: 0 auto;">
+                        <div class="card-restaurante">
+                            <h3>${r.nome}</h3>
+                            <span>${r.cat}</span>
+                        </div>
+                        <div class="ponto-mapa ${concluido ? 'concluido' : ''}" onclick="abrirCheckin('${r.id}', '${r.nome}', '${r.cat}')"></div>
+                    </div>
+                `;
+            });
+        }
+
+        // LÓGICA DO MODAL
+        let restauranteSelecionado = null;
+        window.abrirCheckin = function(id, nome, cat) {
+            if(dadosLocais.restaurantesConcluidos.includes(id)) {
+                alert("Vocês já visitaram este local!"); return;
+            }
+            restauranteSelecionado = id;
+            document.getElementById("modal-nome").innerText = nome;
+            document.getElementById("modal-cat").innerText = cat;
+            document.getElementById("btn-confirmar").disabled = false;
+            document.querySelectorAll(".check-item").forEach(el => el.innerText = "⏳");
+            document.getElementById("modal-checkin").style.display = "block";
+        }
+
+        window.fecharModal = function() {
+            document.getElementById("modal-checkin").style.display = "none";
+            restauranteSelecionado = null;
+        }
+
+        document.getElementById("btn-confirmar").addEventListener("click", async () => {
+            if(!restauranteSelecionado || !codigoAtual) return;
+            
+            const btn = document.getElementById("btn-confirmar");
+            btn.disabled = true;
+            btn.innerText = "Carimbando...";
+
+            let checks = document.querySelectorAll(".check-item");
+            setTimeout(() => checks[0].innerText = "✅", 500);
+            setTimeout(() => checks[1].innerText = "✅", 1000);
+            setTimeout(async () => {
+                checks[2].innerText = "✅";
+                
+                // Salvar no Firebase
+                const ref = doc(db, "vinculos", codigoAtual);
+                await updateDoc(ref, {
+                    xp: dadosLocais.xp + 100,
+                    restaurantesConcluidos: arrayUnion(restauranteSelecionado)
+                });
+
+                setTimeout(() => {
+                    fecharModal();
+                    btn.innerText = "Registrar Presença (+100 XP)";
+                }, 500);
+
+            }, 1500);
+        });
+
+        // NAVEGAÇÃO DE TELAS
+        window.mudarTela = function(tela) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(tela).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+    </script>
+</body>
+</html>
