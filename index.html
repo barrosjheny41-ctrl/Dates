@@ -385,7 +385,7 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
     import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "firebase/firestore";
 
-  const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyBKeGPY0nBPpV_uo6N-vGuK-zNbmLP14wE",
   authDomain: "date-quest-sp.firebaseapp.com",
   projectId: "date-quest-sp",
@@ -395,10 +395,578 @@
   measurementId: "G-PMH0W7QCLC"
 
 };
-   
 
     let app, db, auth;
-    try {
-      app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-      auth = getAuth(app);
+    
+    // VERIFICAÇÃO DE SEGURANÇA: Só tenta conectar se você colocou uma chave real
+    if (firebaseConfig.apiKey !== "COLOQUE_AQUI" && firebaseConfig.apiKey !== "") {
+      try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+      } catch (error) {
+        console.warn("Erro ao iniciar Firebase. Fallback local ativo.", error);
+        db = null;
+        auth = null;
+      }
+    } else {
+      console.warn("Chaves do Firebase não inseridas. Iniciando no Modo Offline Automático.");
+      db = null;
+      auth = null;
+    }
+
+    const RESTAURANTS = [
+      { id: 1, name: "Madero", category: "Burgers", icon: "🍔", island: 1, color: 0x22c55e },
+      { id: 2, name: "Outback", category: "Steakhouse", icon: "🥩", island: 1, color: 0x22c55e },
+      { id: 4, name: "Z Deli", category: "Sanduíches", icon: "🥪", island: 1, color: 0x22c55e },
+      { id: 8, name: "Patties", category: "Smashed", icon: "🍔", island: 1, color: 0x22c55e },
+      { id: 3, name: "Bacio di Latte", category: "Gelato", icon: "🍧", island: 2, color: 0xf472b6 },
+      { id: 5, name: "Carlo's Bakery", category: "Doceria", icon: "🧁", island: 2, color: 0xf472b6 },
+      { id: 6, name: "Le Bife", category: "Bistrô", icon: "🍽️", island: 2, color: 0xf472b6 },
+      { id: 17, name: "Paris 6", category: "Bistrô 24h", icon: "🍰", island: 2, color: 0xf472b6 },
+      { id: 16, name: "L'Entrecôte", category: "Francês", icon: "🍷", island: 2, color: 0xf472b6 },
+      { id: 9, name: "Taverna Medieval", category: "Temático", icon: "⚔️", island: 3, color: 0xfacc15 },
+      { id: 10, name: "Beco Hexagonal", category: "Bruxo", icon: "🪄", island: 3, color: 0xfacc15 },
+      { id: 11, name: "Vassoura Quebrada", category: "Magia", icon: "🧹", island: 3, color: 0xfacc15 },
+      { id: 12, name: "Magia & Bruxaria", category: "Castelo", icon: "🏰", island: 3, color: 0xfacc15 },
+      { id: 13, name: "Hannover", category: "Fondue", icon: "🫕", island: 4, color: 0x38bdf8 },
+      { id: 14, name: "Chalezinho", category: "Fondue Rom", icon: "🧀", island: 4, color: 0x38bdf8 },
+      { id: 7, name: "Eataly", category: "Italiano", icon: "🍕", island: 4, color: 0x38bdf8 },
+      { id: 15, name: "Famiglia Mancini", category: "Cantina", icon: "🍝", island: 4, color: 0x38bdf8 },
+      { id: 18, name: "Figueira Rubaiyat", category: "Carnes", icon: "🍖", island: 5, color: 0xa855f7 },
+      { id: 19, name: "Skye Bar", category: "Rooftop", icon: "🌃", island: 5, color: 0xa855f7 },
+      { id: 20, name: "Maní", category: "Alta Gastron.", icon: "✨", island: 5, color: 0xa855f7 },
+      { id: 21, name: "D.O.M.", category: "Michelin", icon: "🌟", island: 5, color: 0xa855f7 },
+      { id: 22, name: "Terraço Itália", category: "Topo SP", icon: "🥂", island: 5, color: 0xa855f7 }
+    ];
+
+    const ROOM_ID = "NOSSA_JORNADA"; 
+    
+    const State = {
+      myRole: null, 
+      viewingRole: 'p1', 
+      data: {
+        p1: { name: "Pessoa 1", avatar: "🦊", completed: [] },
+        p2: { name: "Pessoa 2", avatar: "🌸", completed: [] },
+        notes: {}, userRoles: {}
+      }
+    };
+
+    const StorageManager = {
+      unsubscribe: null,
+      async initRealtime(uid) {
+        if (!db) return this.fallbackToLocal();
+        try {
+          const docRef = doc(db, "couples", ROOM_ID);
+          this.unsubscribe = onSnapshot(docRef, (snapshot) => {
+            if (snapshot.exists()) {
+              State.data = { ...State.data, ...snapshot.data() };
+              if (State.data.userRoles && State.data.userRoles[uid]) State.myRole = State.data.userRoles[uid];
+              AppUI.renderAll();
+            } else setDoc(docRef, State.data);
+          });
+        } catch (e) { console.error("Erro Realtime:", e); this.fallbackToLocal(); }
+      },
+      async save() {
+        if (!db) return this.saveLocal();
+        try { await setDoc(doc(db, "couples", ROOM_ID), State.data, { merge: true }); } 
+        catch(e) { console.error("Erro ao salvar:", e); this.saveLocal(); }
+      },
+      saveLocal() {
+        localStorage.setItem(`dq_data_local`, JSON.stringify(State.data));
+        if(State.myRole) localStorage.setItem(`dq_myrole`, State.myRole);
+        AppUI.renderAll();
+      },
+      fallbackToLocal() {
+        const localData = localStorage.getItem(`dq_data_local`);
+        const savedRole = localStorage.getItem(`dq_myrole`);
+        if (localData) State.data = JSON.parse(localData);
+        if (savedRole) State.myRole = savedRole;
+        else State.myRole = 'p1'; // default offline
+        AppUI.renderAll();
+      }
+    };
+
+    // ==========================================
+    // MAPA 3D
+    // ==========================================
+    class Map3D {
+      constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x0f172a); // Céu noturno no mapa
+        this.scene.fog = new THREE.FogExp2(0x0f172a, 0.015);
+        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 500);
+        this.camera.position.set(0, 40, 60);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.container.appendChild(this.renderer.domElement);
+        this.labelRenderer = new CSS2DRenderer();
+        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        this.labelRenderer.domElement.style.position = 'absolute';
+        this.labelRenderer.domElement.style.top = '0px';
+        this.labelRenderer.domElement.style.pointerEvents = 'none';
+        this.container.appendChild(this.labelRenderer.domElement);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true; this.controls.enablePan = false;
+        this.controls.minDistance = 20; this.controls.maxDistance = 90; 
+        this.controls.maxPolarAngle = Math.PI/2 - 0.1;
+        
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        this.scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(20, 50, 20);
+        this.scene.add(dirLight);
+
+        this.clock = new THREE.Clock();
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        this.pins = [];
+        this.buildEnvironment();
+        this.buildCheckpoints();
+        window.addEventListener('resize', () => this.onWindowResize());
+        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onClick(e));
+        this.animate();
+      }
+      buildEnvironment() {
+        const ocean = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x001a33, transparent: true, opacity: 0.9 }));
+        ocean.rotation.x = -Math.PI / 2; ocean.position.y = -2; this.scene.add(ocean);
+        this.islandPositions = [
+          { x: 0, z: 0, color: 0x22c55e }, { x: -25, z: -20, color: 0xf472b6 }, 
+          { x: 25, z: -15, color: 0xfacc15 }, { x: -20, z: 25, color: 0x38bdf8 }, { x: 20, z: 25, color: 0xa855f7 }    
+        ];
+        this.islandPositions.forEach(pos => {
+          const base = new THREE.Mesh(new THREE.CylinderGeometry(12, 10, 4, 32), new THREE.MeshStandardMaterial({ color: 0x4a3b2c }));
+          base.position.set(pos.x, 0, pos.z); this.scene.add(base);
+          const top = new THREE.Mesh(new THREE.SphereGeometry(12, 32, 16, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({ color: pos.color, roughness: 0.9 }));
+          top.position.set(pos.x, 2, pos.z); top.scale.y = 0.3; this.scene.add(top);
+        });
+        const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 });
+        const b1 = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 20), bridgeMat); b1.position.set(-12.5, 2, -10); b1.rotation.y = Math.PI/4; this.scene.add(b1);
+        const b2 = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 20), bridgeMat); b2.position.set(12.5, 2, -7.5); b2.rotation.y = -Math.PI/3; this.scene.add(b2);
+      }
+      buildCheckpoints() {
+        RESTAURANTS.forEach(rest => {
+          const base = this.islandPositions[rest.island - 1];
+          const angle = Math.random() * Math.PI * 2; const radius = Math.random() * 8;
+          const pinGroup = new THREE.Group();
+          pinGroup.position.set(base.x + Math.cos(angle)*radius, 5, base.z + Math.sin(angle)*radius);
+          pinGroup.userData = rest;
+          const sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x333333 }));
+          sphere.position.y = 1.8;
+          const cone = new THREE.Mesh(new THREE.ConeGeometry(0.6, 2, 16), new THREE.MeshStandardMaterial({ color: rest.color }));
+          cone.rotation.x = Math.PI;
+          pinGroup.add(sphere); pinGroup.add(cone);
+          
+          const labelDiv = document.createElement('div'); labelDiv.className = 'map-label';
+          labelDiv.innerHTML = `<span class="emoji">${rest.icon}</span> ${rest.name}`;
+          const labelObj = new CSS2DObject(labelDiv); labelObj.position.set(0, 4, 0); pinGroup.add(labelObj);
+          this.scene.add(pinGroup); this.pins.push(pinGroup);
+        });
+      }
+      onClick(event) {
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1; this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const meshes = []; this.pins.forEach(p => p.children.forEach(c => { if(c.isMesh) meshes.push(c); }));
+        const intersects = this.raycaster.intersectObjects(meshes);
+        if (intersects.length > 0) {
+          const rest = intersects[0].object.parent.userData;
+          if(rest && rest.id) AppUI.openCheckinModal(rest);
+        }
+      }
+      onWindowResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight; this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight); this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
+      }
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        const time = this.clock.getElapsedTime();
+        this.pins.forEach((pin, i) => { pin.position.y = 5 + Math.sin(time*2 + i)*0.4; pin.rotation.y += 0.02; });
+        this.controls.update(); this.renderer.render(this.scene, this.camera); this.labelRenderer.render(this.scene, this.camera);
+      }
+    }
+
+    // ==========================================
+    // UI CONTROLLER
+    // ==========================================
+    const AppUI = {
+      currentPage: 0,
+      mapInstance: null,
+      currentModalRestaurant: null,
+      isLoginMode: true,
+      selectedRoleRegister: null,
+
+      init() {
+        this.bindEvents();
+        const splash = document.getElementById('view-splash');
+        
+        // Se o Firebase estiver configurado e ativo
+        if (auth) {
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              StorageManager.initRealtime(user.uid).then(() => {
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.classList.add('hidden'); this.showApp(); }, 800);
+              });
+            } else {
+              splash.style.opacity = '0';
+              setTimeout(() => {
+                splash.classList.add('hidden');
+                document.getElementById('view-lobby').classList.remove('hidden');
+                document.getElementById('view-lobby').classList.add('flex');
+              }, 800);
+            }
+          }, (error) => {
+            // Em caso de erro na conexão da autenticação, força o offline
+            console.error("Erro na autenticação:", error);
+            StorageManager.fallbackToLocal();
+            splash.style.opacity = '0';
+            setTimeout(() => {
+              splash.classList.add('hidden');
+              document.getElementById('view-lobby').classList.remove('hidden');
+              document.getElementById('view-lobby').classList.add('flex');
+            }, 800);
+          });
+        } else {
+          // MODO OFFLINE (Sem chaves do Firebase)
+          StorageManager.fallbackToLocal();
+          setTimeout(() => {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+              splash.classList.add('hidden');
+              
+              // Verifica se já tinha perfil salvo localmente
+              if(localStorage.getItem('dq_data_local')) {
+                this.showApp();
+              } else {
+                document.getElementById('view-lobby').classList.remove('hidden');
+                document.getElementById('view-lobby').classList.add('flex');
+              }
+            }, 800);
+          }, 1500);
+        }
+      },
+
+      bindEvents() {
+        document.getElementById('btn-tab-login').addEventListener('click', () => this.toggleAuthMode(true));
+        document.getElementById('btn-tab-register').addEventListener('click', () => this.toggleAuthMode(false));
+
+        document.querySelectorAll('.role-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.role-btn').forEach(b => {
+              b.classList.remove('border-[#d4af37]', 'bg-slate-700/80');
+              b.classList.add('bg-slate-800/80', 'border-slate-600');
+            });
+            const target = e.currentTarget;
+            target.classList.remove('bg-slate-800/80', 'border-slate-600');
+            target.classList.add('border-[#d4af37]', 'bg-slate-700/80');
+            this.selectedRoleRegister = target.dataset.role;
+          });
+        });
+
+        document.getElementById('btn-bypass').addEventListener('click', () => {
+          // Entra localmente
+          StorageManager.fallbackToLocal();
+          this.showApp();
+        });
+
+        document.getElementById('btn-auth-action').addEventListener('click', async () => {
+          if(!auth) return alert("Firebase não configurado! Use o botão 'Modo Offline' abaixo.");
+          
+          const email = document.getElementById('auth-email').value.trim();
+          const pass = document.getElementById('auth-password').value.trim();
+          const errUI = document.getElementById('lobby-error');
+          const statusUI = document.getElementById('lobby-status');
+          
+          if(!email || !pass) return errUI.innerText = "Preencha e-mail e senha.";
+          errUI.classList.add('hidden'); statusUI.classList.remove('hidden');
+
+          try {
+            if (this.isLoginMode) {
+              await signInWithEmailAndPassword(auth, email, pass);
+            } else {
+              const name = document.getElementById('auth-name').value.trim();
+              if(!name || !this.selectedRoleRegister) {
+                statusUI.classList.add('hidden'); errUI.classList.remove('hidden');
+                return errUI.innerText = "Escolha sua pessoa e nome.";
+              }
+              const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+              const uid = userCred.user.uid;
+              
+              const docRef = doc(db, "couples", ROOM_ID);
+              const snap = await getDoc(docRef);
+              if(snap.exists()) State.data = { ...State.data, ...snap.data() };
+              
+              if(!State.data.userRoles) State.data.userRoles = {};
+              State.data.userRoles[uid] = this.selectedRoleRegister;
+              State.data[this.selectedRoleRegister].name = name;
+              State.data[this.selectedRoleRegister].avatar = this.selectedRoleRegister === 'p1' ? '🦊' : '🌸';
+              
+              await StorageManager.save();
+            }
+          } catch (e) {
+            statusUI.classList.add('hidden'); errUI.classList.remove('hidden');
+            errUI.innerText = "Erro: " + (e.code || e.message);
+          }
+        });
+
+        document.getElementById('tab-p1').addEventListener('click', () => this.switchViewRole('p1'));
+        document.getElementById('tab-p2').addEventListener('click', () => this.switchViewRole('p2'));
+        document.getElementById('nav-home').addEventListener('click', () => this.switchMainTab('home'));
+        document.getElementById('nav-passport').addEventListener('click', () => this.switchMainTab('passaporte'));
+        document.getElementById('nav-map').addEventListener('click', () => this.switchMainTab('mapa'));
+
+        document.querySelectorAll('.task-check').forEach(cb => {
+          cb.addEventListener('change', () => {
+            const allChecked = Array.from(document.querySelectorAll('.task-check')).every(c => c.checked);
+            const btn = document.getElementById('btn-checkin');
+            if(allChecked) {
+              btn.disabled = false;
+              btn.className = "w-full bg-gradient-to-r from-[#d4af37] via-[#facc15] to-[#b8860b] text-slate-900 font-black text-lg py-4 rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.4)] transform active:scale-95 transition flex items-center justify-center gap-2 uppercase tracking-widest";
+              btn.innerHTML = "✨ Registrar Encontro ✨";
+            } else {
+              btn.disabled = true;
+              btn.className = "w-full bg-slate-800 border border-slate-700 text-slate-500 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2 uppercase tracking-widest text-sm";
+              btn.innerHTML = "Complete as etapas";
+            }
+          });
+        });
+
+        document.getElementById('btn-checkin').addEventListener('click', () => {
+          if(!this.currentModalRestaurant) return;
+          const restId = this.currentModalRestaurant.id;
+          
+          if(State.myRole && !State.data[State.myRole].completed.includes(restId)) {
+            State.data[State.myRole].completed.push(restId);
+          }
+          const notesStr = document.getElementById('modal-notes').value.trim();
+          if(!State.data.notes) State.data.notes = {};
+          State.data.notes[restId] = notesStr;
+
+          StorageManager.save();
+          window.closeModal();
+        });
+
+        document.getElementById('btn-save-notes').addEventListener('click', () => {
+          if(!this.currentModalRestaurant) return;
+          const restId = this.currentModalRestaurant.id;
+          const notesStr = document.getElementById('modal-notes').value.trim();
+          if(!State.data.notes) State.data.notes = {};
+          State.data.notes[restId] = notesStr;
+          
+          StorageManager.save();
+          const feedback = document.getElementById('notes-saved-feedback');
+          feedback.classList.remove('hidden');
+          setTimeout(() => feedback.classList.add('hidden'), 2000);
+        });
+      },
+
+      toggleAuthMode(isLogin) {
+        this.isLoginMode = isLogin;
+        const btnLogin = document.getElementById('btn-tab-login');
+        const btnReg = document.getElementById('btn-tab-register');
+        const extraFields = document.getElementById('register-fields');
+        const actionBtn = document.getElementById('btn-auth-action');
+
+        if(isLogin) {
+          btnLogin.className = "flex-1 py-3 text-sm font-bold bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 rounded-lg shadow-lg transition";
+          btnReg.className = "flex-1 py-3 text-sm font-bold text-slate-400 rounded-lg transition hover:text-white";
+          extraFields.classList.add('hidden');
+          actionBtn.innerText = "Começar Aventura";
+        } else {
+          btnReg.className = "flex-1 py-3 text-sm font-bold bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 rounded-lg shadow-lg transition";
+          btnLogin.className = "flex-1 py-3 text-sm font-bold text-slate-400 rounded-lg transition hover:text-white";
+          extraFields.classList.remove('hidden');
+          actionBtn.innerText = "Criar Perfil e Entrar";
+        }
+      },
+
+      showApp() {
+        document.getElementById('view-lobby').classList.add('hidden');
+        document.getElementById('view-app').classList.remove('hidden');
+        document.getElementById('view-app').classList.add('flex');
+        
+        if(!State.myRole) State.myRole = 'p1'; 
+
+        this.switchMainTab('home');
+        this.renderAll();
+      },
+
+      switchMainTab(tab) {
+        document.getElementById('aba-home').classList.add('hidden');
+        document.getElementById('aba-passaporte').classList.add('hidden');
+        document.getElementById('aba-mapa').classList.add('hidden');
+        
+        // Reset Nav Colors
+        document.querySelectorAll('nav button').forEach(b => {
+          b.classList.replace('text-[#d4af37]', 'text-slate-500');
+          b.classList.remove('bg-slate-800');
+        });
+
+        if(tab === 'home') {
+          document.getElementById('aba-home').classList.remove('hidden');
+          const btn = document.getElementById('nav-home');
+          btn.classList.replace('text-slate-500', 'text-[#d4af37]'); btn.classList.add('bg-slate-800');
+          document.getElementById('header-tabs').classList.add('hidden');
+        } 
+        else if(tab === 'passaporte') {
+          document.getElementById('aba-passaporte').classList.remove('hidden');
+          const btn = document.getElementById('nav-passport');
+          btn.classList.replace('text-slate-500', 'text-[#d4af37]'); btn.classList.add('bg-slate-800');
+          document.getElementById('header-tabs').classList.remove('hidden');
+          this.renderPassport();
+        } 
+        else if(tab === 'mapa') {
+          document.getElementById('aba-mapa').classList.remove('hidden');
+          const btn = document.getElementById('nav-map');
+          btn.classList.replace('text-slate-500', 'text-[#d4af37]'); btn.classList.add('bg-slate-800');
+          document.getElementById('header-tabs').classList.add('hidden');
+          if(!this.mapInstance) this.mapInstance = new Map3D('three-canvas-container');
+        }
+      },
+
+      switchViewRole(role) {
+        State.viewingRole = role;
+        ['p1', 'p2'].forEach(r => {
+          const btn = document.getElementById(`tab-${r}`);
+          if(r === role) btn.className = "px-4 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-slate-900 shadow-md";
+          else btn.className = "px-4 py-1 rounded-full text-xs font-bold text-slate-400 hover:text-white transition";
+        });
+        this.renderPassport();
+      },
+
+      renderAll() {
+        this.renderDashboard();
+        if(!document.getElementById('aba-passaporte').classList.contains('hidden')) {
+          this.renderPassport();
+        }
+      },
+
+      renderDashboard() {
+        const p1 = State.data.p1;
+        const p2 = State.data.p2;
+
+        document.getElementById('hub-name-p1').innerText = p1.name;
+        document.getElementById('hub-avatar-p1').innerText = p1.avatar || '🦊';
+        document.getElementById('hub-xp-p1').innerText = `${p1.completed.length * 100} XP`;
+
+        document.getElementById('hub-name-p2').innerText = p2.name;
+        document.getElementById('hub-avatar-p2').innerText = p2.avatar || '🌸';
+        document.getElementById('hub-xp-p2').innerText = `${p2.completed.length * 100} XP`;
+
+        const combinedVisits = new Set([...p1.completed, ...p2.completed]).size;
+        document.getElementById('hub-total-score').innerText = `${combinedVisits} / 22`;
+        document.getElementById('hub-progress-bar').style.width = `${(combinedVisits / 22) * 100}%`;
+        
+        document.getElementById('tab-p1').innerText = p1.name.split(' ')[0] || "P1";
+        document.getElementById('tab-p2').innerText = p2.name.split(' ')[0] || "P2";
+      },
+
+      renderPassport() {
+        const userData = State.data[State.viewingRole];
+        const completed = userData.completed || [];
+        
+        document.getElementById('passport-owner-name').innerText = `Viajante: ${userData.name}`;
+        const totalXP = completed.length * 100;
+        document.getElementById('xp-text').innerText = `${totalXP} / 2200 XP`;
+        document.getElementById('xp-bar').style.width = `${(totalXP / 2200) * 100}%`;
+
+        const wrapper = document.getElementById('pages-wrapper');
+        wrapper.innerHTML = '';
+        const chunks = [ RESTAURANTS.slice(0, 6), RESTAURANTS.slice(6, 12), RESTAURANTS.slice(12, 18), RESTAURANTS.slice(18, 22) ];
+
+        chunks.forEach((chunk, index) => {
+          const div = document.createElement('div');
+          div.className = 'passport-page';
+          div.style.zIndex = chunks.length - index;
+          if(index < this.currentPage) div.classList.add('flipped');
+
+          let stampsHtml = chunk.map(rest => {
+            const isDone = completed.includes(rest.id);
+            return `<div class="stamp ${isDone ? 'completed' : ''}"><span class="text-3xl mb-1">${rest.icon}</span><span class="truncate w-full px-1">${rest.name}</span></div>`;
+          }).join('');
+
+          div.innerHTML = `
+            <div class="flex justify-between items-center mb-6 border-b-2 border-slate-300 pb-2">
+              <span class="font-cinzel text-[#1e3a8a] font-bold text-lg uppercase tracking-wider">Visto ${index + 1}</span>
+              <span class="text-xs text-slate-400 font-bold bg-slate-200 px-2 py-1 rounded-md">Pág ${index + 1}</span>
+            </div>
+            <div class="stamp-grid">${stampsHtml}</div>`;
+          wrapper.appendChild(div);
+        });
+
+        if(!document.getElementById('page-cover').classList.contains('flipped')) {
+           document.getElementById('passport-controls').classList.add('hidden');
+        } else {
+           document.getElementById('passport-controls').classList.remove('hidden');
+        }
+      },
+
+      openCheckinModal(rest) {
+        this.currentModalRestaurant = rest;
+        document.getElementById('modal-icon').innerText = rest.icon;
+        document.getElementById('modal-category').innerText = rest.category;
+        document.getElementById('modal-title').innerText = rest.name;
+        
+        const notasExistentes = (State.data.notes && State.data.notes[rest.id]) ? State.data.notes[rest.id] : '';
+        document.getElementById('modal-notes').value = notasExistentes;
+
+        document.querySelectorAll('.task-check').forEach(cb => cb.checked = false);
+        const btn = document.getElementById('btn-checkin');
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-800 border border-slate-700 text-slate-500 font-bold py-4 rounded-xl transition flex items-center justify-center gap-2 uppercase tracking-widest text-sm";
+        btn.innerHTML = "Complete as etapas";
+
+        const myCompleted = State.myRole ? State.data[State.myRole].completed : [];
+        if(myCompleted.includes(rest.id)) {
+           document.querySelectorAll('.task-check').forEach(cb => { cb.checked = true; cb.disabled = true; });
+           btn.className = "w-full bg-green-600/20 text-green-400 border border-green-500/50 font-bold py-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-widest";
+           btn.innerHTML = "✓ Encontro Realizado";
+        } else {
+           document.querySelectorAll('.task-check').forEach(cb => { cb.disabled = false; });
+        }
+
+        document.getElementById('checkin-modal').classList.add('active');
+      }
+    };
+
+    window.AppUI = AppUI;
+    window.openPassport = () => {
+      document.getElementById('page-cover').classList.add('flipped');
+      document.getElementById('pages-wrapper').classList.remove('hidden');
+      document.getElementById('passport-controls').classList.remove('hidden');
+    };
+    window.nextPage = () => {
+      const pages = document.querySelectorAll('#pages-wrapper .passport-page');
+      if(AppUI.currentPage < pages.length - 1) {
+        pages[AppUI.currentPage].classList.add('flipped');
+        AppUI.currentPage++;
+      }
+    };
+    window.prevPage = () => {
+      if(AppUI.currentPage > 0) {
+        AppUI.currentPage--;
+        document.querySelectorAll('#pages-wrapper .passport-page')[AppUI.currentPage].classList.remove('flipped');
+      } else {
+        document.getElementById('page-cover').classList.remove('flipped');
+        setTimeout(() => {
+          document.getElementById('pages-wrapper').classList.add('hidden');
+          document.getElementById('passport-controls').classList.add('hidden');
+        }, 300);
+      }
+    };
+    window.closeModal = () => document.getElementById('checkin-modal').classList.remove('active');
+    AppUI.openPlayerPassport = (role) => {
+      AppUI.switchViewRole(role);
+      AppUI.switchMainTab('passaporte');
+      // Pequeno timeout para auto-abrir a capa se clicar no atalho do hub
+      setTimeout(() => {
+        if(!document.getElementById('page-cover').classList.contains('flipped')) window.openPassport();
+      }, 400);
+    };
+
+    AppUI.init();
+  </script>
+</body>
+</html>
